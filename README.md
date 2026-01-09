@@ -1,36 +1,50 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Reddit Lead Generation SaaS (MVP)
 
-## Getting Started
+## 1. Project Overview
 
-First, run the development server:
+We are building a specialized B2B SaaS that automates lead generation from Reddit.
+**The Goal:** Find highly specific, "high-intent" customers for agencies by scanning Reddit posts, filtering them with Regex, analyzing them with AI (OpenAI), and notifying the user via Slack.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+**Business Logic:**
+We differ from generic scrapers because we prioritize **Intent**. We do not spam. We only notify users when the AI confirms a post indicates a genuine buying signal or pain point.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 2. Tech Stack
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- **Framework:** Next.js (App Router) + TypeScript.
+- **Database:** Supabase (PostgreSQL).
+- **Queue/Cron:** Upstash QStash (Serverless Queue & Scheduling).
+- **AI:** OpenAI
+- **Deployment:** Vercel.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 3. Core Architecture
 
-## Learn More
+The system runs on a "Filter Funnel" designed to save costs (API usage & Compute).
 
-To learn more about Next.js, take a look at the following resources:
+### Phase A: The Collector (Cron Job)
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+1.  **Fetch:** Every 5-10 minutes, fetch the latest 100 posts from target subreddits using the `.json` endpoint (bypassing expensive Reddit APIs).
+2.  **Deduplicate:** Check `processed_posts` table. If a post ID exists, skip it.
+3.  **Level 1 Filter (Fast/Free):** Apply regex matching based on user keywords (e.g., "looking for seo", "hiring dev").
+4.  **Dispatch:** Only posts that pass the Regex filter are sent to Upstash QStash.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### Phase B: The Analyst (Queue Worker)
 
-## Deploy on Vercel
+1.  **Receive:** The API route receives a single post job.
+2.  **Level 2 Filter (Smart/Paid):** Send the post content to OpenAI.
+    - _System Prompt:_ "Is this user explicitly looking to buy X or complaining about Y? Answer YES/NO."
+3.  **Router:** If OpenAI says "YES", query the database to find which specific User/Client requested this keyword.
+4.  **Notify:** Send a structured message to that User's Slack Webhook.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## 4. Database Schema
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- **`client_profiles`**: Users (Agencies). Contains `slack_webhook_url`.
+- **`alerts`**: The specific rules (Subreddits + Keywords) linked to a `client_id`.
+- **`processed_posts`**: A history of scanned post IDs to prevent duplicate checks.
+
+## 5. Coding Guidelines for Cursor
+
+- **Type Safety:** Always use the interfaces defined in `@/types.ts`.
+- **Environment:** Use `process.env` for all keys. Never hardcode secrets.
+- **Error Handling:** Never crash the app. If Reddit fails, log it and return empty. If OpenAI fails, retry (handled by QStash).
+- **Simplicity:** Do not over-engineer. This is an MVP. Prefer readability over complex abstractions.
+- **Cost Efficiency:** Always assume we are paying for every token. Logic should effectively "gate" the AI usage.
