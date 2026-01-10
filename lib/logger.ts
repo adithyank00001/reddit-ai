@@ -25,21 +25,6 @@ class Logger {
       if (!fsSync.existsSync(this.logPath)) {
         fsSync.writeFileSync(this.logPath, "", "utf8");
       }
-      // #region agent log
-      fetch("http://127.0.0.1:7244/ingest/f26b0d71-5d71-4d69-b4d0-1706630ff879", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          sessionId: "debug-session",
-          runId: "debug",
-          hypothesisId: "H2",
-          location: "lib/logger.ts:ensureLogFile",
-          message: "Log file ensured",
-          data: { logPath: this.logPath },
-          timestamp: Date.now(),
-        }),
-      }).catch(() => {});
-      // #endregion
     } catch (err) {
       console.error(`[LOGGER ERROR] Failed to initialize log file:`, err);
     }
@@ -60,62 +45,29 @@ class Logger {
     const elapsed = this.getElapsedTime();
     const dataStr = data ? ` | DATA: ${JSON.stringify(data)}` : "";
     const logMessage = `[${timestamp}] [${elapsed}] [${level}] [${category}] ${message}${dataStr}\n`;
-    
-    // #region agent log
-    fetch("http://127.0.0.1:7244/ingest/f26b0d71-5d71-4d69-b4d0-1706630ff879", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        sessionId: "debug-session",
-        runId: "debug",
-        hypothesisId: "H3",
-        location: "lib/logger.ts:writeLog:beforeAppend",
-        message: "About to append workflow log",
-        data: { level, category },
-        timestamp: Date.now(),
-      }),
-    }).catch(() => {});
-    // #endregion
 
     // Always log to console
     console.log(logMessage.trim());
     
-    // Append to workflow.log file
+    // Append to workflow.log file - FORCE SYNC WRITE
     try {
+      // Ensure directory exists
+      const logDir = path.dirname(this.logPath);
+      if (!fsSync.existsSync(logDir)) {
+        fsSync.mkdirSync(logDir, { recursive: true });
+      }
+      
+      // Force write to file
       fsSync.appendFileSync(this.logPath, logMessage, "utf8");
-      // #region agent log
-      fetch("http://127.0.0.1:7244/ingest/f26b0d71-5d71-4d69-b4d0-1706630ff879", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          sessionId: "debug-session",
-          runId: "debug",
-          hypothesisId: "H3",
-          location: "lib/logger.ts:writeLog:afterAppend",
-          message: "Append success",
-          data: { level, category },
-          timestamp: Date.now(),
-        }),
-      }).catch(() => {});
-      // #endregion
+      
+      // Verify write succeeded by checking file size
+      const stats = fsSync.statSync(this.logPath);
     } catch (err) {
       const errorMsg = err instanceof Error ? err.message : String(err);
+      const errorStack = err instanceof Error ? err.stack : undefined;
       console.error(`[LOGGER ERROR] Failed to write to workflow.log: ${errorMsg}`);
-      // #region agent log
-      fetch("http://127.0.0.1:7244/ingest/f26b0d71-5d71-4d69-b4d0-1706630ff879", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          sessionId: "debug-session",
-          runId: "debug",
-          hypothesisId: "H3",
-          location: "lib/logger.ts:writeLog:error",
-          message: "Append failed",
-          data: { level, category, error: errorMsg },
-          timestamp: Date.now(),
-        }),
-      }).catch(() => {});
-      // #endregion
+      console.error(`[LOGGER ERROR] Log path: ${this.logPath}`);
+      console.error(`[LOGGER ERROR] Stack: ${errorStack}`);
     }
   }
 
@@ -198,11 +150,13 @@ class Logger {
 
   // Timing
   startTimer(label: string) {
+    const start = Date.now();
+    
     return {
       label,
-      start: Date.now(),
+      start: start,
       end: () => {
-        const duration = Date.now() - this.start;
+        const duration = Date.now() - start;
         this.writeLog("TIMER", label, `Completed in ${duration}ms`);
         return duration;
       }

@@ -1,0 +1,30 @@
+[2026-01-10 15:39:19.272] [44ms] [STEP] [DASHBOARD] Fetching leads for dashboard
+[2026-01-10 15:39:19.275] [47ms] [DB] [QUERY] SELECT on table 'leads' | QUERY: {"operation":"dashboard_fetch","limit":50}
+[2026-01-10 15:39:19.284] [55ms] [STEP] [DASHBOARD] Fetching dashboard statistics
+[2026-01-10 15:39:19.292] [63ms] [DB] [QUERY] SELECT on table 'leads' | QUERY: {"operation":"count"}
+[2026-01-10 15:39:19.293] [64ms] [DB] [QUERY] SELECT on table 'alerts' | QUERY: {"operation":"count"}
+[2026-01-10 15:39:19.295] [66ms] [DB] [QUERY] SELECT on table 'project_settings' | QUERY: {"operation":"global_fetch"}
+[2026-01-10 15:39:22.443] [3214ms] [INFO] [GLOBAL_FETCH] Loaded global project settings | DATA: {"hasContext":true,"keywordCount":14}
+[2026-01-10 15:39:23.729] [4500ms] [DB] [QUERY] SELECT on table 'alerts' | QUERY: {"operation":"active_count","filter":"is_active=true"}
+[2026-01-10 15:39:24.202] [4973ms] [INFO] [DASHBOARD] Dashboard statistics fetched | DATA: {"totalLeads":2,"totalAlerts":5,"activeAlerts":5,"queryTime":"4910ms"}
+[2026-01-10 15:39:24.284] [5055ms] [INFO] [DASHBOARD] Fetched 2 leads | DATA: {"queryTime":"5002ms"}
+[2026-01-10 15:39:48.865] [73ms] [STEP] [DASHBOARD] Fetching leads for dashboard
+[2026-01-10 15:39:48.869] [79ms] [DB] [QUERY] SELECT on table 'leads' | QUERY: {"operation":"dashboard_fetch","limit":50}
+[2026-01-10 15:39:48.876] [84ms] [STEP] [DASHBOARD] Fetching dashboard statistics
+[2026-01-10 15:39:48.881] [89ms] [DB] [QUERY] SELECT on table 'leads' | QUERY: {"operation":"count"}
+[2026-01-10 15:39:48.882] [90ms] [DB] [QUERY] SELECT on table 'alerts' | QUERY: {"operation":"count"}
+[2026-01-10 15:39:48.890] [98ms] [DB] [QUERY] SELECT on table 'project_settings' | QUERY: {"operation":"global_fetch"}
+[2026-01-10 15:39:49.734] [942ms] [INFO] [DASHBOARD] Fetched 2 leads | DATA: {"queryTime":"858ms"}
+[2026-01-10 15:39:49.764] [972ms] [INFO] [GLOBAL_FETCH] Loaded global project settings | DATA: {"hasContext":true,"keywordCount":14}
+[2026-01-10 15:39:50.583] [1791ms] [DB] [QUERY] SELECT on table 'alerts' | QUERY: {"operation":"active_count","filter":"is_active=true"}
+[2026-01-10 15:39:51.044] [2252ms] [INFO] [DASHBOARD] Dashboard statistics fetched | DATA: {"totalLeads":2,"totalAlerts":5,"activeAlerts":5,"queryTime":"2163ms"}
+[2026-01-10 15:41:11.710] [30ms] [STEP] [DASHBOARD] Fetching leads for dashboard
+[2026-01-10 15:41:11.714] [33ms] [DB] [QUERY] SELECT on table 'leads' | QUERY: {"operation":"dashboard_fetch","limit":50}
+[2026-01-10 15:41:11.717] [36ms] [STEP] [DASHBOARD] Fetching dashboard statistics
+[2026-01-10 15:41:11.718] [37ms] [DB] [QUERY] SELECT on table 'leads' | QUERY: {"operation":"count"}
+[2026-01-10 15:41:11.720] [39ms] [DB] [QUERY] SELECT on table 'alerts' | QUERY: {"operation":"count"}
+[2026-01-10 15:41:11.728] [47ms] [DB] [QUERY] SELECT on table 'project_settings' | QUERY: {"operation":"global_fetch"}
+[2026-01-10 15:41:11.889] [208ms] [DB] [QUERY] SELECT on table 'alerts' | QUERY: {"operation":"active_count","filter":"is_active=true"}
+[2026-01-10 15:41:11.898] [217ms] [INFO] [GLOBAL_FETCH] Loaded global project settings | DATA: {"hasContext":true,"keywordCount":14}
+[2026-01-10 15:41:11.902] [221ms] [INFO] [DASHBOARD] Fetched 2 leads | DATA: {"queryTime":"187ms"}
+[2026-01-10 15:41:11.951] [270ms] [INFO] [DASHBOARD] Dashboard statistics fetched | DATA: {"totalLeads":2,"totalAlerts":5,"activeAlerts":5,"queryTime":"233ms"}

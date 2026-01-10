@@ -5,7 +5,7 @@ dotenv.config({ path: ".env.local" });
 // Import the three pipeline functions
 import { fetchSubredditPosts } from "@/lib/reddit";
 import { containsKeyword } from "@/lib/scanner";
-import { analyzeIntent } from "@/lib/ai";
+import { analyzeOpportunity } from "@/lib/ai";
 
 /**
  * Manual test function to verify the entire data pipeline:
@@ -47,13 +47,30 @@ async function runTest() {
     console.log("Step C: Analyzing post with AI...");
     console.log(`📝 Post Title: "${testPost.title}"\n`);
 
-    const hasIntent = await analyzeIntent(testPost.title, testPost.selftext);
+    const productContext =
+      process.env.TEST_PRODUCT_CONTEXT ||
+      "Generic SaaS product helping users with problems discussed in the post.";
+
+    const opportunity = await analyzeOpportunity(
+      testPost.title,
+      testPost.selftext,
+      productContext
+    );
 
     // Log final verdict
-    if (hasIntent) {
-      console.log("🤖 AI says: YES (Lead) ✅");
+    if (opportunity.is_opportunity && opportunity.score >= 70) {
+      console.log("🤖 AI says: YES (Opportunity) ✅");
+      console.log(
+        `Type: ${opportunity.opportunity_type}, Score: ${opportunity.score}`
+      );
+      console.log(`Reason: ${opportunity.short_reason}`);
+      console.log(`Angle: ${opportunity.suggested_angle}`);
     } else {
-      console.log("🤖 AI says: NO ❌");
+      console.log("🤖 AI says: NO (Weak or no opportunity) ❌");
+      console.log(
+        `Type: ${opportunity.opportunity_type}, Score: ${opportunity.score}`
+      );
+      console.log(`Reason: ${opportunity.short_reason}`);
     }
 
     console.log("\n✨ Test completed successfully!");
