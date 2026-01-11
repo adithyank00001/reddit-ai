@@ -67,12 +67,16 @@ async function logDebug(payload: Record<string, any>) {
     body: JSON.stringify(enriched),
   }).catch(() => {});
 
-  try {
-    const logPath = path.join(process.cwd(), ".cursor", "debug.log");
-    await fs.mkdir(path.dirname(logPath), { recursive: true });
-    await fs.appendFile(logPath, JSON.stringify(enriched) + "\n");
-  } catch (err) {
-    log("LOG_DEBUG", `append failed: ${err}`);
+  // Only write to filesystem in development mode
+  // In production (Vercel), filesystem is read-only, so skip file operations
+  if (process.env.NODE_ENV === 'development') {
+    try {
+      const logPath = path.join(process.cwd(), ".cursor", "debug.log");
+      await fs.mkdir(path.dirname(logPath), { recursive: true });
+      await fs.appendFile(logPath, JSON.stringify(enriched) + "\n");
+    } catch (err) {
+      log("LOG_DEBUG", `append failed: ${err}`);
+    }
   }
 }
 

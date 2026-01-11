@@ -16,17 +16,21 @@ class Logger {
   }
 
   private ensureLogFile() {
-    try {
-      const logDir = path.dirname(this.logPath);
-      if (!fsSync.existsSync(logDir)) {
-        fsSync.mkdirSync(logDir, { recursive: true });
+    // Only write to filesystem in development mode
+    // In production (Vercel), filesystem is read-only, so skip file operations
+    if (process.env.NODE_ENV === 'development') {
+      try {
+        const logDir = path.dirname(this.logPath);
+        if (!fsSync.existsSync(logDir)) {
+          fsSync.mkdirSync(logDir, { recursive: true });
+        }
+        // Create file if it doesn't exist
+        if (!fsSync.existsSync(this.logPath)) {
+          fsSync.writeFileSync(this.logPath, "", "utf8");
+        }
+      } catch (err) {
+        console.error(`[LOGGER ERROR] Failed to initialize log file:`, err);
       }
-      // Create file if it doesn't exist
-      if (!fsSync.existsSync(this.logPath)) {
-        fsSync.writeFileSync(this.logPath, "", "utf8");
-      }
-    } catch (err) {
-      console.error(`[LOGGER ERROR] Failed to initialize log file:`, err);
     }
   }
 
@@ -49,25 +53,28 @@ class Logger {
     // Always log to console
     console.log(logMessage.trim());
     
-    // Append to workflow.log file - FORCE SYNC WRITE
-    try {
-      // Ensure directory exists
-      const logDir = path.dirname(this.logPath);
-      if (!fsSync.existsSync(logDir)) {
-        fsSync.mkdirSync(logDir, { recursive: true });
+    // Append to workflow.log file - only in development mode
+    // In production (Vercel), filesystem is read-only, so skip file operations
+    if (process.env.NODE_ENV === 'development') {
+      try {
+        // Ensure directory exists
+        const logDir = path.dirname(this.logPath);
+        if (!fsSync.existsSync(logDir)) {
+          fsSync.mkdirSync(logDir, { recursive: true });
+        }
+        
+        // Force write to file
+        fsSync.appendFileSync(this.logPath, logMessage, "utf8");
+        
+        // Verify write succeeded by checking file size
+        const stats = fsSync.statSync(this.logPath);
+      } catch (err) {
+        const errorMsg = err instanceof Error ? err.message : String(err);
+        const errorStack = err instanceof Error ? err.stack : undefined;
+        console.error(`[LOGGER ERROR] Failed to write to workflow.log: ${errorMsg}`);
+        console.error(`[LOGGER ERROR] Log path: ${this.logPath}`);
+        console.error(`[LOGGER ERROR] Stack: ${errorStack}`);
       }
-      
-      // Force write to file
-      fsSync.appendFileSync(this.logPath, logMessage, "utf8");
-      
-      // Verify write succeeded by checking file size
-      const stats = fsSync.statSync(this.logPath);
-    } catch (err) {
-      const errorMsg = err instanceof Error ? err.message : String(err);
-      const errorStack = err instanceof Error ? err.stack : undefined;
-      console.error(`[LOGGER ERROR] Failed to write to workflow.log: ${errorMsg}`);
-      console.error(`[LOGGER ERROR] Log path: ${this.logPath}`);
-      console.error(`[LOGGER ERROR] Stack: ${errorStack}`);
     }
   }
 
