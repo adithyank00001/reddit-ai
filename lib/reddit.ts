@@ -2,12 +2,12 @@ import { RedditPost } from "@/types";
 import { logger } from "./logger";
 
 const MIRRORS = [
-  "https://redlib.tux.pizza",
-  "https://redlib.perennialte.ch",
-  "https://redlib.catsarch.com",
-  "https://libreddit.kavin.rocks",
-  "https://snoo.habedieeh.re",
-  "https://l.opnxng.com"
+  "https://redlib.kylrth.com",
+  "https://redlib.seonthes.com",
+  "https://libreddit.bus-hit.me",
+  "https://redlib.incognit.xyz",
+  "https://libreddit.lunar.icu",
+  "https://snoo.habedieeh.re"
 ];
 
 export async function fetchSubredditPosts(
@@ -40,7 +40,8 @@ export async function fetchSubredditPosts(
 
         const res = await fetch(url, {
           headers: {
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
+            "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36",
+            "Accept": "application/json",
           },
           cache: "no-store",
           signal: controller.signal
@@ -54,6 +55,13 @@ export async function fetchSubredditPosts(
         // If this mirror failed, try next one immediately
         if (!res.ok) {
           logger.redditError(subredditStr, `Mirror ${mirror} returned HTTP ${res.status} ${res.statusText}. Trying next mirror...`);
+          continue;
+        }
+
+        // Safety check: Detect HTML responses (Cloudflare challenges) before parsing JSON
+        const contentType = res.headers.get("content-type") || "";
+        if (contentType.includes("text/html")) {
+          logger.warn("REDDIT_FETCH", `Mirror ${mirror} sent HTML (likely Cloudflare block). Trying next mirror...`);
           continue;
         }
 
