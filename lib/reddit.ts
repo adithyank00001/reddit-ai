@@ -2,12 +2,24 @@ import { RedditPost } from "@/types";
 import { logger } from "./logger";
 
 const MIRRORS = [
+  // Teddit Instances (Different frontend, often lighter/less strict)
+  "https://teddit.net",
+  "https://teddit.zaggy.nl",
+  "https://teddit.namazso.eu",
+  "https://t.sneed.network",
+  "https://teddit.pussthecat.org",
+  "https://teddit.adminforge.de",
+  "https://teddit.hostux.net",
+  
+  // Redlib / Libreddit Instances
+  "https://redlib.tux.pizza",
+  "https://redlib.perennialte.ch",
+  "https://libreddit.kavin.rocks",
   "https://redlib.kylrth.com",
-  "https://redlib.seonthes.com",
-  "https://libreddit.bus-hit.me",
-  "https://redlib.incognit.xyz",
-  "https://libreddit.lunar.icu",
-  "https://snoo.habedieeh.re"
+  "https://snoo.habedieeh.re",
+  "https://redlib.vsls.cz",
+  "https://redlib.dnav.no",
+  "https://libreddit.privacy.com.de"
 ];
 
 export async function fetchSubredditPosts(
@@ -26,7 +38,18 @@ export async function fetchSubredditPosts(
     }
 
     // Try mirrors one by one (no delay between attempts)
+    // Track total time to avoid Vercel timeout (30 second budget)
+    const overallStart = Date.now();
+    const MAX_TOTAL_TIME = 30000; // 30 seconds total budget
+
     for (const mirror of MIRRORS) {
+      // Check if we're running out of time budget
+      const elapsed = Date.now() - overallStart;
+      if (elapsed > MAX_TOTAL_TIME) {
+        logger.warn("REDDIT_FETCH", `Time budget exceeded (${elapsed}ms). Stopping mirror attempts.`);
+        break;
+      }
+
       try {
         const url = `${mirror}/r/${subredditStr}/new.json?limit=100`;
         const requestStart = Date.now();
@@ -34,9 +57,9 @@ export async function fetchSubredditPosts(
         // Log which mirror we are trying
         logger.redditRequest(subredditStr, url);
 
-        // Create AbortController for timeout (5 seconds per mirror)
+        // Create AbortController for timeout (3 seconds per mirror for faster failures)
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 5000);
+        const timeoutId = setTimeout(() => controller.abort(), 3000);
 
         const res = await fetch(url, {
           headers: {
