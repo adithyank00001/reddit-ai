@@ -1,83 +1,121 @@
 import { RedditPost } from "@/types";
 import { logger } from "./logger";
 
+const MIRRORS = [
+  "https://redlib.tux.pizza",
+  "https://redlib.perennialte.ch",
+  "https://redlib.catsarch.com",
+  "https://libreddit.kavin.rocks",
+  "https://snoo.habedieeh.re",
+  "https://l.opnxng.com"
+];
+
 export async function fetchSubredditPosts(
   subreddits: string[]
 ): Promise<RedditPost[]> {
   const timer = logger.startTimer("REDDIT_FETCH");
   const subredditStr = subreddits.join("+");
-  
+
   try {
     logger.step("REDDIT_FETCH", `Starting fetch for subreddits: ${subredditStr}`);
-    
+
     // Early return if subreddits array is empty
     if (subreddits.length === 0) {
       logger.warn("REDDIT_FETCH", "Empty subreddits array provided");
       return [];
     }
 
-    // Join subreddit names with + separator
-    const joinedNames = subreddits.join("+");
+    // Try mirrors one by one (no delay between attempts)
+    for (const mirror of MIRRORS) {
+      try {
+        const url = `${mirror}/r/${subredditStr}/new.json?limit=100`;
+        const requestStart = Date.now();
 
-    // Construct the Reddit API URL
-    const url = `https://www.reddit.com/r/${joinedNames}/new.json?limit=100`;
-    
-    logger.redditRequest(subredditStr, url);
+        // Log which mirror we are trying
+        logger.redditRequest(subredditStr, url);
 
-    const requestStart = Date.now();
-    // Fetch with custom User-Agent to avoid bot detection
-    const res = await fetch(url, {
-      headers: {
-        "User-Agent":
-          "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-      },
-      cache: "no-store",
-    });
-    const requestTime = Date.now() - requestStart;
+        // Create AbortController for timeout (5 seconds per mirror)
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 5000);
 
-    logger.apiResponse("GET", url, res.status, res.statusText, requestTime);
+        const res = await fetch(url, {
+          headers: {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
+          },
+          cache: "no-store",
+          signal: controller.signal
+        });
 
-    // Check if request was successful
-    if (!res.ok) {
-      logger.redditError(subredditStr, `HTTP ${res.status} ${res.statusText}`);
-      return [];
+        clearTimeout(timeoutId);
+        const requestTime = Date.now() - requestStart;
+
+        logger.apiResponse("GET", url, res.status, res.statusText, requestTime);
+
+        // If this mirror failed, try next one immediately
+        if (!res.ok) {
+          logger.redditError(subredditStr, `Mirror ${mirror} returned HTTP ${res.status} ${res.statusText}. Trying next mirror...`);
+          continue;
+        }
+
+        // Parse JSON response
+        const parseStart = Date.now();
+        const data = await res.json();
+        const parseTime = Date.now() - parseStart;
+
+        // Validate response structure
+        if (!data?.data?.children) {
+          logger.redditError(subredditStr, `Mirror ${mirror} returned invalid JSON structure. Trying next mirror...`);
+          continue;
+        }
+
+        // Map Reddit API response to our RedditPost interface
+        const mapStart = Date.now();
+        const posts: RedditPost[] = data.data.children.map((child: any) => {
+          const permalink = child.data.permalink.startsWith("/")
+            ? child.data.permalink
+            : `/${child.data.permalink}`;
+
+          return {
+            id: child.data.name,
+            title: child.data.title,
+            selftext: child.data.selftext || "",
+            url: `https://www.reddit.com${permalink}`, // Force Real Reddit Link
+            author: child.data.author,
+            subreddit: child.data.subreddit,
+            created_utc: child.data.created_utc,
+          };
+        });
+        const mapTime = Date.now() - mapStart;
+
+        logger.debug("REDDIT_FETCH", `Parsed JSON response in ${parseTime}ms`, {
+          childrenCount: posts.length
+        });
+        logger.debug("REDDIT_FETCH", `Mapped ${posts.length} posts in ${mapTime}ms`);
+        logger.redditResponse(subredditStr, posts.length, Date.now() - requestStart);
+        timer.end();
+
+        return posts;
+
+      } catch (err) {
+        // If timeout or network error, try next mirror immediately
+        const errorMsg = err instanceof Error ? err.message : String(err);
+        if (errorMsg.includes("aborted") || errorMsg.includes("timeout")) {
+          logger.redditError(subredditStr, `Mirror ${mirror} timed out. Trying next mirror...`);
+        } else {
+          logger.redditError(subredditStr, `Mirror ${mirror} connection failed: ${errorMsg}. Trying next mirror...`);
+        }
+        // Continue to next mirror (0ms delay)
+        continue;
+      }
     }
 
-    // Parse JSON response
-    const parseStart = Date.now();
-    const data = await res.json();
-    const parseTime = Date.now() - parseStart;
-    
-    logger.debug("REDDIT_FETCH", `Parsed JSON response in ${parseTime}ms`, {
-      childrenCount: data.data?.children?.length || 0
-    });
-
-    // Map Reddit API response to our RedditPost interface
-    const mapStart = Date.now();
-    const posts: RedditPost[] = data.data.children.map((child: any) => {
-      const permalink = child.data.permalink.startsWith("/")
-        ? child.data.permalink
-        : `/${child.data.permalink}`;
-
-      return {
-        id: child.data.name,
-        title: child.data.title,
-        selftext: child.data.selftext,
-        url: `https://reddit.com${permalink}`,
-        author: child.data.author,
-        subreddit: child.data.subreddit,
-        created_utc: child.data.created_utc,
-      };
-    });
-    const mapTime = Date.now() - mapStart;
-
-    logger.debug("REDDIT_FETCH", `Mapped ${posts.length} posts in ${mapTime}ms`);
-    logger.redditResponse(subredditStr, posts.length, Date.now() - requestStart);
+    // All mirrors failed
+    logger.redditError(subredditStr, "All mirrors failed. No posts fetched.");
     timer.end();
+    return [];
 
-    return posts;
   } catch (error) {
-    // Log error and return empty array (never crash)
+    // Critical error outside the mirror loop
     logger.redditError(subredditStr, error);
     timer.end();
     return [];
