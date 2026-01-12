@@ -25,24 +25,11 @@ export async function fetchSubredditPosts(
     logger.redditRequest(subredditStr, url);
 
     const requestStart = Date.now();
-    // Fetch with Reddit-compliant User-Agent to avoid 403 blocks from data centers
-    // Reddit requires identifying your bot, not using generic browser User-Agents
-    const redditUsername = process.env.REDDIT_USERNAME;
-    const redditEmail = process.env.REDDIT_EMAIL;
-    
-    let userAgent: string;
-    if (redditUsername) {
-      userAgent = `RedditLeadScout/1.0 (by /u/${redditUsername})`;
-    } else if (redditEmail) {
-      userAgent = `RedditLeadScout/1.0 (Contact: ${redditEmail})`;
-    } else {
-      // Fallback - user should update .env.local with their Reddit username or email
-      userAgent = "RedditLeadScout/1.0 (Contact: your-email@example.com)";
-    }
-    
+    // Fetch with custom User-Agent to avoid bot detection
     const res = await fetch(url, {
       headers: {
-        "User-Agent": userAgent,
+        "User-Agent":
+          "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
       },
       cache: "no-store",
     });
