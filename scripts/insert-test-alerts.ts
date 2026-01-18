@@ -20,23 +20,23 @@ async function insertTestAlerts() {
   const testAlerts = [
     {
       subreddit: "saas",
-      keywords: ["marketing", "seo", "growth"],
+      is_active: true,
     },
     {
       subreddit: "entrepreneur",
-      keywords: ["hiring", "developer", "freelancer"],
+      is_active: true,
     },
     {
       subreddit: "startups",
-      keywords: ["funding", "investor", "vc"],
+      is_active: true,
     },
     {
       subreddit: "marketing",
-      keywords: ["agency", "consultant", "services"],
+      is_active: true,
     },
     {
       subreddit: "webdev",
-      keywords: ["looking for", "need help", "recommendation"],
+      is_active: true,
     },
   ];
 
@@ -52,7 +52,7 @@ async function insertTestAlerts() {
       console.error(`❌ Failed to insert alert for r/${alert.subreddit}:`, error.message);
       results.push({ success: false, alert, error: error.message });
     } else {
-      console.log(`✅ Inserted alert for r/${alert.subreddit} with keywords: ${alert.keywords.join(", ")}`);
+      console.log(`✅ Inserted alert for r/${alert.subreddit} (is_active: ${alert.is_active})`);
       results.push({ success: true, alert, data });
     }
   }
@@ -67,14 +67,21 @@ async function insertTestAlerts() {
   console.log("\n🔍 Verifying alerts in database:");
   const { data: allAlerts, error: fetchError } = await supabase
     .from("alerts")
-    .select("id, subreddit, keywords");
+    .select("id, subreddit, is_active");
 
   if (fetchError) {
     console.error("❌ Failed to fetch alerts:", fetchError.message);
   } else {
     console.log(`✅ Found ${allAlerts?.length || 0} alerts in database:`);
     allAlerts?.forEach((alert, idx) => {
-      console.log(`  ${idx + 1}. r/${alert.subreddit} - Keywords: ${JSON.stringify(alert.keywords)}`);
+      console.log(`  ${idx + 1}. r/${alert.subreddit} - is_active: ${alert.is_active}`);
+    });
+    
+    // Check active alerts specifically
+    const activeAlerts = allAlerts?.filter(a => a.is_active === true) || [];
+    console.log(`\n✅ Active alerts: ${activeAlerts.length}`);
+    activeAlerts.forEach((alert, idx) => {
+      console.log(`  ${idx + 1}. r/${alert.subreddit} (ID: ${alert.id})`);
     });
   }
 
