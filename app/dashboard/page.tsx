@@ -168,7 +168,7 @@ export default async function DashboardPage() {
                   placeholder="Paste a long, messy description of your product here. Example: We build an AI chatbot for Shopify stores that answers customer questions 24/7..."
                 />
                 <p className="mt-1 text-xs text-muted-foreground">
-                  The AI will generate a concise context (about 15–20 words) used across all alerts.
+                  Worker 2 will automatically generate a concise context (about 15–20 words) from this description.
                 </p>
               </div>
               <div>
@@ -195,7 +195,7 @@ export default async function DashboardPage() {
                 variant="default"
                 className="bg-blue-600 hover:bg-blue-700 text-white"
               >
-                Save &amp; Optimize Configuration
+                Save Configuration
               </Button>
             </form>
             <div>
@@ -203,7 +203,7 @@ export default async function DashboardPage() {
               <p className="text-sm text-muted-foreground whitespace-pre-wrap">
                 {globalSettings.product_context
                   ? globalSettings.product_context
-                  : "Not set yet. Save a product description to generate it."}
+                  : "Not set yet. Worker 2 will generate this automatically after you save a product description."}
               </p>
             </div>
           </CardContent>
