@@ -1,15 +1,24 @@
 /**
- * Smart Scout - Google Apps Script
+ * Worker 1: The Scout - Google Apps Script
  * 
- * Fetches active alerts from Supabase, retrieves Reddit posts for each alert,
- * and sends them to the Vercel backend for processing.
+ * Fetches Reddit posts from manually specified subreddits, filters by keywords,
+ * and saves matching posts directly to Supabase leads table.
  * 
  * Configuration (set via PropertiesService):
  * - SUPABASE_URL: Your Supabase project URL
- * - SUPABASE_KEY: Supabase anon or service role key
- * - VERCEL_ENDPOINT: Full URL to your Vercel /api/cron endpoint
- * - CRON_SECRET: Secret token for authenticating with Vercel
+ * - SUPABASE_KEY: Supabase Service Role key (required to bypass RLS)
  */
+
+// ============================================================================
+// MANUAL CONFIGURATION: Edit this list to add/remove subreddits
+// ============================================================================
+const TARGET_SUBREDDITS = ['saas', 'entrepreneur'];
+
+// ============================================================================
+// COST CONTROL: Limit posts saved per run to control OpenAI costs
+// ============================================================================
+const ENABLE_LIMIT = true; // Set to false to disable the limit
+const MAX_POSTS_PER_RUN = 10; // Max number of posts to save total
 
 /**
  * Main function to run the Smart Scout process
@@ -17,7 +26,7 @@
  */
 function runSmartScout() {
   const startTime = new Date();
-  Logger.log(`[${formatTimestamp(startTime)}] Smart Scout started`);
+  Logger.log(`[${formatTimestamp(startTime)}] Worker 1 (The Scout) started`);
 
   try {
     // Get configuration
@@ -27,60 +36,100 @@ function runSmartScout() {
       return;
     }
 
-    // Fetch active alerts from Supabase
-    Logger.log("Fetching active alerts from Supabase...");
-    const alerts = fetchActiveAlerts(config);
+    // Fetch keywords from database
+    Logger.log("Fetching keywords from project_settings...");
+    const keywords = fetchKeywords(config);
     
-    if (!alerts || alerts.length === 0) {
-      Logger.log("No active alerts found. Exiting.");
+    if (!keywords || keywords.length === 0) {
+      Logger.log("WARNING: No keywords found in project_settings. Stopping to avoid fetching everything.");
+      Logger.log("Please add keywords to the project_settings table (id=1) before running again.");
       return;
     }
 
-    Logger.log(`Found ${alerts.length} active alert(s)`);
+    Logger.log(`Found ${keywords.length} keyword(s): ${keywords.join(', ')}`);
 
-    // Process each alert
+    // Cost control setup
+    if (ENABLE_LIMIT) {
+      Logger.log(`Cost limit enabled: Max ${MAX_POSTS_PER_RUN} posts per run`);
+    }
+
+    // Process each subreddit in manual list
     let totalProcessed = 0;
     let totalErrors = 0;
+    let totalSkipped = 0;
+    let limitReached = false;
 
-    for (const alert of alerts) {
+    for (const subreddit of TARGET_SUBREDDITS) {
+      // Check if cost limit has been reached
+      if (ENABLE_LIMIT && totalProcessed >= MAX_POSTS_PER_RUN) {
+        Logger.log("\n⚠️ Cost limit reached. Stopping further processing.");
+        limitReached = true;
+        break;
+      }
+
       try {
-        Logger.log(`\nProcessing alert: ${alert.id} (r/${alert.subreddit})`);
+        Logger.log(`\nProcessing r/${subreddit}...`);
         
-        // Fetch Reddit posts
-        const posts = fetchRedditPosts(alert.subreddit);
-        
-        if (!posts || posts.length === 0) {
-          Logger.log(`No posts found for r/${alert.subreddit}`);
+        // Find alert_id for this subreddit
+        const alertId = findAlertId(config, subreddit);
+        if (!alertId) {
+          Logger.log(`No active alert found for r/${subreddit}. Skipping.`);
+          totalSkipped++;
           continue;
         }
 
-        Logger.log(`Found ${posts.length} post(s) from r/${alert.subreddit}`);
-
-        // Map posts to expected format
-        const mappedPosts = mapRedditPosts(posts, alert.subreddit);
-
-        // Send to Vercel
-        const result = sendToVercel(config, alert.id, alert.subreddit, mappedPosts);
+        Logger.log(`Found alert_id: ${alertId} for r/${subreddit}`);
         
-        if (result.success) {
-          Logger.log(`✓ Successfully sent ${mappedPosts.length} post(s) to Vercel`);
-          totalProcessed += mappedPosts.length;
-        } else {
-          Logger.log(`✗ Failed to send posts: ${result.error}`);
-          totalErrors++;
+        // Fetch Reddit posts
+        const posts = fetchRedditPosts(subreddit);
+        
+        if (!posts || posts.length === 0) {
+          Logger.log(`No posts found for r/${subreddit}`);
+          continue;
         }
+
+        Logger.log(`Found ${posts.length} post(s) from r/${subreddit}`);
+
+        // Filter posts by keywords
+        const filteredPosts = filterPostsByKeywords(posts, keywords);
+        Logger.log(`After keyword filtering: ${filteredPosts.length} post(s) match`);
+
+        if (filteredPosts.length === 0) {
+          Logger.log(`No posts match keywords for r/${subreddit}`);
+          continue;
+        }
+
+        // Calculate remaining limit
+        const remainingLimit = ENABLE_LIMIT ? MAX_POSTS_PER_RUN - totalProcessed : null;
+
+        // Save matching posts to Supabase (respects limit)
+        const saved = savePostsToSupabase(config, filteredPosts, alertId, subreddit, remainingLimit);
+        totalProcessed += saved.success;
+        totalErrors += saved.errors;
+
+        // Check if limit was reached during this save operation
+        if (ENABLE_LIMIT && totalProcessed >= MAX_POSTS_PER_RUN) {
+          Logger.log("\n⚠️ Cost limit reached. Stopping further processing.");
+          limitReached = true;
+          break;
+        }
+
       } catch (error) {
-        Logger.log(`✗ Error processing alert ${alert.id}: ${error.message}`);
+        Logger.log(`✗ Error processing r/${subreddit}: ${error.message}`);
+        Logger.log(error.stack);
         totalErrors++;
-        // Continue with next alert
       }
     }
 
     const endTime = new Date();
     const duration = (endTime - startTime) / 1000;
-    Logger.log(`\n[${formatTimestamp(endTime)}] Smart Scout completed`);
+    Logger.log(`\n[${formatTimestamp(endTime)}] Worker 1 completed`);
     Logger.log(`Duration: ${duration.toFixed(2)}s`);
-    Logger.log(`Total posts processed: ${totalProcessed}`);
+    Logger.log(`Total posts saved: ${totalProcessed}${ENABLE_LIMIT ? ` (limit: ${MAX_POSTS_PER_RUN})` : ''}`);
+    if (limitReached) {
+      Logger.log(`⚠️ Cost limit was reached during this run`);
+    }
+    Logger.log(`Subreddits skipped: ${totalSkipped}`);
     Logger.log(`Errors: ${totalErrors}`);
 
   } catch (error) {
@@ -91,37 +140,40 @@ function runSmartScout() {
 
 /**
  * Get configuration from Script Properties
+ * 
+ * Reads from Google Apps Script Properties:
+ * - SUPABASE_URL: Your Supabase project URL (e.g., https://xxxxx.supabase.co)
+ * - SUPABASE_KEY: Your Supabase Service Role key (JWT token)
+ * 
+ * To set these: File > Project Settings > Script Properties
  */
 function getConfig() {
   const props = PropertiesService.getScriptProperties();
   
+  // Read from Script Properties (set in File > Project Settings > Script Properties)
   const supabaseUrl = props.getProperty("SUPABASE_URL");
   const supabaseKey = props.getProperty("SUPABASE_KEY");
-  const vercelEndpoint = props.getProperty("VERCEL_ENDPOINT");
-  const cronSecret = props.getProperty("CRON_SECRET");
 
-  if (!supabaseUrl || !supabaseKey || !vercelEndpoint || !cronSecret) {
+  if (!supabaseUrl || !supabaseKey) {
     Logger.log("Missing configuration properties:");
     Logger.log(`  SUPABASE_URL: ${supabaseUrl ? "✓" : "✗"}`);
     Logger.log(`  SUPABASE_KEY: ${supabaseKey ? "✓" : "✗"}`);
-    Logger.log(`  VERCEL_ENDPOINT: ${vercelEndpoint ? "✓" : "✗"}`);
-    Logger.log(`  CRON_SECRET: ${cronSecret ? "✓" : "✗"}`);
+    Logger.log("Please set these in: File > Project Settings > Script Properties");
     return null;
   }
 
   return {
     supabaseUrl: supabaseUrl.trim(),
     supabaseKey: supabaseKey.trim(),
-    vercelEndpoint: vercelEndpoint.trim(),
-    cronSecret: cronSecret.trim(),
   };
 }
 
 /**
- * Fetch active alerts from Supabase
+ * Fetch keywords from project_settings table
+ * Returns the keywords array or empty array if not found
  */
-function fetchActiveAlerts(config) {
-  const url = `${config.supabaseUrl}/rest/v1/alerts?select=id,subreddit&is_active=eq.true`;
+function fetchKeywords(config) {
+  const url = `${config.supabaseUrl}/rest/v1/project_settings?id=eq.1&select=keywords`;
   
   try {
     const response = UrlFetchApp.fetch(url, {
@@ -143,11 +195,56 @@ function fetchActiveAlerts(config) {
       return [];
     }
 
-    const alerts = JSON.parse(responseText);
-    return Array.isArray(alerts) ? alerts : [];
+    const result = JSON.parse(responseText);
+    if (!Array.isArray(result) || result.length === 0) {
+      Logger.log("No project_settings found with id=1");
+      return [];
+    }
+
+    const keywords = result[0].keywords;
+    return Array.isArray(keywords) ? keywords : [];
   } catch (error) {
-    Logger.log(`ERROR fetching alerts: ${error.message}`);
+    Logger.log(`ERROR fetching keywords: ${error.message}`);
     return [];
+  }
+}
+
+/**
+ * Find alert_id for a given subreddit
+ * Returns the first active alert's ID, or null if not found
+ */
+function findAlertId(config, subreddit) {
+  const url = `${config.supabaseUrl}/rest/v1/alerts?subreddit=eq.${encodeURIComponent(subreddit)}&is_active=eq.true&select=id&limit=1`;
+  
+  try {
+    const response = UrlFetchApp.fetch(url, {
+      method: "GET",
+      headers: {
+        "apikey": config.supabaseKey,
+        "Authorization": `Bearer ${config.supabaseKey}`,
+        "Content-Type": "application/json",
+      },
+      muteHttpExceptions: true,
+    });
+
+    const statusCode = response.getResponseCode();
+    const responseText = response.getContentText();
+
+    if (statusCode !== 200) {
+      Logger.log(`ERROR: Supabase API returned ${statusCode}`);
+      Logger.log(`Response: ${responseText}`);
+      return null;
+    }
+
+    const result = JSON.parse(responseText);
+    if (!Array.isArray(result) || result.length === 0) {
+      return null;
+    }
+
+    return result[0].id;
+  } catch (error) {
+    Logger.log(`ERROR finding alert_id: ${error.message}`);
+    return null;
   }
 }
 
@@ -272,7 +369,7 @@ function fetchRedditPosts(subreddit) {
       return {
         id: id,
         title: title,
-        selftext: selftext,
+        body: selftext, // Using 'body' to match database schema
         url: url,
         author: author,
         subreddit: subreddit,
@@ -292,62 +389,146 @@ function fetchRedditPosts(subreddit) {
 }
 
 /**
- * Map Reddit post data to expected format
- * Since fetchRedditPosts now handles the mapping (XML to Object),
- * this function simply returns the posts array as-is (pass-through)
+ * Extract short Reddit post ID from full Reddit URL/ID
+ * Reddit RSS provides full URLs like: https://www.reddit.com/r/saas/comments/abc123/title/
+ * We need just the short ID: abc123
  */
-function mapRedditPosts(redditPosts, subreddit) {
-  // Posts are already mapped in fetchRedditPosts, so just return them
-  return redditPosts;
+function extractRedditPostId(redditId) {
+  if (!redditId) return "";
+  
+  // Reddit ID format in RSS: https://www.reddit.com/r/subreddit/comments/SHORT_ID/title/
+  // We need to extract the SHORT_ID part
+  const match = redditId.match(/\/comments\/([^\/]+)\//);
+  if (match && match[1]) {
+    return match[1];
+  }
+  
+  // If it's already a short ID (just letters/numbers), return as-is
+  if (/^[a-z0-9]+$/i.test(redditId)) {
+    return redditId;
+  }
+  
+  // Fallback: try to extract from any URL pattern
+  const parts = redditId.split('/');
+  for (let i = 0; i < parts.length; i++) {
+    if (parts[i] === 'comments' && parts[i + 1]) {
+      return parts[i + 1];
+    }
+  }
+  
+  // Last resort: return the last meaningful part
+  return redditId.split('/').pop() || redditId;
 }
 
 /**
- * Send posts to Vercel backend
+ * Filter posts by keywords (case-insensitive)
+ * A post matches if its title OR body contains at least one keyword
  */
-function sendToVercel(config, alertId, subreddit, posts) {
-  if (!posts || posts.length === 0) {
-    return { success: false, error: "No posts to send" };
+function filterPostsByKeywords(posts, keywords) {
+  if (!keywords || keywords.length === 0) {
+    return posts; // No keywords = no filtering
   }
 
-  const payload = {
-    alert_id: alertId,
-    subreddit: subreddit,
-    posts: posts,
-  };
+  // Convert keywords to lowercase for case-insensitive matching
+  const lowerKeywords = keywords.map(k => k.toLowerCase().trim()).filter(k => k.length > 0);
 
-  try {
-    const response = UrlFetchApp.fetch(config.vercelEndpoint, {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${config.cronSecret}`,
-        "Content-Type": "application/json",
-      },
-      payload: JSON.stringify(payload),
-      muteHttpExceptions: true,
+  return posts.filter(post => {
+    const title = (post.title || "").toLowerCase();
+    const body = (post.body || "").toLowerCase();
+    
+    // Check if any keyword appears in title or body
+    return lowerKeywords.some(keyword => {
+      return title.includes(keyword) || body.includes(keyword);
     });
+  });
+}
 
-    const statusCode = response.getResponseCode();
-    const responseText = response.getContentText();
-
-    if (statusCode >= 200 && statusCode < 300) {
-      let result;
-      try {
-        result = JSON.parse(responseText);
-      } catch (e) {
-        result = { message: "Success (no JSON response)" };
-      }
-      
-      Logger.log(`Vercel response: ${JSON.stringify(result)}`);
-      return { success: true, result: result };
-    } else {
-      const errorMsg = `HTTP ${statusCode}: ${responseText.substring(0, 200)}`;
-      Logger.log(`ERROR: ${errorMsg}`);
-      return { success: false, error: errorMsg };
-    }
-  } catch (error) {
-    Logger.log(`ERROR sending to Vercel: ${error.message}`);
-    return { success: false, error: error.message };
+/**
+ * Save posts to Supabase leads table
+ * Handles duplicates gracefully (logs and continues)
+ * 
+ * @param {Object} config - Configuration object with supabaseUrl and supabaseKey
+ * @param {Array} posts - Array of post objects to save
+ * @param {string} alertId - The alert ID to associate with these posts
+ * @param {string} subreddit - The subreddit name
+ * @param {number|null} remainingLimit - Optional limit on how many posts to save (null = no limit)
+ * @returns {Object} Object with success count and error count
+ */
+function savePostsToSupabase(config, posts, alertId, subreddit, remainingLimit) {
+  if (!posts || posts.length === 0) {
+    return { success: 0, errors: 0 };
   }
+
+  let successCount = 0;
+  let errorCount = 0;
+
+  for (const post of posts) {
+    // Check if we've reached the limit (if enabled)
+    if (remainingLimit !== null && successCount >= remainingLimit) {
+      Logger.log(`Cost limit reached (${remainingLimit} posts). Stopping save operation.`);
+      break;
+    }
+
+    try {
+      // Extract short post ID
+      const redditPostId = extractRedditPostId(post.id);
+      
+      if (!redditPostId) {
+        Logger.log(`Warning: Could not extract post ID from: ${post.id}`);
+        errorCount++;
+        continue;
+      }
+
+      // Prepare data for Supabase
+      const leadData = {
+        reddit_post_id: redditPostId,
+        alert_id: alertId,
+        title: post.title || "",
+        body: post.body || "",
+        url: post.url || "",
+        author: post.author || "[deleted]",
+        subreddit: subreddit,
+        created_utc: post.created_utc || Math.floor(Date.now() / 1000),
+        processing_status: 'new',
+        status: 'new'
+      };
+
+      // Insert into Supabase
+      const url = `${config.supabaseUrl}/rest/v1/leads`;
+      const response = UrlFetchApp.fetch(url, {
+        method: "POST",
+        headers: {
+          "apikey": config.supabaseKey,
+          "Authorization": `Bearer ${config.supabaseKey}`,
+          "Content-Type": "application/json",
+          "Prefer": "return=minimal"
+        },
+        payload: JSON.stringify(leadData),
+        muteHttpExceptions: true,
+      });
+
+      const statusCode = response.getResponseCode();
+      const responseText = response.getContentText();
+
+      if (statusCode === 201 || statusCode === 200) {
+        successCount++;
+        Logger.log(`✓ Saved post: ${redditPostId} (${post.title.substring(0, 50)}...)`);
+      } else if (statusCode === 409 || statusCode === 23505) {
+        // Duplicate key error (UNIQUE constraint violation)
+        Logger.log(`Post already exists, skipping: ${redditPostId}`);
+        // Don't count as error, just continue
+      } else {
+        Logger.log(`✗ Failed to save post ${redditPostId}: HTTP ${statusCode}`);
+        Logger.log(`Response: ${responseText.substring(0, 200)}`);
+        errorCount++;
+      }
+    } catch (error) {
+      Logger.log(`✗ Error saving post: ${error.message}`);
+      errorCount++;
+    }
+  }
+
+  return { success: successCount, errors: errorCount };
 }
 
 /**
@@ -371,10 +552,9 @@ function setupConfig() {
   // CRITICAL: Use SERVICE_ROLE_KEY, not anon key, to bypass RLS (Row Level Security)
   props.setProperty("SUPABASE_URL", "https://your-project.supabase.co");
   props.setProperty("SUPABASE_KEY", "your-supabase-SERVICE-ROLE-key"); // Must be service role key!
-  props.setProperty("VERCEL_ENDPOINT", "https://your-app.vercel.app/api/cron");
-  props.setProperty("CRON_SECRET", "your-cron-secret");
   
   Logger.log("Configuration set. Please update the values with your actual credentials.");
   Logger.log("⚠️ IMPORTANT: SUPABASE_KEY must be the SERVICE_ROLE_KEY (not anon key) to bypass RLS");
   Logger.log("You can also set these manually in File > Project Settings > Script Properties");
+  Logger.log("\n📝 Don't forget to edit TARGET_SUBREDDITS at the top of the script!");
 }
