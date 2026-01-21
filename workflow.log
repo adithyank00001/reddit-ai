@@ -1,0 +1,2 @@
+[2026-01-21 05:49:32.497] [83ms] [INFO] [SETTINGS_UPDATE_START] Settings form received | DATA: {"descriptionLength":22,"keywordsRaw":"saas, startup, seo","subreddit":"","hasWebhook":false}
+[2026-01-21 05:49:34.806] [2392ms] [ERROR] [SETTINGS_UPDATE_ERROR] Failed to update project_settings | DATA: {"message":"new row violates row-level security policy for table \"project_settings\"","code":"42501"}

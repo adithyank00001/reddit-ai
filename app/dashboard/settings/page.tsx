@@ -33,34 +33,22 @@ export default function SettingsPage() {
   useEffect(() => {
     async function fetchSettings() {
       try {
-        // Check authentication first
-        const {
-          data: { user },
-          error: authError,
-        } = await supabase.auth.getUser();
-
-        if (authError || !user) {
-          setError("Not authenticated. Please log in.");
-          router.push("/");
-          return;
-        }
-
-        // Fetch all settings in parallel
+        // Fetch all settings in parallel (first available row)
         const [settingsResult, alertsResult, profilesResult] = await Promise.all([
           supabase
             .from("project_settings")
             .select("*")
-            .eq("user_id", user.id)
+            .limit(1)
             .maybeSingle(),
           supabase
             .from("alerts")
             .select("*")
-            .eq("user_id", user.id)
+            .limit(1)
             .maybeSingle(),
           supabase
             .from("client_profiles")
             .select("*")
-            .eq("user_id", user.id)
+            .limit(1)
             .maybeSingle(),
         ]);
 
@@ -88,7 +76,7 @@ export default function SettingsPage() {
     }
 
     fetchSettings();
-  }, [supabase, router]);
+  }, [supabase]);
 
   if (loading) {
     return (

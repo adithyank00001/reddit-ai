@@ -1,8 +1,0 @@
-{"location":"dashboard/page.tsx:177","message":"Render state check","data":{"loading":true,"error":null,"leadsCount":0,"selectedLeadId":null,"hasSelectedLead":false},"timestamp":1768900809470,"sessionId":"debug-session","runId":"run1","hypothesisId":"E,F"}
-{"location":"dashboard/page.tsx:26","message":"fetchInitialLeads started","data":{"hasSupabaseUrl":true,"hasAnonKey":true},"timestamp":1768900809467,"sessionId":"debug-session","runId":"run1","hypothesisId":"B"}
-{"location":"dashboard/page.tsx:30","message":"Before Supabase query","data":{"filter":"status=eq.new"},"timestamp":1768900809469,"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}
-{"location":"dashboard/page.tsx:35","message":"After Supabase query","data":{"hasError":false,"dataLength":0,"dataCount":0},"timestamp":1768900810512,"sessionId":"debug-session","runId":"run1","hypothesisId":"A,C,D"}
-{"location":"dashboard/page.tsx:42","message":"Before setLeads","data":{"dataLength":0,"willSetEmpty":true},"timestamp":1768900810512,"sessionId":"debug-session","runId":"run1","hypothesisId":"E"}
-{"location":"dashboard/page.tsx:45","message":"After setLeads","data":{"dataLength":0},"timestamp":1768900810513,"sessionId":"debug-session","runId":"run1","hypothesisId":"E"}
-{"location":"dashboard/page.tsx:51","message":"fetchInitialLeads completed","data":{"loadingSetToFalse":true},"timestamp":1768900810513,"sessionId":"debug-session","runId":"run1","hypothesisId":"E"}
-{"location":"dashboard/page.tsx:177","message":"Render state check","data":{"loading":false,"error":null,"leadsCount":0,"selectedLeadId":null,"hasSelectedLead":false},"timestamp":1768900810518,"sessionId":"debug-session","runId":"run1","hypothesisId":"E,F"}
