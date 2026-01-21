@@ -7,41 +7,71 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { updateSettings } from "@/app/actions/settings";
 import { toast } from "sonner";
-import { Loader2, Webhook } from "lucide-react";
+import { Loader2, Webhook, X, Plus } from "lucide-react";
+import { useState, KeyboardEvent } from "react";
 
 const notificationSchema = z.object({
-  subreddit: z.string().min(1, "Subreddit is required").regex(/^[a-zA-Z0-9_]+$/, "Invalid subreddit name"),
+  subreddits: z.array(z.string()).min(1, "At least one subreddit is required"),
   slackWebhookUrl: z.string().url("Invalid webhook URL").optional().or(z.literal("")),
 });
 
 type NotificationFormData = z.infer<typeof notificationSchema>;
 
 interface NotificationSettingsProps {
-  initialSubreddit?: string;
+  initialSubreddits?: string[];
   initialSlackWebhookUrl?: string;
 }
 
 export function NotificationSettings({
-  initialSubreddit = "",
+  initialSubreddits = [],
   initialSlackWebhookUrl = "",
 }: NotificationSettingsProps) {
+  const [subreddits, setSubreddits] = useState<string[]>(initialSubreddits);
+  const [currentInput, setCurrentInput] = useState("");
+
   const {
     register,
     handleSubmit,
+    setValue,
     formState: { isSubmitting },
   } = useForm<NotificationFormData>({
     resolver: zodResolver(notificationSchema),
     defaultValues: {
-      subreddit: initialSubreddit,
+      subreddits: initialSubreddits,
       slackWebhookUrl: initialSlackWebhookUrl,
     },
   });
 
+  const addSubreddit = (subredditName: string) => {
+    const cleanName = subredditName.trim().toLowerCase();
+    if (cleanName && !subreddits.includes(cleanName)) {
+      const newSubreddits = [...subreddits, cleanName];
+      setSubreddits(newSubreddits);
+      setValue("subreddits", newSubreddits);
+      setCurrentInput("");
+    }
+  };
+
+  const removeSubreddit = (subredditToRemove: string) => {
+    const newSubreddits = subreddits.filter(s => s !== subredditToRemove);
+    setSubreddits(newSubreddits);
+    setValue("subreddits", newSubreddits);
+  };
+
+  const handleKeyPress = (e: KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      addSubreddit(currentInput);
+    }
+  };
+
   async function onSubmit(data: NotificationFormData) {
     const formData = new FormData();
-    formData.append("subreddit", data.subreddit);
+    // Send subreddits as JSON string
+    formData.append("subreddits", JSON.stringify(data.subreddits));
     formData.append("slackWebhookUrl", data.slackWebhookUrl || "");
 
     const result = await updateSettings(formData);

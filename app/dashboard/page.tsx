@@ -17,43 +17,40 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<any>(null);
   const [userLoading, setUserLoading] = useState(true);
-  
+
   // Create Supabase client once and reuse it
   const supabase = useMemo(() => createClient(), []);
 
-  // Check authentication
+  // Get mock user ID from global state (dev mode)
+  const getMockUser = () => {
+    if (typeof window !== 'undefined' && (window as any).__mockUserId) {
+      return { id: (window as any).__mockUserId, email: (window as any).__mockUserEmail };
+    }
+    return null;
+  };
+
+  // Check mock authentication
   useEffect(() => {
-    async function checkUser() {
-      try {
-        const {
-          data: { user: currentUser },
-        } = await supabase.auth.getUser();
-        setUser(currentUser);
-      } catch (error) {
-        console.error("Error checking user:", error);
-      } finally {
-        setUserLoading(false);
-      }
+    function checkUser() {
+      const mockUser = getMockUser();
+      setUser(mockUser);
+      setUserLoading(false);
     }
 
     checkUser();
 
-    // Listen for auth changes
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      const newUser = session?.user ?? null;
+    // Listen for mock auth changes (simplified - just recheck periodically)
+    const interval = setInterval(() => {
+      const newUser = getMockUser();
       setUser(newUser);
       // Clear selected lead when user changes
       if (newUser?.id !== user?.id) {
         setSelectedLeadId(null);
       }
-    });
+    }, 1000); // Check every second
 
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, [supabase, user?.id]);
+    return () => clearInterval(interval);
+  }, [user?.id]);
 
   // Initial data fetch - filter by user_id via alerts
   useEffect(() => {

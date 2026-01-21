@@ -15,9 +15,9 @@ interface SettingsData {
     keywords?: string[];
     product_description_raw?: string;
   } | null;
-  alert: {
-    subreddit?: string;
-  } | null;
+  alerts: {
+    subreddit: string;
+  }[];
   clientProfile: {
     slack_webhook_url?: string;
   } | null;
@@ -32,31 +32,37 @@ export default function SettingsPage() {
 
   useEffect(() => {
     async function fetchSettings() {
+      // Check for mock user
+      const mockUser = typeof window !== 'undefined' && (window as any).__mockUserId;
+      if (!mockUser) {
+        setError("No user session found. Please use the Dev Switcher first.");
+        setLoading(false);
+        return;
+      }
+
       try {
-        // Fetch all settings in parallel (first available row)
-        const [settingsResult, alertsResult, profilesResult] = await Promise.all([
+        // Fetch all settings in parallel (filtered by mock user ID)
+        const [settingsResult, profilesResult] = await Promise.all([
           supabase
             .from("project_settings")
             .select("*")
-            .limit(1)
-            .maybeSingle(),
-          supabase
-            .from("alerts")
-            .select("*")
-            .limit(1)
+            .eq("user_id", mockUser)
             .maybeSingle(),
           supabase
             .from("client_profiles")
             .select("*")
-            .limit(1)
+            .eq("user_id", mockUser)
             .maybeSingle(),
         ]);
 
+        // Get all user's alerts (multiple subreddits)
+        const { data: alertsResult } = await supabase
+          .from("alerts")
+          .select("subreddit")
+          .eq("user_id", mockUser);
+
         if (settingsResult.error) {
           console.error("Error fetching project_settings:", settingsResult.error);
-        }
-        if (alertsResult.error) {
-          console.error("Error fetching alerts:", alertsResult.error);
         }
         if (profilesResult.error) {
           console.error("Error fetching client_profiles:", profilesResult.error);
@@ -64,7 +70,7 @@ export default function SettingsPage() {
 
         setSettings({
           projectSettings: settingsResult.data || null,
-          alert: alertsResult.data || null,
+          alerts: alertsResult || [],
           clientProfile: profilesResult.data || null,
         });
       } catch (err) {
@@ -159,7 +165,7 @@ export default function SettingsPage() {
 
             <TabsContent value="notifications" className="space-y-4">
               <NotificationSettings
-                initialSubreddit={settings?.alert?.subreddit || ""}
+                initialSubreddits={settings?.alerts?.map(a => a.subreddit) || []}
                 initialSlackWebhookUrl={settings?.clientProfile?.slack_webhook_url || ""}
               />
             </TabsContent>

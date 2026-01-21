@@ -5,22 +5,48 @@ import { createServerSupabaseClient } from "@/lib/supabase-server";
 import { revalidatePath } from "next/cache";
 
 /**
+ * Get mock user ID from global state (dev mode)
+ */
+function getMockUserId(): string | null {
+  if (typeof globalThis !== 'undefined' && globalThis.__mockUserId) {
+    return globalThis.__mockUserId;
+  }
+  return null;
+}
+
+/**
  * Settings update action
  * Updates project_settings, alerts, and client_profiles (first available row)
  */
 export async function updateSettings(formData: FormData) {
   const supabase = await createServerSupabaseClient();
 
+  // Get mock user ID instead of real auth
+  const userId = getMockUserId();
+  if (!userId) {
+    return { success: false, error: "No user session found. Please use the Dev Switcher." };
+  }
+
   // Extract form data
   const rawDescription = String(formData.get("productDescription") || "");
   const keywordsString = String(formData.get("keywords") || "");
-  const subreddit = String(formData.get("subreddit") || "");
+  const subredditsJson = String(formData.get("subreddits") || "[]");
   const slackWebhookUrl = String(formData.get("slackWebhookUrl") || "");
 
+  // Parse subreddits array
+  let subreddits: string[] = [];
+  try {
+    subreddits = JSON.parse(subredditsJson);
+    if (!Array.isArray(subreddits)) subreddits = [];
+  } catch (error) {
+    subreddits = [];
+  }
+
   logger.info("SETTINGS_UPDATE_START", "Settings form received", {
+    userId,
     descriptionLength: rawDescription.length,
     keywordsRaw: keywordsString,
-    subreddit,
+    subredditsCount: subreddits.length,
     hasWebhook: !!slackWebhookUrl,
   });
 
@@ -130,7 +156,9 @@ export async function updateSettings(formData: FormData) {
     logger.info("SETTINGS_UPDATE_SUCCESS", "All settings updated successfully", {
       descriptionLength: rawDescription.length,
       keywordCount: limitedKeywords.length,
-      subreddit,
+      subredditsCount: subreddits.length,
+      deletedCount: toDelete.length,
+      insertedCount: toInsert.length,
     });
 
     revalidatePath("/dashboard/settings");
@@ -149,29 +177,36 @@ export async function updateSettings(formData: FormData) {
 export async function getSettings() {
   const supabase = await createServerSupabaseClient();
 
+  // Get mock user ID instead of real auth
+  const userId = getMockUserId();
+  if (!userId) {
+    return { error: "No user session found. Please use the Dev Switcher." };
+  }
+
   try {
-    // Fetch all settings in parallel (first available row)
-    const [settingsResult, alertsResult, profilesResult] = await Promise.all([
+    // Fetch all settings in parallel (filtered by mock user ID)
+    const [settingsResult, profilesResult] = await Promise.all([
       supabase
         .from("project_settings")
         .select("*")
-        .limit(1)
-        .maybeSingle(),
-      supabase
-        .from("alerts")
-        .select("*")
-        .limit(1)
+        .eq("user_id", userId)
         .maybeSingle(),
       supabase
         .from("client_profiles")
         .select("*")
-        .limit(1)
+        .eq("user_id", userId)
         .maybeSingle(),
     ]);
 
+    // Get all user's alerts (multiple subreddits)
+    const { data: userAlerts } = await supabase
+      .from("alerts")
+      .select("subreddit")
+      .eq("user_id", userId);
+
     return {
       projectSettings: settingsResult.data || null,
-      alert: alertsResult.data || null,
+      alerts: userAlerts || [], // Array of { subreddit: string }
       clientProfile: profilesResult.data || null,
     };
   } catch (error) {

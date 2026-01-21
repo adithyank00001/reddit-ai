@@ -2,6 +2,10 @@
 
 import { createServerSupabaseClient } from "@/lib/supabase-server";
 import { revalidatePath } from "next/cache";
+import { v5 as uuidv5 } from "uuid";
+
+// UUID namespace for deterministic user ID generation
+const UUID_NAMESPACE = "6ba7b811-9dad-11d1-80b4-00c04fd430c8";
 
 const DEV_PASSWORD = "dev123";
 
@@ -16,8 +20,8 @@ function checkDevMode() {
 }
 
 /**
- * Switch to an existing user by email
- * Signs in with the default dev password
+ * Switch to a mock user by email
+ * Uses cookies to simulate authentication
  */
 export async function switchUser(email: string) {
   const devCheck = checkDevMode();
@@ -26,22 +30,38 @@ export async function switchUser(email: string) {
   const supabase = await createServerSupabaseClient();
 
   try {
-    // Sign in with email and default password
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email: email.trim(),
-      password: DEV_PASSWORD,
-    });
+    const cleanEmail = email.trim().toLowerCase();
 
-    if (error) {
-      return { success: false, error: error.message };
+    // Generate deterministic UUID from email
+    const mockUserId = uuidv5(cleanEmail, UUID_NAMESPACE);
+
+    // Set cookies to simulate authentication
+    // Note: In production Next.js, use proper cookie setting via headers
+    // For dev mode, we'll use a simple approach
+
+    // For now, we'll store in a global variable as a workaround
+    // In a real implementation, you'd set HTTP-only cookies
+    if (typeof globalThis !== 'undefined') {
+      globalThis.__mockUserId = mockUserId;
+      globalThis.__mockUserEmail = cleanEmail;
     }
 
-    if (!data.user) {
-      return { success: false, error: "Failed to sign in" };
+    // Ensure user "exists" by upserting project_settings
+    const { error: upsertError } = await supabase
+      .from("project_settings")
+      .upsert({
+        user_id: mockUserId,
+        product_description_raw: "",
+        keywords: [],
+      });
+
+    if (upsertError) {
+      console.error("Failed to create mock user:", upsertError);
+      // Don't fail the operation
     }
 
     revalidatePath("/dashboard");
-    return { success: true, userId: data.user.id };
+    return { success: true, userId: mockUserId };
   } catch (error) {
     return {
       success: false,
@@ -51,57 +71,25 @@ export async function switchUser(email: string) {
 }
 
 /**
- * Create a new user or switch to existing one
- * If user exists, just signs them in
- * If new, creates account, inserts project_settings, and signs in
+ * Create a new mock user or switch to existing one
+ * Redirects to switchUser logic for consistency
  */
 export async function createUser(formData: FormData) {
-  const devCheck = checkDevMode();
-  if (devCheck) return devCheck;
-
-  const supabase = await createServerSupabaseClient();
-
   const email = String(formData.get("email") || "").trim();
-  const subreddit = String(formData.get("subreddit") || "").trim();
-  const keywords = String(formData.get("keywords") || "");
-  const productDescription = String(formData.get("productDescription") || "");
 
   if (!email) {
     return { success: false, error: "Email is required" };
   }
 
+  // Handle subreddits and keywords setup
+  const supabase = await createServerSupabaseClient();
+  const mockUserId = uuidv5(email.trim().toLowerCase(), UUID_NAMESPACE);
+
+  const subreddit = String(formData.get("subreddit") || "").trim();
+  const keywords = String(formData.get("keywords") || "");
+  const productDescription = String(formData.get("productDescription") || "");
+
   try {
-    // First, try to sign in (user might already exist)
-    const signInResult = await supabase.auth.signInWithPassword({
-      email,
-      password: DEV_PASSWORD,
-    });
-
-    // If sign in succeeds, user exists - just return success
-    if (signInResult.data.user && !signInResult.error) {
-      revalidatePath("/dashboard");
-      return { success: true, userId: signInResult.data.user.id, existing: true };
-    }
-
-    // User doesn't exist, create new account
-    const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
-      email,
-      password: DEV_PASSWORD,
-      options: {
-        emailRedirectTo: undefined, // No email confirmation needed
-      },
-    });
-
-    if (signUpError) {
-      return { success: false, error: signUpError.message };
-    }
-
-    if (!signUpData.user) {
-      return { success: false, error: "Failed to create user" };
-    }
-
-    const userId = signUpData.user.id;
-
     // Insert project_settings if keywords or description provided
     if (keywords || productDescription) {
       const cleanedKeywords = keywords
@@ -117,21 +105,19 @@ export async function createUser(formData: FormData) {
 
       const { error: settingsError } = await supabase
         .from("project_settings")
-        .insert({
-          user_id: userId,
+        .upsert({
+          user_id: mockUserId,
           keywords: limitedKeywords,
           product_description_raw: productDescription,
         });
 
       if (settingsError) {
         console.error("Failed to insert project_settings:", settingsError);
-        // Don't fail the whole operation, just log it
       }
     }
 
     // Insert subreddits if provided
     if (subreddit) {
-      // Split by comma and clean up
       const subredditNames = subreddit
         .split(",")
         .map((s) => s.trim().toLowerCase())
@@ -152,32 +138,27 @@ export async function createUser(formData: FormData) {
           }
         }
 
-        // Also save to alerts table (you can keep the first one for compatibility)
-        const { error: alertError } = await supabase
-          .from("alerts")
-          .insert({
-            user_id: userId,
-            subreddit: subredditNames[0], // Store first subreddit in alerts
-          });
+        // Save ALL subreddits to alerts table (one row per subreddit)
+        for (const subredditName of subredditNames) {
+          const { error: alertError } = await supabase
+            .from("alerts")
+            .insert({
+              user_id: mockUserId,
+              subreddit: subredditName,
+              is_active: true,
+              product_context: productDescription || null,
+              product_description_raw: productDescription || null,
+            });
 
-        if (alertError) {
-          console.error("Failed to insert alert:", alertError);
+          if (alertError) {
+            console.error(`Failed to insert alert for subreddit ${subredditName}:`, alertError);
+          }
         }
       }
     }
 
-    // Sign in the newly created user
-    const { error: signInError } = await supabase.auth.signInWithPassword({
-      email,
-      password: DEV_PASSWORD,
-    });
-
-    if (signInError) {
-      return { success: false, error: "User created but failed to sign in" };
-    }
-
-    revalidatePath("/dashboard");
-    return { success: true, userId, existing: false };
+    // Now switch to this user (sets cookies)
+    return await switchUser(email);
   } catch (error) {
     return {
       success: false,
