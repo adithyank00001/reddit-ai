@@ -105,11 +105,14 @@ export async function createUser(formData: FormData) {
 
       const { error: settingsError } = await supabase
         .from("project_settings")
-        .upsert({
-          user_id: mockUserId,
-          keywords: limitedKeywords,
-          product_description_raw: productDescription,
-        });
+        .upsert(
+          {
+            user_id: mockUserId,
+            keywords: limitedKeywords,
+            product_description_raw: productDescription,
+          },
+          { onConflict: "user_id" }
+        );
 
       if (settingsError) {
         console.error("Failed to insert project_settings:", settingsError);
@@ -146,7 +149,6 @@ export async function createUser(formData: FormData) {
               user_id: mockUserId,
               subreddit: subredditName,
               is_active: true,
-              product_context: productDescription || null,
               product_description_raw: productDescription || null,
             });
 

@@ -42,9 +42,11 @@
  *    - Name this tab exactly: "Logs" (case-sensitive)
  *    - Add a header row in row 1 with two columns: "Timestamp" and "Message"
  * 
- * 4. UPDATE THE SHEET ID IN CODE:
- *    - Find the line in the logToSheet() function that says: 'YOUR_SHEET_ID_HERE'
- *    - Replace 'YOUR_SHEET_ID_HERE' with your actual Sheet ID from step 2
+ * 4. BIND THE SCRIPT TO YOUR SHEET:
+ *    - Make sure the Google Apps Script is attached to your Google Sheet
+ *    - If it's a standalone script, you need to either:
+ *      a) Create a new script from within the Sheet (Extensions > Apps Script)
+ *      b) Or copy this code into a script bound to your Sheet
  * 
  * 5. GRANT PERMISSIONS:
  *    - When you first run the script, Google will ask for permission to access your Sheet
@@ -63,42 +65,112 @@
  */
 
 /**
+ * Format timestamp for logging (inline version to ensure it's always available)
+ * @param {Date} date - Date object to format
+ * @returns {string} Formatted timestamp string
+ */
+function formatTimestampForLog(date) {
+  try {
+    return Utilities.formatDate(date, Session.getScriptTimeZone(), "yyyy-MM-dd HH:mm:ss");
+  } catch (e) {
+    // Fallback if timezone fails
+    return date.toISOString().replace('T', ' ').substring(0, 19);
+  }
+}
+
+/**
  * Log messages to Google Sheet for debugging
  * @param {string|Object} message - The message to log (string or object)
  */
 function logToSheet(message) {
   try {
+    // Handle undefined/null messages
+    if (message === undefined || message === null) {
+      // Get stack trace to identify where it's being called from
+      const stack = new Error().stack;
+      const caller = stack ? stack.split('\n')[2] : "unknown";
+      Logger.log("logToSheet: Warning - called with undefined/null message");
+      Logger.log("Called from: " + caller);
+      message = "[No message provided - check Execution log for caller]";
+    }
+    
     // Container-bound script: Access the spreadsheet this script is bound to
     const spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
+    
+    if (!spreadsheet) {
+      // If no active spreadsheet, logging is not available (standalone script)
+      // Log to Logger so we know it failed
+      Logger.log("logToSheet: No active spreadsheet found");
+      return;
+    }
     
     // Get or create the 'Logs' sheet
     let sheet = spreadsheet.getSheetByName('Logs');
     if (!sheet) {
-      // Create the sheet if it doesn't exist
-      sheet = spreadsheet.insertSheet('Logs');
-      // Add header row
-      sheet.getRange(1, 1, 1, 2).setValues([['Timestamp', 'Message']]);
-      // Make header row bold
-      sheet.getRange(1, 1, 1, 2).setFontWeight('bold');
+      try {
+        // Create the sheet if it doesn't exist
+        sheet = spreadsheet.insertSheet('Logs');
+        // Add header row
+        sheet.getRange(1, 1, 1, 2).setValues([['Timestamp', 'Message']]);
+        // Make header row bold
+        sheet.getRange(1, 1, 1, 2).setFontWeight('bold');
+        Logger.log("logToSheet: Created 'Logs' sheet");
+      } catch (createError) {
+        Logger.log("logToSheet: Failed to create sheet - " + createError.message);
+        return;
+      }
     }
     
     // Format the message
     let messageText;
-    if (typeof message === 'object') {
-      messageText = JSON.stringify(message);
-    } else {
-      messageText = String(message);
+    try {
+      if (message === null || message === undefined) {
+        messageText = "[Null/undefined message]";
+      } else if (typeof message === 'object') {
+        messageText = JSON.stringify(message);
+      } else if (typeof message === 'string') {
+        messageText = message;
+      } else {
+        messageText = String(message);
+      }
+      
+      // Ensure messageText is not empty
+      if (!messageText || messageText.trim() === '') {
+        messageText = "[Empty message]";
+      }
+    } catch (formatError) {
+      messageText = "[Error formatting message: " + formatError.message + "]";
     }
     
-    // Create timestamp
-    const timestamp = formatTimestamp(new Date());
+    // Create timestamp (use inline function to ensure it's available)
+    let timestamp;
+    try {
+      timestamp = formatTimestampForLog(new Date());
+    } catch (timeError) {
+      timestamp = new Date().toISOString();
+    }
     
     // Append the log entry
-    sheet.appendRow([timestamp, messageText]);
+    try {
+      sheet.appendRow([timestamp, messageText]);
+      // Also log to Logger for verification
+      Logger.log("logToSheet: Successfully logged - " + messageText.substring(0, 50));
+    } catch (appendError) {
+      Logger.log("logToSheet: Failed to append row - " + appendError.message);
+      Logger.log("Error details: " + appendError.stack);
+    }
     
   } catch (error) {
-    // Silent fail - don't break the webhook if logging fails
-    // Logging errors are ignored to prevent breaking the main functionality
+    // Log error to Logger (visible in Apps Script execution log)
+    // But don't break the webhook - logging is optional
+    try {
+      Logger.log("ERROR in logToSheet: " + error.message);
+      Logger.log("Stack: " + error.stack);
+      Logger.log("Error type: " + (error.name || "Unknown"));
+    } catch (e) {
+      // If even Logger fails, we can't do anything
+      // This should never happen, but just in case
+    }
   }
 }
 
@@ -131,6 +203,11 @@ function logToSheet(message) {
  * @param {Array} debugLogs - Array to store debug logs for response (optional)
  */
 function logWithDebug(message, debugLogs = null) {
+  // Ensure message is not undefined/null before logging
+  if (message === undefined || message === null) {
+    message = "[logWithDebug called with undefined/null]";
+  }
+  
   // Log to Google Sheet (existing functionality)
   logToSheet(message);
   
@@ -138,12 +215,18 @@ function logWithDebug(message, debugLogs = null) {
   if (debugLogs && Array.isArray(debugLogs)) {
     // Format message for debug array
     let messageText;
-    if (typeof message === 'object') {
-      messageText = JSON.stringify(message);
-    } else {
-      messageText = String(message);
+    try {
+      if (message === null || message === undefined) {
+        messageText = "[Null/undefined message]";
+      } else if (typeof message === 'object') {
+        messageText = JSON.stringify(message);
+      } else {
+        messageText = String(message);
+      }
+      debugLogs.push(messageText);
+    } catch (e) {
+      debugLogs.push("[Error formatting debug log: " + e.message + "]");
     }
-    debugLogs.push(messageText);
   }
 }
 
@@ -153,7 +236,12 @@ function logWithDebug(message, debugLogs = null) {
  * @param {Object} e - Event object from Google Apps Script web app
  */
 function doGet(e) {
-  const timestamp = formatTimestamp(new Date());
+  let timestamp;
+  try {
+    timestamp = formatTimestamp(new Date());
+  } catch (e) {
+    timestamp = formatTimestampForLog(new Date());
+  }
   logToSheet("TEST: doGet() called - web app is accessible!");
   
   return ContentService.createTextOutput(JSON.stringify({
@@ -168,15 +256,35 @@ function doGet(e) {
  * Manual test function for sheet logging
  * Run this manually in the Google Apps Script editor to test logging
  * Select "testSheetLogging" from the function dropdown and click "Run"
+ * Check both the "Logs" sheet tab AND the Execution log (View > Execution log)
  */
 function testSheetLogging() {
-  logToSheet("=== MANUAL TEST ===");
-  logToSheet("Test message 1: Sheet logging is working!");
-  logToSheet("Test message 2: Timestamp formatting works");
-  logToSheet("Test message 3: Object logging test");
-  logToSheet({ test: "object", number: 123, boolean: true });
-  logToSheet("=== MANUAL TEST COMPLETE ===");
-  logToSheet("If you see these messages in your Google Sheet, logging is working correctly!");
+  Logger.log("=== Starting testSheetLogging ===");
+  
+  try {
+    const ss = SpreadsheetApp.getActiveSpreadsheet();
+    if (!ss) {
+      Logger.log("ERROR: No active spreadsheet!");
+      return "ERROR: Script is not bound to a spreadsheet. Create the script from within a Google Sheet.";
+    }
+    Logger.log("Spreadsheet found: " + ss.getName());
+    
+    logToSheet("=== MANUAL TEST ===");
+    logToSheet("Test message 1: Sheet logging is working!");
+    logToSheet("Test message 2: Timestamp formatting works");
+    logToSheet("Test message 3: Object logging test");
+    logToSheet({ test: "object", number: 123, boolean: true });
+    logToSheet("=== MANUAL TEST COMPLETE ===");
+    logToSheet("If you see these messages in your Google Sheet 'Logs' tab, logging is working correctly!");
+    
+    Logger.log("=== testSheetLogging completed ===");
+    Logger.log("Check the 'Logs' sheet tab in your spreadsheet for the test messages.");
+    return "Test completed! Check the 'Logs' sheet tab and Execution log.";
+  } catch (e) {
+    Logger.log("ERROR in testSheetLogging: " + e.message);
+    Logger.log("Stack: " + e.stack);
+    return "ERROR: " + e.message;
+  }
 }
 
 /**
@@ -191,9 +299,87 @@ function forcePermission() {
     const ss = SpreadsheetApp.getActiveSpreadsheet();
     Logger.log("✅ Successfully accessed sheet: " + ss.getName());
     Logger.log("✅ Permissions are granted!");
+    
+    // Test logging
+    logToSheet("=== PERMISSION TEST ===");
+    logToSheet("If you see this message, logging is working!");
+    
+    return "Success! Check the 'Logs' sheet tab for test messages.";
   } catch (e) {
     Logger.log("❌ Permission error: " + e.message);
+    Logger.log("Stack: " + e.stack);
+    return "Error: " + e.message;
   }
+}
+
+/**
+ * Diagnostic function to test logging and identify issues
+ * Run this manually to see what's wrong with logging
+ */
+function diagnoseLogging() {
+  const results = [];
+  
+  try {
+    // Test 1: Check if spreadsheet is accessible
+    const ss = SpreadsheetApp.getActiveSpreadsheet();
+    if (ss) {
+      results.push("✅ Spreadsheet accessible: " + ss.getName());
+    } else {
+      results.push("❌ No active spreadsheet found (script may be standalone)");
+      return results.join("\n");
+    }
+    
+    // Test 2: Check if Logs sheet exists
+    let sheet = ss.getSheetByName('Logs');
+    if (sheet) {
+      results.push("✅ 'Logs' sheet exists");
+    } else {
+      results.push("⚠️ 'Logs' sheet does not exist - will be created");
+    }
+    
+    // Test 3: Test formatTimestamp function
+    try {
+      const testTimestamp = formatTimestamp(new Date());
+      results.push("✅ formatTimestamp works: " + testTimestamp);
+    } catch (e) {
+      results.push("❌ formatTimestamp error: " + e.message);
+    }
+    
+    // Test 4: Try to write to sheet
+    try {
+      if (!sheet) {
+        sheet = ss.insertSheet('Logs');
+        sheet.getRange(1, 1, 1, 2).setValues([['Timestamp', 'Message']]);
+        sheet.getRange(1, 1, 1, 2).setFontWeight('bold');
+        results.push("✅ Created 'Logs' sheet");
+      }
+      
+      const testRow = [formatTimestamp(new Date()), "Diagnostic test message"];
+      sheet.appendRow(testRow);
+      results.push("✅ Successfully wrote test row to sheet");
+    } catch (e) {
+      results.push("❌ Error writing to sheet: " + e.message);
+      results.push("Stack: " + e.stack);
+    }
+    
+    // Test 5: Test logToSheet function
+    try {
+      logToSheet("=== DIAGNOSTIC TEST ===");
+      logToSheet({ test: "object", timestamp: new Date().toISOString() });
+      results.push("✅ logToSheet function executed without errors");
+    } catch (e) {
+      results.push("❌ logToSheet error: " + e.message);
+      results.push("Stack: " + e.stack);
+    }
+    
+  } catch (e) {
+    results.push("❌ Fatal error: " + e.message);
+    results.push("Stack: " + e.stack);
+  }
+  
+  const resultText = results.join("\n");
+  Logger.log(resultText);
+  return resultText;
 }
 
 /**
@@ -204,7 +390,16 @@ function doPost(e) {
   // Initialize debug logs array for dual logging
   const debugLogs = [];
   const startTime = new Date();
-  logWithDebug(`[${formatTimestamp(startTime)}] Worker 2 (The Brain) - Webhook received`, debugLogs);
+  
+  // Format timestamp safely
+  let timestampStr;
+  try {
+    timestampStr = formatTimestamp(startTime);
+  } catch (e) {
+    timestampStr = formatTimestampForLog(startTime); // Fallback
+  }
+  
+  logWithDebug(`[${timestampStr}] Worker 2 (The Brain) - Webhook received`, debugLogs);
 
   try {
     // Parse webhook payload
@@ -220,25 +415,22 @@ function doPost(e) {
       })).setMimeType(ContentService.MimeType.JSON);
     }
 
-    // Extract lead information from webhook
+    // Extract lead ID from webhook
     // Supabase webhook format: { type: 'INSERT', table: 'leads', record: {...} }
     const lead = payload.record || payload;
     const leadId = lead.id;
-    const title = lead.title;
-    const body = lead.body;
 
-    if (!leadId || !title) {
-      logWithDebug(`ERROR: Missing required fields in webhook payload`, debugLogs);
+    if (!leadId) {
+      logWithDebug(`ERROR: Missing lead ID in webhook payload`, debugLogs);
       logWithDebug(`Payload: ${JSON.stringify(payload)}`, debugLogs);
       return ContentService.createTextOutput(JSON.stringify({
         success: false,
-        error: "Missing required fields (id, title)",
+        error: "Missing required field (id)",
         debug_logs: debugLogs
       })).setMimeType(ContentService.MimeType.JSON);
     }
 
     logWithDebug(`Processing lead: ${leadId}`, debugLogs);
-    logWithDebug(`Title: ${title.substring(0, 50)}...`, debugLogs);
 
     // Get configuration
     const config = getConfig(debugLogs);
@@ -252,24 +444,69 @@ function doPost(e) {
       })).setMimeType(ContentService.MimeType.JSON);
     }
 
-    // Step 1: Fetch product context from database
-    logWithDebug("Fetching product context...", debugLogs);
-    const productContext = fetchProductContext(config, debugLogs);
-    if (!productContext) {
-      logWithDebug("ERROR: Could not fetch product context", debugLogs);
+    // Step 1: Fetch lead details from database (title, body, alert_id)
+    logWithDebug("Fetching lead details from database...", debugLogs);
+    const leadDetails = fetchLeadDetails(config, leadId, debugLogs);
+    if (!leadDetails) {
+      logWithDebug("ERROR: Could not fetch lead details", debugLogs);
       updateLeadStatus(config, leadId, 'error', 'error', debugLogs);
       return ContentService.createTextOutput(JSON.stringify({
         success: false,
-        error: "Could not fetch product context",
+        error: "Could not fetch lead details",
         debug_logs: debugLogs
       })).setMimeType(ContentService.MimeType.JSON);
     }
 
-    logWithDebug(`Product context: ${productContext.substring(0, 100)}...`, debugLogs);
+    const title = leadDetails.title;
+    const body = leadDetails.body;
+    const alertId = leadDetails.alert_id;
 
-    // Step 2: Lock the record by setting processing_status to 'processing'
+    if (!title || !alertId) {
+      logWithDebug(`ERROR: Missing required fields in lead (title: ${!!title}, alert_id: ${!!alertId})`, debugLogs);
+      updateLeadStatus(config, leadId, 'error', 'error', debugLogs);
+      return ContentService.createTextOutput(JSON.stringify({
+        success: false,
+        error: "Missing required fields in lead (title or alert_id)",
+        debug_logs: debugLogs
+      })).setMimeType(ContentService.MimeType.JSON);
+    }
+
+    logWithDebug(`Title: ${title.substring(0, 50)}...`, debugLogs);
+    logWithDebug(`Alert ID: ${alertId}`, debugLogs);
+
+    // Step 2: Resolve user by fetching alert to get user_id
+    logWithDebug("Resolving user from alert...", debugLogs);
+    const userId = fetchUserIdFromAlert(config, alertId, debugLogs);
+    if (!userId) {
+      logWithDebug("ERROR: Could not resolve user from alert", debugLogs);
+      updateLeadStatus(config, leadId, 'error', 'error', debugLogs);
+      return ContentService.createTextOutput(JSON.stringify({
+        success: false,
+        error: "Could not resolve user from alert",
+        debug_logs: debugLogs
+      })).setMimeType(ContentService.MimeType.JSON);
+    }
+
+    logWithDebug(`User ID: ${userId}`, debugLogs);
+
+    // Step 3: Fetch product description from project_settings using user_id
+    logWithDebug("Fetching product description from project_settings...", debugLogs);
+    const productDescription = fetchProductContext(config, userId, debugLogs);
+    if (!productDescription) {
+      logWithDebug("ERROR: Could not fetch product description", debugLogs);
+      updateLeadStatus(config, leadId, 'error', 'error', debugLogs);
+      return ContentService.createTextOutput(JSON.stringify({
+        success: false,
+        error: "Could not fetch product description",
+        debug_logs: debugLogs
+      })).setMimeType(ContentService.MimeType.JSON);
+    }
+
+    logWithDebug(`Product description: ${productDescription.substring(0, 100)}...`, debugLogs);
+
+    // Step 4: Lock the record by setting processing_status to 'processing'
     logWithDebug("Locking lead record...", debugLogs);
-    const lockResult = updateLeadStatus(config, leadId, 'processing', lead.status || 'new', debugLogs);
+    const lockResult = updateLeadStatus(config, leadId, 'processing', leadDetails.status || 'new', debugLogs);
     if (!lockResult) {
       logWithDebug("ERROR: Failed to lock lead record", debugLogs);
       return ContentService.createTextOutput(JSON.stringify({
@@ -279,9 +516,9 @@ function doPost(e) {
       })).setMimeType(ContentService.MimeType.JSON);
     }
 
-    // Step 3: Stage 1 - Binary Relevance Filter
+    // Step 5: Stage 1 - Binary Relevance Filter
     logWithDebug("\n=== Stage 1: Binary Relevance Check ===", debugLogs);
-    const stage1Result = stage1BinaryRelevance(config, title, body, productContext, debugLogs);
+    const stage1Result = stage1BinaryRelevance(config, title, body, productDescription, debugLogs);
     
     if (!stage1Result.success) {
       logWithDebug(`ERROR in Stage 1: ${stage1Result.error}`, debugLogs);
@@ -307,9 +544,9 @@ function doPost(e) {
 
     logWithDebug("Stage 1 Result: RELEVANT - Proceeding to Stage 2", debugLogs);
 
-    // Step 4: Stage 2 - Sales Intelligence Generation
+    // Step 6: Stage 2 - Sales Intelligence Generation
     logWithDebug("\n=== Stage 2: Sales Intelligence Analysis ===", debugLogs);
-    const stage2Result = stage2SalesIntelligence(config, title, body, productContext, debugLogs);
+    const stage2Result = stage2SalesIntelligence(config, title, body, productDescription, debugLogs);
     
     if (!stage2Result.success) {
       logWithDebug(`ERROR in Stage 2: ${stage2Result.error}`, debugLogs);
@@ -321,7 +558,7 @@ function doPost(e) {
       })).setMimeType(ContentService.MimeType.JSON);
     }
 
-    // Step 5: Update database with Stage 2 results
+    // Step 7: Update database with Stage 2 results
     logWithDebug("Updating lead with analysis results...", debugLogs);
     const updateResult = updateLeadWithAnalysis(config, leadId, stage2Result.data, debugLogs);
     
@@ -337,7 +574,16 @@ function doPost(e) {
 
     const endTime = new Date();
     const duration = (endTime - startTime) / 1000;
-    logWithDebug(`\n[${formatTimestamp(endTime)}] Worker 2 completed successfully`, debugLogs);
+    
+    // Format end timestamp safely
+    let endTimestampStr;
+    try {
+      endTimestampStr = formatTimestamp(endTime);
+    } catch (e) {
+      endTimestampStr = formatTimestampForLog(endTime);
+    }
+    
+    logWithDebug(`\n[${endTimestampStr}] Worker 2 completed successfully`, debugLogs);
     logWithDebug(`Duration: ${duration.toFixed(2)}s`, debugLogs);
     logWithDebug(`Lead ${leadId} is now ready for review`, debugLogs);
 
@@ -411,12 +657,106 @@ function getConfig(debugLogs = null) {
 }
 
 /**
- * Fetch product_context from project_settings table
+ * Fetch lead details from database (title, body, alert_id)
  * @param {Object} config - Configuration object
+ * @param {string} leadId - Lead ID
  * @param {Array} debugLogs - Optional array to store debug logs
+ * @returns {Object|null} Lead details object or null if not found
  */
-function fetchProductContext(config, debugLogs = null) {
-  const url = `${config.supabaseUrl}/rest/v1/project_settings?id=eq.1&select=product_context`;
+function fetchLeadDetails(config, leadId, debugLogs = null) {
+  const url = `${config.supabaseUrl}/rest/v1/leads?id=eq.${leadId}&select=title,body,alert_id,status`;
+  
+  try {
+    const response = UrlFetchApp.fetch(url, {
+      method: "GET",
+      headers: {
+        "apikey": config.supabaseKey,
+        "Authorization": `Bearer ${config.supabaseKey}`,
+        "Content-Type": "application/json",
+      },
+      muteHttpExceptions: true,
+    });
+
+    const statusCode = response.getResponseCode();
+    const responseText = response.getContentText();
+
+    if (statusCode !== 200) {
+      logWithDebug(`ERROR: Supabase API returned ${statusCode} when fetching lead`, debugLogs);
+      logWithDebug(`Response: ${responseText}`, debugLogs);
+      return null;
+    }
+
+    const result = JSON.parse(responseText);
+    if (!Array.isArray(result) || result.length === 0) {
+      logWithDebug(`No lead found with id=${leadId}`, debugLogs);
+      return null;
+    }
+
+    return result[0];
+  } catch (error) {
+    logWithDebug(`ERROR fetching lead details: ${error.message}`, debugLogs);
+    return null;
+  }
+}
+
+/**
+ * Fetch user_id from alerts table using alert_id
+ * @param {Object} config - Configuration object
+ * @param {string} alertId - Alert ID
+ * @param {Array} debugLogs - Optional array to store debug logs
+ * @returns {string|null} User ID or null if not found
+ */
+function fetchUserIdFromAlert(config, alertId, debugLogs = null) {
+  const url = `${config.supabaseUrl}/rest/v1/alerts?id=eq.${alertId}&select=user_id`;
+  
+  try {
+    const response = UrlFetchApp.fetch(url, {
+      method: "GET",
+      headers: {
+        "apikey": config.supabaseKey,
+        "Authorization": `Bearer ${config.supabaseKey}`,
+        "Content-Type": "application/json",
+      },
+      muteHttpExceptions: true,
+    });
+
+    const statusCode = response.getResponseCode();
+    const responseText = response.getContentText();
+
+    if (statusCode !== 200) {
+      logWithDebug(`ERROR: Supabase API returned ${statusCode} when fetching alert`, debugLogs);
+      logWithDebug(`Response: ${responseText}`, debugLogs);
+      return null;
+    }
+
+    const result = JSON.parse(responseText);
+    if (!Array.isArray(result) || result.length === 0) {
+      logWithDebug(`No alert found with id=${alertId}`, debugLogs);
+      return null;
+    }
+
+    const userId = result[0].user_id;
+    if (!userId) {
+      logWithDebug(`Alert ${alertId} has no user_id`, debugLogs);
+      return null;
+    }
+
+    return userId;
+  } catch (error) {
+    logWithDebug(`ERROR fetching user_id from alert: ${error.message}`, debugLogs);
+    return null;
+  }
+}
+
+/**
+ * Fetch product_description_raw from project_settings table using user_id
+ * @param {Object} config - Configuration object
+ * @param {string} userId - User ID (UUID)
+ * @param {Array} debugLogs - Optional array to store debug logs
+ * @returns {string|null} Product description or null if not found
+ */
+function fetchProductContext(config, userId, debugLogs = null) {
+  const url = `${config.supabaseUrl}/rest/v1/project_settings?user_id=eq.${userId}&select=product_description_raw`;
   
   try {
     const response = UrlFetchApp.fetch(url, {
@@ -440,13 +780,19 @@ function fetchProductContext(config, debugLogs = null) {
 
     const result = JSON.parse(responseText);
     if (!Array.isArray(result) || result.length === 0) {
-      logWithDebug("No project_settings found with id=1", debugLogs);
+      logWithDebug(`No project_settings found for user_id=${userId}`, debugLogs);
       return null;
     }
 
-    return result[0].product_context || null;
+    const productDescription = result[0].product_description_raw;
+    if (!productDescription || productDescription.trim().length === 0) {
+      logWithDebug(`Project settings found but product_description_raw is empty for user_id=${userId}`, debugLogs);
+      return null;
+    }
+
+    return productDescription;
   } catch (error) {
-    logWithDebug(`ERROR fetching product context: ${error.message}`, debugLogs);
+    logWithDebug(`ERROR fetching product description: ${error.message}`, debugLogs);
     return null;
   }
 }
@@ -502,15 +848,15 @@ function updateLeadStatus(config, leadId, processingStatus, status, debugLogs = 
  * @param {Object} config - Configuration object
  * @param {string} title - Post title
  * @param {string} body - Post body
- * @param {string} productContext - Product context
+ * @param {string} productDescription - Product description
  * @param {Array} debugLogs - Optional array to store debug logs
  */
-function stage1BinaryRelevance(config, title, body, productContext, debugLogs = null) {
+function stage1BinaryRelevance(config, title, body, productDescription, debugLogs = null) {
   const systemPrompt = "Answer ONLY 'Yes' or 'No'.";
   
-  const userPrompt = `Determine if this Reddit post has any potential for sales, marketing, or feedback for a product with this context:
+  const userPrompt = `Determine if this Reddit post has any potential for sales, marketing, or feedback for a product with this description:
 
-${productContext}
+Product Description: ${productDescription}
 
 Post Title: ${title}
 Post Body: ${body}
@@ -547,10 +893,10 @@ Does this post have any potential for sales, marketing, or feedback? Answer ONLY
  * @param {Object} config - Configuration object
  * @param {string} title - Post title
  * @param {string} body - Post body
- * @param {string} productContext - Product context
+ * @param {string} productDescription - Product description
  * @param {Array} debugLogs - Optional array to store debug logs
  */
-function stage2SalesIntelligence(config, title, body, productContext, debugLogs = null) {
+function stage2SalesIntelligence(config, title, body, productDescription, debugLogs = null) {
   const systemPrompt = "You are a sales intelligence analyst. Analyze Reddit posts and provide structured JSON responses with sales opportunity insights.";
 
   const userPrompt = `Analyze this Reddit post deeply and provide a JSON response with these exact keys:
@@ -562,7 +908,7 @@ function stage2SalesIntelligence(config, title, body, productContext, debugLogs 
 - "suggested_angle": (A 1-sentence strategic tip on how to approach this user)
 - "ai_reply": (A humanized, non-salesy, helpful 2-3 sentence Reddit comment draft)
 
-Product Context: ${productContext}
+Product Description: ${productDescription}
 
 Post Title: ${title}
 Post Body: ${body}
@@ -720,9 +1066,23 @@ function updateLeadWithAnalysis(config, leadId, analysisData, debugLogs = null) 
 
 /**
  * Format timestamp for logging
+ * @param {Date} date - Date object to format
+ * @returns {string} Formatted timestamp string
  */
 function formatTimestamp(date) {
-  return Utilities.formatDate(date, Session.getScriptTimeZone(), "yyyy-MM-dd HH:mm:ss");
+  try {
+    if (!date || !(date instanceof Date)) {
+      Logger.log("formatTimestamp: Invalid date parameter");
+      return new Date().toISOString().replace('T', ' ').substring(0, 19);
+    }
+    const formatted = Utilities.formatDate(date, Session.getScriptTimeZone(), "yyyy-MM-dd HH:mm:ss");
+    // Ensure we always return a string
+    return formatted || date.toISOString().replace('T', ' ').substring(0, 19);
+  } catch (e) {
+    Logger.log("formatTimestamp error: " + e.message);
+    // Fallback to ISO string
+    return date ? date.toISOString().replace('T', ' ').substring(0, 19) : new Date().toISOString().replace('T', ' ').substring(0, 19);
+  }
 }
 
 /**
