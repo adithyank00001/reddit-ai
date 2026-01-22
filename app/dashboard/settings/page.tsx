@@ -32,8 +32,19 @@ export default function SettingsPage() {
 
   useEffect(() => {
     async function fetchSettings() {
-      // Check for mock user
-      const mockUser = typeof window !== 'undefined' && (window as any).__mockUserId;
+      // Get mock user from cookie
+      const getCookie = (name: string) => {
+        if (typeof window === 'undefined') return null;
+        const value = `; ${document.cookie}`;
+        const parts = value.split(`; ${name}=`);
+        if (parts.length === 2) {
+          const cookieValue = parts.pop()?.split(';').shift();
+          return cookieValue ? decodeURIComponent(cookieValue) : null;
+        }
+        return null;
+      };
+      
+      const mockUser = getCookie("dev_mock_user_id");
       if (!mockUser) {
         setError("No user session found. Please use the Dev Switcher first.");
         setLoading(false);

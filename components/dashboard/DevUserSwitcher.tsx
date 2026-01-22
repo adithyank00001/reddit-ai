@@ -25,10 +25,20 @@ export function DevUserSwitcher() {
 
     setIsSubmitting(true);
     try {
+      // #region agent log
+      fetch('http://127.0.0.1:7244/ingest/f26b0d71-5d71-4d69-b4d0-1706630ff879',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'DevUserSwitcher.tsx:27',message:'handleSwitchUser: Before calling switchUser',data:{email},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
+      // #endregion
       const result = await switchUser(email);
+      // #region agent log
+      fetch('http://127.0.0.1:7244/ingest/f26b0d71-5d71-4d69-b4d0-1706630ff879',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'DevUserSwitcher.tsx:30',message:'handleSwitchUser: After switchUser call',data:{success:result.success,userId:result.userId,error:result.error},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
+      // #endregion
       if (result.success) {
         toast.success(`Switched to user: ${email}`);
-        router.refresh();
+        // #region agent log
+        fetch('http://127.0.0.1:7244/ingest/f26b0d71-5d71-4d69-b4d0-1706630ff879',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'DevUserSwitcher.tsx:34',message:'handleSwitchUser: Before router.refresh',data:{email},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
+        // #endregion
+        // Force a full page reload to ensure cookies are read
+        window.location.reload();
       } else {
         toast.error(result.error || "Failed to switch user");
       }
@@ -54,7 +64,8 @@ export function DevUserSwitcher() {
           ? `User already exists. Switched to: ${email}`
           : `User created and signed in: ${email}`;
         toast.success(message);
-        router.refresh();
+        // Force a full page reload to ensure cookies are read
+        window.location.reload();
       } else {
         toast.error(result.error || "Failed to create user");
       }

@@ -21,10 +21,35 @@ export default function DashboardPage() {
   // Create Supabase client once and reuse it
   const supabase = useMemo(() => createClient(), []);
 
-  // Get mock user ID from global state (dev mode)
+  // Get mock user ID from cookie (dev mode)
   const getMockUser = () => {
-    if (typeof window !== 'undefined' && (window as any).__mockUserId) {
-      return { id: (window as any).__mockUserId, email: (window as any).__mockUserEmail };
+    if (typeof window === 'undefined') return null;
+    
+    // #region agent log
+    fetch('http://127.0.0.1:7244/ingest/f26b0d71-5d71-4d69-b4d0-1706630ff879',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'page.tsx:26',message:'getMockUser: Reading cookies',data:{allCookies:document.cookie},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'D'})}).catch(()=>{});
+    // #endregion
+    
+    // Read from cookie instead of window global
+    const getCookie = (name: string) => {
+      const value = `; ${document.cookie}`;
+      const parts = value.split(`; ${name}=`);
+      if (parts.length === 2) {
+        const cookieValue = parts.pop()?.split(';').shift();
+        // Decode URL-encoded values (e.g., %40 becomes @)
+        return cookieValue ? decodeURIComponent(cookieValue) : null;
+      }
+      return null;
+    };
+    
+    const userId = getCookie("dev_mock_user_id");
+    const email = getCookie("dev_mock_user_email");
+    
+    // #region agent log
+    fetch('http://127.0.0.1:7244/ingest/f26b0d71-5d71-4d69-b4d0-1706630ff879',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'page.tsx:38',message:'getMockUser: Cookie values',data:{userId,email},timestamp:Date.now(),sessionId:'debug-session',runId:'post-fix',hypothesisId:'D'})}).catch(()=>{});
+    // #endregion
+    
+    if (userId && email) {
+      return { id: userId, email };
     }
     return null;
   };
@@ -32,29 +57,26 @@ export default function DashboardPage() {
   // Check mock authentication
   useEffect(() => {
     function checkUser() {
+      // #region agent log
+      fetch('http://127.0.0.1:7244/ingest/f26b0d71-5d71-4d69-b4d0-1706630ff879',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'page.tsx:45',message:'checkUser: Initial check',data:{},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'E'})}).catch(()=>{});
+      // #endregion
       const mockUser = getMockUser();
+      // #region agent log
+      fetch('http://127.0.0.1:7244/ingest/f26b0d71-5d71-4d69-b4d0-1706630ff879',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'page.tsx:48',message:'checkUser: User state set',data:{userId:mockUser?.id,email:mockUser?.email},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'E'})}).catch(()=>{});
+      // #endregion
       setUser(mockUser);
       setUserLoading(false);
     }
 
     checkUser();
-
-    // Listen for mock auth changes (simplified - just recheck periodically)
-    const interval = setInterval(() => {
-      const newUser = getMockUser();
-      setUser(newUser);
-      // Clear selected lead when user changes
-      if (newUser?.id !== user?.id) {
-        setSelectedLeadId(null);
-      }
-    }, 1000); // Check every second
-
-    return () => clearInterval(interval);
-  }, [user?.id]);
+  }, []);
 
   // Initial data fetch - filter by user_id via alerts
   useEffect(() => {
     async function fetchLeads() {
+      // #region agent log
+      fetch('http://127.0.0.1:7244/ingest/f26b0d71-5d71-4d69-b4d0-1706630ff879',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'page.tsx:76',message:'fetchLeads: Starting',data:{hasUser:!!user,userId:user?.id},timestamp:Date.now(),sessionId:'debug-session',runId:'post-fix',hypothesisId:'F'})}).catch(()=>{});
+      // #endregion
       if (!user) {
         setLeads([]);
         setLoading(false);
@@ -62,12 +84,15 @@ export default function DashboardPage() {
       }
 
       try {
-        // First, get the user's alert_id(s)
+        // First, get ALL the user's alert_id(s) (user can have multiple alerts)
         const { data: alertsData, error: alertsError } = await supabase
           .from("alerts")
           .select("id")
-          .eq("user_id", user.id)
-          .maybeSingle();
+          .eq("user_id", user.id);
+
+        // #region agent log
+        fetch('http://127.0.0.1:7244/ingest/f26b0d71-5d71-4d69-b4d0-1706630ff879',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'page.tsx:90',message:'fetchLeads: Alerts query result',data:{alertCount:alertsData?.length||0,alertIds:alertsData?.map(a=>a.id),error:alertsError?.message},timestamp:Date.now(),sessionId:'debug-session',runId:'post-fix',hypothesisId:'F'})}).catch(()=>{});
+        // #endregion
 
         if (alertsError) {
           console.error("Error fetching alerts:", alertsError);
@@ -77,20 +102,27 @@ export default function DashboardPage() {
         }
 
         // If user has no alerts, they have no leads
-        if (!alertsData) {
+        if (!alertsData || alertsData.length === 0) {
           setLeads([]);
           setLoading(false);
           return;
         }
 
-        // Fetch leads for this user's alert
+        // Get all alert IDs
+        const alertIds = alertsData.map(alert => alert.id);
+
+        // Fetch leads for ALL of this user's alerts (using .in() filter)
         const { data, error } = await supabase
           .from("leads")
           .select("*")
           .eq("status", "new")
-          .eq("alert_id", alertsData.id)
+          .in("alert_id", alertIds)
           .order("created_utc", { ascending: false })
           .limit(50);
+
+        // #region agent log
+        fetch('http://127.0.0.1:7244/ingest/f26b0d71-5d71-4d69-b4d0-1706630ff879',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'page.tsx:115',message:'fetchLeads: Leads query result',data:{leadCount:data?.length||0,error:error?.message},timestamp:Date.now(),sessionId:'debug-session',runId:'post-fix',hypothesisId:'F'})}).catch(()=>{});
+        // #endregion
 
         if (error) {
           console.error("Error fetching leads:", error);
@@ -117,15 +149,19 @@ export default function DashboardPage() {
     let channel: any = null;
 
     async function setupSubscription() {
-      // Get user's alert_id
+      // Get ALL user's alert_ids (user can have multiple alerts)
       const { data: alertsData } = await supabase
         .from("alerts")
         .select("id")
-        .eq("user_id", user.id)
-        .maybeSingle();
+        .eq("user_id", user.id);
 
-      if (!alertsData) return;
+      if (!alertsData || alertsData.length === 0) return;
 
+      // Subscribe to leads for ALL alerts
+      // Note: Supabase real-time filters don't support .in() directly,
+      // so we'll filter in the callback instead
+      const alertIds = alertsData.map(alert => alert.id);
+      
       channel = supabase
         .channel(`leads-channel-${user.id}`)
         .on(
@@ -134,11 +170,15 @@ export default function DashboardPage() {
             event: "INSERT",
             schema: "public",
             table: "leads",
-            filter: `status=eq.new&alert_id=eq.${alertsData.id}`,
+            filter: `status=eq.new`,
           },
           (payload) => {
-            // Add new lead to the beginning of the array (newest first)
-            setLeads((prev) => [payload.new as Post, ...prev]);
+            // Only add if the lead belongs to one of this user's alerts
+            const newLead = payload.new as Post;
+            if (alertIds.includes(newLead.alert_id)) {
+              // Add new lead to the beginning of the array (newest first)
+              setLeads((prev) => [newLead, ...prev]);
+            }
           }
         )
         .subscribe();
@@ -161,6 +201,11 @@ export default function DashboardPage() {
           <h1 className="text-2xl font-bold">Lead Feed</h1>
           <p className="text-sm text-muted-foreground mt-1">
             Reddit opportunities with status: new
+            {user?.email && (
+              <span className="ml-2 text-orange-500 font-medium">
+                • Logged in as: {user.email}
+              </span>
+            )}
           </p>
         </div>
         <ThemeToggle />

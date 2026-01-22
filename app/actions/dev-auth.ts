@@ -3,6 +3,7 @@
 import { createServerSupabaseClient } from "@/lib/supabase-server";
 import { revalidatePath } from "next/cache";
 import { v5 as uuidv5 } from "uuid";
+import { cookies } from "next/headers";
 
 // UUID namespace for deterministic user ID generation
 const UUID_NAMESPACE = "6ba7b811-9dad-11d1-80b4-00c04fd430c8";
@@ -35,16 +36,30 @@ export async function switchUser(email: string) {
     // Generate deterministic UUID from email
     const mockUserId = uuidv5(cleanEmail, UUID_NAMESPACE);
 
-    // Set cookies to simulate authentication
-    // Note: In production Next.js, use proper cookie setting via headers
-    // For dev mode, we'll use a simple approach
+    // #region agent log
+    fetch('http://127.0.0.1:7244/ingest/f26b0d71-5d71-4d69-b4d0-1706630ff879',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'dev-auth.ts:36',message:'switchUser: Before setting cookie',data:{email:cleanEmail,userId:mockUserId},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
+    // #endregion
 
-    // For now, we'll store in a global variable as a workaround
-    // In a real implementation, you'd set HTTP-only cookies
-    if (typeof globalThis !== 'undefined') {
-      globalThis.__mockUserId = mockUserId;
-      globalThis.__mockUserEmail = cleanEmail;
-    }
+    // Set cookie to store user ID (accessible from both server and client)
+    const cookieStore = await cookies();
+    cookieStore.set("dev_mock_user_id", mockUserId, {
+      httpOnly: false, // Allow client-side access
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      maxAge: 60 * 60 * 24 * 7, // 7 days
+      path: "/",
+    });
+    cookieStore.set("dev_mock_user_email", cleanEmail, {
+      httpOnly: false,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      maxAge: 60 * 60 * 24 * 7,
+      path: "/",
+    });
+
+    // #region agent log
+    fetch('http://127.0.0.1:7244/ingest/f26b0d71-5d71-4d69-b4d0-1706630ff879',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'dev-auth.ts:55',message:'switchUser: After setting cookie',data:{email:cleanEmail,userId:mockUserId},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
+    // #endregion
 
     // Ensure user "exists" by upserting project_settings
     const { error: upsertError } = await supabase
