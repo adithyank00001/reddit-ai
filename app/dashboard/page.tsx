@@ -1,82 +1,65 @@
 "use client";
 
 import { useEffect, useState, useMemo } from "react";
-import { createClient } from "@/lib/supabase-client";
+import { createClient } from "@/utils/supabase/client";
 import { LeadFeed } from "@/components/dashboard/LeadFeed";
 import { LeadDetail } from "@/components/dashboard/LeadDetail";
-import { DevUserSwitcher } from "@/components/dashboard/DevUserSwitcher";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent } from "@/components/ui/card";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { MessageSquare, LogIn } from "lucide-react";
 import type { Post } from "@/types";
+import type { User } from "@supabase/supabase-js";
 
 export default function DashboardPage() {
   const [leads, setLeads] = useState<Post[]>([]);
   const [selectedLeadId, setSelectedLeadId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [userLoading, setUserLoading] = useState(true);
 
   // Create Supabase client once and reuse it
   const supabase = useMemo(() => createClient(), []);
 
-  // Get mock user ID from cookie (dev mode)
-  const getMockUser = () => {
-    if (typeof window === 'undefined') return null;
-    
-    // #region agent log
-    fetch('http://127.0.0.1:7244/ingest/f26b0d71-5d71-4d69-b4d0-1706630ff879',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'page.tsx:26',message:'getMockUser: Reading cookies',data:{allCookies:document.cookie},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'D'})}).catch(()=>{});
-    // #endregion
-    
-    // Read from cookie instead of window global
-    const getCookie = (name: string) => {
-      const value = `; ${document.cookie}`;
-      const parts = value.split(`; ${name}=`);
-      if (parts.length === 2) {
-        const cookieValue = parts.pop()?.split(';').shift();
-        // Decode URL-encoded values (e.g., %40 becomes @)
-        return cookieValue ? decodeURIComponent(cookieValue) : null;
-      }
-      return null;
-    };
-    
-    const userId = getCookie("dev_mock_user_id");
-    const email = getCookie("dev_mock_user_email");
-    
-    // #region agent log
-    fetch('http://127.0.0.1:7244/ingest/f26b0d71-5d71-4d69-b4d0-1706630ff879',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'page.tsx:38',message:'getMockUser: Cookie values',data:{userId,email},timestamp:Date.now(),sessionId:'debug-session',runId:'post-fix',hypothesisId:'D'})}).catch(()=>{});
-    // #endregion
-    
-    if (userId && email) {
-      return { id: userId, email };
-    }
-    return null;
-  };
-
-  // Check mock authentication
+  // Check real Supabase authentication
   useEffect(() => {
-    function checkUser() {
-      // #region agent log
-      fetch('http://127.0.0.1:7244/ingest/f26b0d71-5d71-4d69-b4d0-1706630ff879',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'page.tsx:45',message:'checkUser: Initial check',data:{},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'E'})}).catch(()=>{});
-      // #endregion
-      const mockUser = getMockUser();
-      // #region agent log
-      fetch('http://127.0.0.1:7244/ingest/f26b0d71-5d71-4d69-b4d0-1706630ff879',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'page.tsx:48',message:'checkUser: User state set',data:{userId:mockUser?.id,email:mockUser?.email},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'E'})}).catch(()=>{});
-      // #endregion
-      setUser(mockUser);
-      setUserLoading(false);
+    async function checkUser() {
+      try {
+        const { data: { user: currentUser }, error } = await supabase.auth.getUser();
+        if (error) {
+          console.error("Error checking user:", error);
+          setUser(null);
+        } else {
+          setUser(currentUser);
+        }
+      } catch (error) {
+        console.error("Error checking user:", error);
+        setUser(null);
+      } finally {
+        setUserLoading(false);
+      }
     }
 
     checkUser();
-  }, []);
+
+    // Listen for auth state changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      const newUser = session?.user ?? null;
+      setUser(newUser);
+      // Clear selected lead when user changes
+      if (newUser?.id !== user?.id) {
+        setSelectedLeadId(null);
+      }
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [supabase, user?.id]);
 
   // Initial data fetch - filter by user_id via alerts
   useEffect(() => {
     async function fetchLeads() {
-      // #region agent log
-      fetch('http://127.0.0.1:7244/ingest/f26b0d71-5d71-4d69-b4d0-1706630ff879',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'page.tsx:76',message:'fetchLeads: Starting',data:{hasUser:!!user,userId:user?.id},timestamp:Date.now(),sessionId:'debug-session',runId:'post-fix',hypothesisId:'F'})}).catch(()=>{});
-      // #endregion
       if (!user) {
         setLeads([]);
         setLoading(false);
@@ -89,10 +72,6 @@ export default function DashboardPage() {
           .from("alerts")
           .select("id")
           .eq("user_id", user.id);
-
-        // #region agent log
-        fetch('http://127.0.0.1:7244/ingest/f26b0d71-5d71-4d69-b4d0-1706630ff879',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'page.tsx:90',message:'fetchLeads: Alerts query result',data:{alertCount:alertsData?.length||0,alertIds:alertsData?.map(a=>a.id),error:alertsError?.message},timestamp:Date.now(),sessionId:'debug-session',runId:'post-fix',hypothesisId:'F'})}).catch(()=>{});
-        // #endregion
 
         if (alertsError) {
           console.error("Error fetching alerts:", alertsError);
@@ -119,10 +98,6 @@ export default function DashboardPage() {
           .in("alert_id", alertIds)
           .order("created_utc", { ascending: false })
           .limit(50);
-
-        // #region agent log
-        fetch('http://127.0.0.1:7244/ingest/f26b0d71-5d71-4d69-b4d0-1706630ff879',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'page.tsx:115',message:'fetchLeads: Leads query result',data:{leadCount:data?.length||0,error:error?.message},timestamp:Date.now(),sessionId:'debug-session',runId:'post-fix',hypothesisId:'F'})}).catch(()=>{});
-        // #endregion
 
         if (error) {
           console.error("Error fetching leads:", error);
@@ -211,10 +186,6 @@ export default function DashboardPage() {
         <ThemeToggle />
       </div>
 
-      <div className="p-4 border-b">
-        <DevUserSwitcher />
-      </div>
-
       {userLoading ? (
         <div className="flex-1 p-4">
           <div className="space-y-4">
@@ -232,7 +203,7 @@ export default function DashboardPage() {
                 <div>
                   <h3 className="text-lg font-semibold">No User Logged In</h3>
                   <p className="text-sm text-muted-foreground mt-2">
-                    Use the Dev User Switcher above to log in or create a test account
+                    Please log in to view your leads
                   </p>
                 </div>
               </div>

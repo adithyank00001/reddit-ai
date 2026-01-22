@@ -1,0 +1,49 @@
+[2026-01-22 09:13:11.618] [28ms] [INFO] [AI_DEBUG] updateSettings FUNCTION CALLED - NEW CODE VERSION | DATA: {"timestamp":"2026-01-22T09:13:11.618Z"}
+[2026-01-22 09:13:11.972] [382ms] [INFO] [AI_DEBUG] updateSettings USER ID CHECK | DATA: {"hasUserId":true,"userId":"99efda60-c451-45e6-9dec-b8bb68291c3e"}
+[2026-01-22 09:13:11.976] [387ms] [INFO] [AI_DEBUG] updateSettings FORM DATA EXTRACTED | DATA: {"rawDescriptionLength":29,"rawDescriptionPreview":"ai seo tool for saas founders","hasDescription":true,"trimmedLength":29}
+[2026-01-22 09:13:11.978] [388ms] [INFO] [SETTINGS_UPDATE_START] Settings form received | DATA: {"userId":"99efda60-c451-45e6-9dec-b8bb68291c3e","descriptionLength":29,"keywordsRaw":"saas, seo, feedback","subredditsCount":0,"hasWebhook":false}
+[2026-01-22 09:13:11.980] [390ms] [INFO] [SETTINGS_UPDATE] Upserting settings to database | DATA: {"userId":"99efda60-c451-45e6-9dec-b8bb68291c3e","descriptionLength":29,"keywordCount":3,"operation":"upsert"}
+[2026-01-22 09:13:12.364] [774ms] [INFO] [AI_DEBUG] updateSettings AFTER DB SAVE | DATA: {"hasError":false,"errorMessage":"none","errorCode":"none"}
+[2026-01-22 09:13:13.164] [1574ms] [ERROR] [SETTINGS_UPDATE_ERROR] Failed to update client_profiles | DATA: {"message":"null value in column \"client_name\" of relation \"client_profiles\" violates not-null constraint","code":"23502"}
+[2026-01-22 09:18:23.907] [312317ms] [INFO] [AI_DEBUG] updateSettings FUNCTION CALLED - NEW CODE VERSION | DATA: {"timestamp":"2026-01-22T09:18:23.906Z"}
+[2026-01-22 09:18:24.250] [312660ms] [INFO] [AI_DEBUG] updateSettings USER ID CHECK | DATA: {"hasUserId":true,"userId":"99efda60-c451-45e6-9dec-b8bb68291c3e"}
+[2026-01-22 09:18:24.255] [312665ms] [INFO] [AI_DEBUG] updateSettings FORM DATA EXTRACTED | DATA: {"rawDescriptionLength":29,"rawDescriptionPreview":"ai seo tool for saas founders","hasDescription":true,"trimmedLength":29}
+[2026-01-22 09:18:24.257] [312667ms] [INFO] [SETTINGS_UPDATE_START] Settings form received | DATA: {"userId":"99efda60-c451-45e6-9dec-b8bb68291c3e","descriptionLength":29,"keywordsRaw":"saas, seo, feedback","subredditsCount":0,"hasWebhook":false}
+[2026-01-22 09:18:24.259] [312669ms] [INFO] [SETTINGS_UPDATE] Upserting settings to database | DATA: {"userId":"99efda60-c451-45e6-9dec-b8bb68291c3e","descriptionLength":29,"keywordCount":3,"operation":"upsert"}
+[2026-01-22 09:18:24.596] [313006ms] [INFO] [AI_DEBUG] updateSettings AFTER DB SAVE | DATA: {"hasError":false,"errorMessage":"none","errorCode":"none"}
+[2026-01-22 09:18:25.288] [313698ms] [ERROR] [SETTINGS_UPDATE_ERROR] Failed to update client_profiles | DATA: {"message":"null value in column \"client_name\" of relation \"client_profiles\" violates not-null constraint","code":"23502"}
+[2026-01-22 09:19:48.162] [396572ms] [INFO] [AI_DEBUG] updateSettings FUNCTION CALLED - NEW CODE VERSION | DATA: {"timestamp":"2026-01-22T09:19:48.162Z"}
+[2026-01-22 09:19:48.475] [396885ms] [INFO] [AI_DEBUG] updateSettings USER ID CHECK | DATA: {"hasUserId":true,"userId":"99efda60-c451-45e6-9dec-b8bb68291c3e"}
+[2026-01-22 09:19:48.479] [396889ms] [INFO] [AI_DEBUG] updateSettings FORM DATA EXTRACTED | DATA: {"rawDescriptionLength":29,"rawDescriptionPreview":"ai seo tool for saas founders","hasDescription":true,"trimmedLength":29}
+[2026-01-22 09:19:48.482] [396892ms] [INFO] [SETTINGS_UPDATE_START] Settings form received | DATA: {"userId":"99efda60-c451-45e6-9dec-b8bb68291c3e","descriptionLength":29,"keywordsRaw":"saas, seo, feedback","subredditsCount":0,"hasWebhook":false}
+[2026-01-22 09:19:48.483] [396893ms] [INFO] [SETTINGS_UPDATE] Upserting settings to database | DATA: {"userId":"99efda60-c451-45e6-9dec-b8bb68291c3e","descriptionLength":29,"keywordCount":3,"operation":"upsert"}
+[2026-01-22 09:19:48.822] [397232ms] [INFO] [AI_DEBUG] updateSettings AFTER DB SAVE | DATA: {"hasError":false,"errorMessage":"none","errorCode":"none"}
+[2026-01-22 09:19:49.519] [397929ms] [ERROR] [SETTINGS_UPDATE_ERROR] Failed to update client_profiles | DATA: {"message":"null value in column \"client_name\" of relation \"client_profiles\" violates not-null constraint","code":"23502"}
+[2026-01-22 10:03:55.702] [28ms] [INFO] [AI_DEBUG] updateSettings FUNCTION CALLED - NEW CODE VERSION | DATA: {"timestamp":"2026-01-22T10:03:55.701Z"}
+[2026-01-22 10:03:56.060] [386ms] [INFO] [AI_DEBUG] updateSettings USER ID CHECK | DATA: {"hasUserId":true,"userId":"99efda60-c451-45e6-9dec-b8bb68291c3e"}
+[2026-01-22 10:03:56.065] [391ms] [INFO] [AI_DEBUG] updateSettings FORM DATA EXTRACTED | DATA: {"rawDescriptionLength":49,"rawDescriptionPreview":"ai seo and feedback giving tool for saas founders","hasDescription":true,"trimmedLength":49}
+[2026-01-22 10:03:56.068] [394ms] [INFO] [SETTINGS_UPDATE_START] Settings form received | DATA: {"userId":"99efda60-c451-45e6-9dec-b8bb68291c3e","descriptionLength":49,"keywordsRaw":"saas, seo, feedback","subredditsCount":4,"hasWebhook":false}
+[2026-01-22 10:03:56.071] [397ms] [INFO] [SETTINGS_UPDATE] Upserting settings to database | DATA: {"userId":"99efda60-c451-45e6-9dec-b8bb68291c3e","descriptionLength":49,"keywordCount":3,"operation":"upsert"}
+[2026-01-22 10:03:56.587] [913ms] [INFO] [AI_DEBUG] updateSettings AFTER DB SAVE | DATA: {"hasError":false,"errorMessage":"none","errorCode":"none"}
+[2026-01-22 10:03:58.194] [2520ms] [ERROR] [SETTINGS_UPDATE_ERROR] Failed to update client_profiles | DATA: {"message":"null value in column \"client_name\" of relation \"client_profiles\" violates not-null constraint","code":"23502"}
+[2026-01-22 10:09:30.436] [9ms] [INFO] [AI_DEBUG] updateSettings FUNCTION CALLED - NEW CODE VERSION | DATA: {"timestamp":"2026-01-22T10:09:30.435Z"}
+[2026-01-22 10:09:30.755] [328ms] [INFO] [AI_DEBUG] updateSettings USER ID CHECK | DATA: {"hasUserId":true,"userId":"99efda60-c451-45e6-9dec-b8bb68291c3e"}
+[2026-01-22 10:09:30.758] [331ms] [INFO] [AI_DEBUG] updateSettings FORM DATA EXTRACTED | DATA: {"rawDescriptionLength":49,"rawDescriptionPreview":"ai seo and feedback giving tool for saas founders","hasDescription":true,"trimmedLength":49}
+[2026-01-22 10:09:30.760] [333ms] [INFO] [SETTINGS_UPDATE_START] Settings form received | DATA: {"userId":"99efda60-c451-45e6-9dec-b8bb68291c3e","descriptionLength":49,"keywordsRaw":"saas, seo, feedback","subredditsCount":5,"hasWebhook":false}
+[2026-01-22 10:09:30.762] [335ms] [INFO] [SETTINGS_UPDATE] Upserting settings to database | DATA: {"userId":"99efda60-c451-45e6-9dec-b8bb68291c3e","descriptionLength":49,"keywordCount":3,"operation":"upsert"}
+[2026-01-22 10:09:31.157] [730ms] [INFO] [AI_DEBUG] updateSettings AFTER DB SAVE | DATA: {"hasError":false,"errorMessage":"none","errorCode":"none"}
+[2026-01-22 10:09:32.019] [1592ms] [INFO] [SETTINGS_UPDATE_SUCCESS] All settings updated successfully | DATA: {"descriptionLength":49,"keywordCount":3,"subredditsCount":5}
+[2026-01-22 10:10:15.094] [44667ms] [INFO] [AI_DEBUG] updateSettings FUNCTION CALLED - NEW CODE VERSION | DATA: {"timestamp":"2026-01-22T10:10:15.094Z"}
+[2026-01-22 10:10:15.408] [44981ms] [INFO] [AI_DEBUG] updateSettings USER ID CHECK | DATA: {"hasUserId":true,"userId":"99efda60-c451-45e6-9dec-b8bb68291c3e"}
+[2026-01-22 10:10:15.415] [44988ms] [INFO] [AI_DEBUG] updateSettings FORM DATA EXTRACTED | DATA: {"rawDescriptionLength":49,"rawDescriptionPreview":"ai seo and feedback giving tool for saas founders","hasDescription":true,"trimmedLength":49}
+[2026-01-22 10:10:15.419] [44992ms] [INFO] [SETTINGS_UPDATE_START] Settings form received | DATA: {"userId":"99efda60-c451-45e6-9dec-b8bb68291c3e","descriptionLength":49,"keywordsRaw":"saas, seo, feedback, validation","subredditsCount":5,"hasWebhook":false}
+[2026-01-22 10:10:15.422] [44995ms] [INFO] [SETTINGS_UPDATE] Upserting settings to database | DATA: {"userId":"99efda60-c451-45e6-9dec-b8bb68291c3e","descriptionLength":49,"keywordCount":4,"operation":"upsert"}
+[2026-01-22 10:10:15.748] [45321ms] [INFO] [AI_DEBUG] updateSettings AFTER DB SAVE | DATA: {"hasError":false,"errorMessage":"none","errorCode":"none"}
+[2026-01-22 10:10:16.388] [45961ms] [INFO] [SETTINGS_UPDATE_SUCCESS] All settings updated successfully | DATA: {"descriptionLength":49,"keywordCount":4,"subredditsCount":5}
+[2026-01-22 10:12:12.839] [162412ms] [INFO] [AI_DEBUG] updateSettings FUNCTION CALLED - NEW CODE VERSION | DATA: {"timestamp":"2026-01-22T10:12:12.839Z"}
+[2026-01-22 10:12:13.152] [162725ms] [INFO] [AI_DEBUG] updateSettings USER ID CHECK | DATA: {"hasUserId":true,"userId":"4cd1ece8-7338-43f0-9f30-2a80878cdf60"}
+[2026-01-22 10:12:13.154] [162727ms] [INFO] [AI_DEBUG] updateSettings FORM DATA EXTRACTED | DATA: {"rawDescriptionLength":32,"rawDescriptionPreview":"email marketing tool for founder","hasDescription":true,"trimmedLength":32}
+[2026-01-22 10:12:13.155] [162728ms] [INFO] [SETTINGS_UPDATE_START] Settings form received | DATA: {"userId":"4cd1ece8-7338-43f0-9f30-2a80878cdf60","descriptionLength":32,"keywordsRaw":"saas, email, mrr ","subredditsCount":3,"hasWebhook":false}
+[2026-01-22 10:12:13.157] [162730ms] [INFO] [SETTINGS_UPDATE] Upserting settings to database | DATA: {"userId":"4cd1ece8-7338-43f0-9f30-2a80878cdf60","descriptionLength":32,"keywordCount":3,"operation":"upsert"}
+[2026-01-22 10:12:13.705] [163278ms] [INFO] [AI_DEBUG] updateSettings AFTER DB SAVE | DATA: {"hasError":false,"errorMessage":"none","errorCode":"none"}
+[2026-01-22 10:12:14.636] [164209ms] [INFO] [SETTINGS_UPDATE_SUCCESS] All settings updated successfully | DATA: {"descriptionLength":32,"keywordCount":3,"subredditsCount":3}

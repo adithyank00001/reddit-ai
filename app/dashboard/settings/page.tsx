@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { createClient } from "@/lib/supabase-client";
+import { createClient } from "@/utils/supabase/client";
 import { ScraperSettings } from "@/components/dashboard/settings/ScraperSettings";
 import { NotificationSettings } from "@/components/dashboard/settings/NotificationSettings";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -32,37 +32,29 @@ export default function SettingsPage() {
 
   useEffect(() => {
     async function fetchSettings() {
-      // Get mock user from cookie
-      const getCookie = (name: string) => {
-        if (typeof window === 'undefined') return null;
-        const value = `; ${document.cookie}`;
-        const parts = value.split(`; ${name}=`);
-        if (parts.length === 2) {
-          const cookieValue = parts.pop()?.split(';').shift();
-          return cookieValue ? decodeURIComponent(cookieValue) : null;
-        }
-        return null;
-      };
-      
-      const mockUser = getCookie("dev_mock_user_id");
-      if (!mockUser) {
-        setError("No user session found. Please use the Dev Switcher first.");
-        setLoading(false);
-        return;
-      }
-
       try {
-        // Fetch all settings in parallel (filtered by mock user ID)
+        // Get real user from Supabase auth
+        const { data: { user }, error: authError } = await supabase.auth.getUser();
+        
+        if (authError || !user) {
+          setError("Unauthorized. Please log in.");
+          setLoading(false);
+          return;
+        }
+
+        const userId = user.id;
+
+        // Fetch all settings in parallel (filtered by real user ID)
         const [settingsResult, profilesResult] = await Promise.all([
           supabase
             .from("project_settings")
             .select("*")
-            .eq("user_id", mockUser)
+            .eq("user_id", userId)
             .maybeSingle(),
           supabase
             .from("client_profiles")
             .select("*")
-            .eq("user_id", mockUser)
+            .eq("user_id", userId)
             .maybeSingle(),
         ]);
 
@@ -70,7 +62,7 @@ export default function SettingsPage() {
         const { data: alertsResult } = await supabase
           .from("alerts")
           .select("subreddit")
-          .eq("user_id", mockUser);
+          .eq("user_id", userId);
 
         if (settingsResult.error) {
           console.error("Error fetching project_settings:", settingsResult.error);
@@ -171,6 +163,7 @@ export default function SettingsPage() {
               <ScraperSettings
                 initialKeywords={settings?.projectSettings?.keywords || []}
                 initialProductDescription={settings?.projectSettings?.product_description_raw || ""}
+                initialSubreddits={settings?.alerts?.map(a => a.subreddit) || []}
               />
             </TabsContent>
 

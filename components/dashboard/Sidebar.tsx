@@ -1,8 +1,13 @@
 "use client";
 
+import { useEffect, useState, useMemo } from "react";
 import Link from "next/link";
-import { Home, Settings } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { Home, Settings, LogOut } from "lucide-react";
 import { usePathname } from "next/navigation";
+import { createClient } from "@/utils/supabase/client";
+import { Button } from "@/components/ui/button";
+import type { User } from "@supabase/supabase-js";
 
 /**
  * Sidebar Component
@@ -10,12 +15,38 @@ import { usePathname } from "next/navigation";
  */
 export function Sidebar() {
   const pathname = usePathname();
+  const router = useRouter();
+  const [user, setUser] = useState<User | null>(null);
+  const supabase = useMemo(() => createClient(), []);
 
   const isActive = (path: string) => pathname === path;
 
+  useEffect(() => {
+    async function fetchUser() {
+      const { data: { user: currentUser } } = await supabase.auth.getUser();
+      setUser(currentUser);
+    }
+
+    fetchUser();
+
+    // Listen for auth state changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [supabase]);
+
+  async function handleSignOut() {
+    await supabase.auth.signOut();
+    router.push("/login");
+  }
+
   return (
-    <aside className="w-64 bg-card border-r border-border">
-      <div className="p-4">
+    <aside className="w-64 bg-card border-r border-border flex flex-col">
+      <div className="p-4 flex-1">
         <h2 className="text-lg font-semibold text-card-foreground">Dashboard</h2>
         <nav className="mt-4">
           <ul className="space-y-2">
@@ -47,6 +78,27 @@ export function Sidebar() {
             </li>
           </ul>
         </nav>
+      </div>
+
+      {/* User info and sign out at bottom */}
+      <div className="p-4 border-t border-border">
+        {user?.email && (
+          <div className="mb-3">
+            <p className="text-xs text-muted-foreground mb-1">Logged in as</p>
+            <p className="text-sm font-medium text-card-foreground truncate" title={user.email}>
+              {user.email}
+            </p>
+          </div>
+        )}
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={handleSignOut}
+          className="w-full flex items-center gap-2"
+        >
+          <LogOut className="h-4 w-4" />
+          Sign Out
+        </Button>
       </div>
     </aside>
   );

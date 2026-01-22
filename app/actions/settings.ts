@@ -1,28 +1,9 @@
 "use server";
 
 import { logger } from "@/lib/logger";
-import { createServerSupabaseClient } from "@/lib/supabase-server";
+import { createClient } from "@/utils/supabase/server";
 import { supabase as supabaseServiceRole } from "@/lib/supabase";
 import { revalidatePath } from "next/cache";
-
-// Extend globalThis type for dev mode mock user ID
-declare global {
-  // eslint-disable-next-line no-var
-  var __mockUserId: string | undefined;
-}
-
-/**
- * Get mock user ID from global state (dev mode)
- */
-function getMockUserId(): string | null {
-  if (typeof globalThis !== 'undefined') {
-    const mockUserId = (globalThis as any).__mockUserId;
-    if (mockUserId) {
-      return mockUserId;
-    }
-  }
-  return null;
-}
 
 /**
  * Settings update action
@@ -45,22 +26,34 @@ export async function updateSettings(formData: FormData) {
   
   console.log("[DEBUG] Supabase client initialized");
 
-  // Get mock user ID instead of real auth
-  const userId = getMockUserId();
+  // Get real user from Supabase auth
+  const authClient = await createClient();
+  const { data: { user }, error: authError } = await authClient.auth.getUser();
+  
+  if (authError || !user) {
+    logger.error("AUTH_ERROR", "Unauthorized access to updateSettings", {
+      error: authError?.message,
+    });
+    return { success: false, error: "Unauthorized. Please log in." };
+  }
+  
+  const userId = user.id;
   
   logger.info("AI_DEBUG", "updateSettings USER ID CHECK", {
     hasUserId: !!userId,
     userId: userId || "none",
   });
-  if (!userId) {
-    return { success: false, error: "No user session found. Please use the Dev Switcher." };
-  }
 
-  // Extract form data
-  const rawDescription = String(formData.get("productDescription") || "");
-  const keywordsString = String(formData.get("keywords") || "");
-  const subredditsJson = String(formData.get("subreddits") || "[]");
-  const slackWebhookUrl = String(formData.get("slackWebhookUrl") || "");
+  // Extract form data (check if keys exist to determine which sections to update)
+  const hasProductDescription = formData.has("productDescription");
+  const hasKeywords = formData.has("keywords");
+  const hasSubreddits = formData.has("subreddits");
+  const hasSlackWebhook = formData.has("slackWebhookUrl");
+
+  const rawDescription = hasProductDescription ? String(formData.get("productDescription") || "") : "";
+  const keywordsString = hasKeywords ? String(formData.get("keywords") || "") : "";
+  const subredditsJson = hasSubreddits ? String(formData.get("subreddits") || "[]") : "[]";
+  const slackWebhookUrl = hasSlackWebhook ? String(formData.get("slackWebhookUrl") || "") : "";
   
   console.log("[DEBUG] Form data extracted:", {
     rawDescriptionLength: rawDescription.length,
@@ -105,102 +98,157 @@ export async function updateSettings(formData: FormData) {
       : cleanedKeywords;
 
   try {
-    // Update project_settings using UPSERT with user_id
-    // This ensures one row per user and prevents duplicates
-    const settingsPayload = {
-      user_id: userId,
-      product_description_raw: rawDescription,
-      keywords: limitedKeywords,
-    };
-    
-    logger.info("SETTINGS_UPDATE", "Upserting settings to database", {
-      userId,
-      descriptionLength: rawDescription.length,
-      keywordCount: limitedKeywords.length,
-      operation: "upsert",
-    });
+    // Update project_settings only if keywords or productDescription are provided
+    if (hasKeywords || hasProductDescription) {
+      const settingsPayload = {
+        user_id: userId,
+        product_description_raw: rawDescription,
+        keywords: limitedKeywords,
+      };
+      
+      logger.info("SETTINGS_UPDATE", "Upserting settings to database", {
+        userId,
+        descriptionLength: rawDescription.length,
+        keywordCount: limitedKeywords.length,
+        operation: "upsert",
+      });
 
-    const { error: settingsError } = await supabase
-      .from("project_settings")
-      .upsert(settingsPayload, { onConflict: "user_id" });
-    
-    logger.info("AI_DEBUG", "updateSettings AFTER DB SAVE", {
-      hasError: !!settingsError,
-      errorMessage: settingsError?.message || "none",
-      errorCode: settingsError?.code || "none",
-    });
+      const { error: settingsError } = await supabase
+        .from("project_settings")
+        .upsert(settingsPayload, { onConflict: "user_id" });
+      
+      logger.info("AI_DEBUG", "updateSettings AFTER DB SAVE", {
+        hasError: !!settingsError,
+        errorMessage: settingsError?.message || "none",
+        errorCode: settingsError?.code || "none",
+      });
 
-    if (settingsError) {
-      logger.error(
-        "SETTINGS_UPDATE_ERROR",
-        "Failed to update project_settings",
-        {
-          message: settingsError.message,
-          code: (settingsError as any).code,
-        }
-      );
-      return { success: false, error: "Failed to update project settings" };
+      if (settingsError) {
+        logger.error(
+          "SETTINGS_UPDATE_ERROR",
+          "Failed to update project_settings",
+          {
+            message: settingsError.message,
+            code: (settingsError as any).code,
+          }
+        );
+        return { success: false, error: "Failed to update project settings" };
+      }
     }
 
-    // Update alerts (first available row)
-    // First try to get first row, if exists update it, otherwise insert
-    // Note: This section appears to have a bug (subreddit variable not defined)
-    // Skipping alert updates for now - this should be handled separately
-    // const { data: existingAlert } = await supabase
-    //   .from("alerts")
-    //   .select("id")
-    //   .limit(1)
-    //   .maybeSingle();
-
-    // const alertPayload = {
-    //   subreddit: subreddits[0]?.trim() || "",
-    // };
-
-    // Alert updates commented out due to undefined variable issue
-    // const { error: alertsError } = existingAlert
-    //   ? await supabase
-    //       .from("alerts")
-    //       .update(alertPayload)
-    //       .eq("id", existingAlert.id)
-    //   : await supabase.from("alerts").insert(alertPayload);
-
-    // if (alertsError) {
-    //   logger.error("SETTINGS_UPDATE_ERROR", "Failed to update alerts", {
-    //     message: alertsError.message,
-    //     code: (alertsError as any).code,
-    //   });
-    //   return { success: false, error: "Failed to update alert settings" };
-    // }
-
-    // Update client_profiles (first available row)
-    // First try to get first row, if exists update it, otherwise insert
-    const { data: existingProfile } = await supabase
-      .from("client_profiles")
-      .select("id")
-      .limit(1)
-      .maybeSingle();
-
-    const profilePayload = {
-      slack_webhook_url: slackWebhookUrl.trim() || null,
-    };
-
-    const { error: profilesError } = existingProfile
-      ? await supabase
-          .from("client_profiles")
-          .update(profilePayload)
-          .eq("id", existingProfile.id)
-      : await supabase.from("client_profiles").insert(profilePayload);
-
-    if (profilesError) {
-      logger.error(
-        "SETTINGS_UPDATE_ERROR",
-        "Failed to update client_profiles",
-        {
-          message: profilesError.message,
-          code: (profilesError as any).code,
-        }
+    // Update alerts for this user only if subreddits are provided
+    // Sync alerts table with submitted subreddits:
+    // - New subreddit in list  -> INSERT
+    // - Subreddit removed      -> DELETE
+    // - Existing               -> Do nothing
+    if (hasSubreddits) {
+      // Normalize and deduplicate submitted subreddits
+      const cleanedSubreddits = Array.from(
+        new Set(
+          subreddits
+            .map((s) => {
+              let clean = String(s || "").trim().toLowerCase();
+              if (clean.startsWith("r/")) {
+                clean = clean.slice(2);
+              }
+              return clean;
+            })
+            .filter((s) => s.length > 0)
+        )
       );
-      return { success: false, error: "Failed to update notification settings" };
+
+      // Fetch existing alerts for this user
+      const { data: existingAlerts = [] } = await supabase
+        .from("alerts")
+        .select("id, subreddit")
+        .eq("user_id", userId);
+
+      const existingSet = new Set(
+        existingAlerts.map((a) => a.subreddit.toLowerCase())
+      );
+      const desiredSet = new Set(cleanedSubreddits);
+
+      const toInsert = cleanedSubreddits.filter(
+        (s) => !existingSet.has(s.toLowerCase())
+      );
+      const toDelete = existingAlerts.filter(
+        (a) => !desiredSet.has(a.subreddit.toLowerCase())
+      );
+
+      let alertsError: any = null;
+
+      // Insert new alerts (if any)
+      if (toInsert.length > 0) {
+        const insertPayload = toInsert.map((subreddit) => ({
+          user_id: userId,
+          subreddit,
+          is_active: true,
+        }));
+
+        const { error } = await supabase
+          .from("alerts")
+          .insert(insertPayload);
+
+        if (error) {
+          alertsError = error;
+        }
+      }
+
+      // Delete removed alerts (if any)
+      if (!alertsError && toDelete.length > 0) {
+        const idsToDelete = toDelete.map((a) => a.id);
+
+        const { error } = await supabase
+          .from("alerts")
+          .delete()
+          .in("id", idsToDelete);
+
+        if (error) {
+          alertsError = error;
+        }
+      }
+
+      if (alertsError) {
+        logger.error("SETTINGS_UPDATE_ERROR", "Failed to update alerts", {
+          message: alertsError.message,
+          code: (alertsError as any).code,
+        });
+        return { success: false, error: "Failed to update alert settings" };
+      }
+    }
+
+    // Update client_profiles only if slackWebhookUrl is provided
+    if (hasSlackWebhook) {
+      // First try to get user's profile, if exists update it, otherwise insert
+      const { data: existingProfile } = await supabase
+        .from("client_profiles")
+        .select("id")
+        .eq("user_id", userId)
+        .maybeSingle();
+
+      const profilePayload = {
+        user_id: userId,
+        slack_webhook_url: slackWebhookUrl.trim() || null,
+      };
+
+      const { error: profilesError } = existingProfile
+        ? await supabase
+            .from("client_profiles")
+            .update(profilePayload)
+            .eq("id", existingProfile.id)
+        : await supabase.from("client_profiles").insert(profilePayload);
+
+      if (profilesError) {
+        logger.error(
+          "SETTINGS_UPDATE_ERROR",
+          "Failed to update client_profiles",
+          {
+            message: profilesError.message,
+            code: (profilesError as any).code,
+          }
+        );
+        return { success: false, error: "Failed to update notification settings" };
+      }
     }
 
     logger.info("SETTINGS_UPDATE_SUCCESS", "All settings updated successfully", {
@@ -223,13 +271,19 @@ export async function updateSettings(formData: FormData) {
  * Fetch current settings (first available row)
  */
 export async function getSettings() {
-  const supabase = await createServerSupabaseClient();
+  const supabase = await createClient();
 
-  // Get mock user ID instead of real auth
-  const userId = getMockUserId();
-  if (!userId) {
-    return { error: "No user session found. Please use the Dev Switcher." };
+  // Get real user from Supabase auth
+  const { data: { user }, error: authError } = await supabase.auth.getUser();
+  
+  if (authError || !user) {
+    logger.error("AUTH_ERROR", "Unauthorized access to getSettings", {
+      error: authError?.message,
+    });
+    return { error: "Unauthorized. Please log in." };
   }
+  
+  const userId = user.id;
 
   try {
     // Fetch all settings in parallel (filtered by mock user ID)
