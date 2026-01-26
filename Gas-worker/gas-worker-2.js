@@ -65,6 +65,35 @@
  */
 
 /**
+ * ============================================================================
+ * AI MODEL CONFIGURATION
+ * ============================================================================
+ * 
+ * Centralized configuration for all AI models used in this worker.
+ * Modify these variables to change models without touching the code logic.
+ */
+
+// Stage 1: Binary Relevance Filter
+// Used to quickly determine if a Reddit post has any potential for sales/marketing/feedback
+// Low max_tokens (10) for binary Yes/No responses
+const AI_MODEL_STAGE1_BINARY_RELEVANCE = "gpt-4o-mini";
+const AI_MAX_TOKENS_STAGE1_BINARY_RELEVANCE = 10;
+const AI_TEMPERATURE_STAGE1_BINARY_RELEVANCE = 0.7;
+
+// Stage 2: Sales Intelligence Generation
+// Used to generate detailed analysis, scoring, and reply drafts for relevant leads
+// Higher max_tokens (500) for structured JSON responses
+const AI_MODEL_STAGE2_SALES_INTELLIGENCE = "gpt-4o-mini";
+const AI_MAX_TOKENS_STAGE2_SALES_INTELLIGENCE = 500;
+const AI_TEMPERATURE_STAGE2_SALES_INTELLIGENCE = 0.7;
+
+/**
+ * ============================================================================
+ * END AI MODEL CONFIGURATION
+ * ============================================================================
+ */
+
+/**
  * Format timestamp for logging (inline version to ensure it's always available)
  * @param {Date} date - Date object to format
  * @returns {string} Formatted timestamp string
@@ -843,8 +872,7 @@ function updateLeadStatus(config, leadId, processingStatus, status, debugLogs = 
 
 /**
  * Stage 1: Binary Relevance Filter
- * Uses GPT-4o-mini to determine if the post has any potential for sales/marketing/feedback
- * Note: Using gpt-4o-mini as "gpt-4.1-nano" doesn't exist. This is the most cost-effective option.
+ * Uses AI_MODEL_STAGE1_BINARY_RELEVANCE to determine if the post has any potential for sales/marketing/feedback
  * @param {Object} config - Configuration object
  * @param {string} title - Post title
  * @param {string} body - Post body
@@ -864,7 +892,7 @@ Post Body: ${body}
 Does this post have any potential for sales, marketing, or feedback? Answer ONLY 'Yes' or 'No'.`;
 
   try {
-    const response = callOpenAI(config, "gpt-4o-mini", systemPrompt, userPrompt, 10, debugLogs); // Low max_tokens for binary response
+    const response = callOpenAI(config, AI_MODEL_STAGE1_BINARY_RELEVANCE, systemPrompt, userPrompt, AI_MAX_TOKENS_STAGE1_BINARY_RELEVANCE, AI_TEMPERATURE_STAGE1_BINARY_RELEVANCE, debugLogs);
     
     if (!response || !response.choices || !response.choices[0]) {
       return { success: false, error: "Invalid response from OpenAI" };
@@ -889,7 +917,7 @@ Does this post have any potential for sales, marketing, or feedback? Answer ONLY
 
 /**
  * Stage 2: Sales Intelligence Generation
- * Uses GPT-4o-mini to generate detailed analysis and scoring
+ * Uses AI_MODEL_STAGE2_SALES_INTELLIGENCE to generate detailed analysis and scoring
  * @param {Object} config - Configuration object
  * @param {string} title - Post title
  * @param {string} body - Post body
@@ -916,7 +944,7 @@ Post Body: ${body}
 Return ONLY valid JSON with these exact keys. No markdown, no code blocks, just the JSON object.`;
 
   try {
-    const response = callOpenAI(config, "gpt-4o-mini", systemPrompt, userPrompt, 500, debugLogs);
+    const response = callOpenAI(config, AI_MODEL_STAGE2_SALES_INTELLIGENCE, systemPrompt, userPrompt, AI_MAX_TOKENS_STAGE2_SALES_INTELLIGENCE, AI_TEMPERATURE_STAGE2_SALES_INTELLIGENCE, debugLogs);
     
     if (!response || !response.choices || !response.choices[0]) {
       return { success: false, error: "Invalid response from OpenAI" };
@@ -971,9 +999,10 @@ Return ONLY valid JSON with these exact keys. No markdown, no code blocks, just 
  * @param {string} systemPrompt - System prompt
  * @param {string} userPrompt - User prompt
  * @param {number} maxTokens - Maximum tokens (default 500)
+ * @param {number} temperature - Temperature for AI response (default 0.7)
  * @param {Array} debugLogs - Optional array to store debug logs
  */
-function callOpenAI(config, model, systemPrompt, userPrompt, maxTokens = 500, debugLogs = null) {
+function callOpenAI(config, model, systemPrompt, userPrompt, maxTokens = 500, temperature = 0.7, debugLogs = null) {
   const url = "https://api.openai.com/v1/chat/completions";
   
   const payload = {
@@ -983,7 +1012,7 @@ function callOpenAI(config, model, systemPrompt, userPrompt, maxTokens = 500, de
       { role: "user", content: userPrompt }
     ],
     max_tokens: maxTokens,
-    temperature: 0.7
+    temperature: temperature
   };
 
   try {

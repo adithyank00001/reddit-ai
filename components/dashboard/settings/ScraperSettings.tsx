@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, KeyboardEvent } from "react";
+import { useState, useEffect, KeyboardEvent } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -13,9 +13,11 @@ import { Badge } from "@/components/ui/badge";
 import { updateSettings } from "@/app/actions/settings";
 import { toast } from "sonner";
 import { Loader2, X, Plus } from "lucide-react";
+import { WebsiteAnalyzerForm } from "@/components/onboarding/WebsiteAnalyzerForm";
+import { KeywordManager } from "@/components/shared/KeywordManager";
 
 const scraperSchema = z.object({
-  keywords: z.string().min(1, "At least one keyword is required"),
+  keywords: z.array(z.string()).min(1, "At least one keyword is required"),
   productDescription: z.string().min(10, "Product description must be at least 10 characters"),
 });
 
@@ -25,31 +27,68 @@ interface ScraperSettingsProps {
   initialKeywords?: string[];
   initialProductDescription?: string;
   initialSubreddits?: string[];
+  initialWebsiteUrl?: string;
+  onSave?: () => void;
 }
 
 export function ScraperSettings({
   initialKeywords = [],
   initialProductDescription = "",
   initialSubreddits = [],
+  initialWebsiteUrl = "",
+  onSave,
 }: ScraperSettingsProps) {
+  const [keywords, setKeywords] = useState<string[]>(initialKeywords);
   const {
     register,
     handleSubmit,
+    setValue,
     formState: { isSubmitting },
   } = useForm<ScraperFormData>({
     resolver: zodResolver(scraperSchema),
     defaultValues: {
-      keywords: initialKeywords.join(", "),
+      keywords: initialKeywords,
       productDescription: initialProductDescription,
     },
   });
 
   const [subreddits, setSubreddits] = useState<string[]>(initialSubreddits);
   const [currentSubreddit, setCurrentSubreddit] = useState("");
+  const [websiteUrl, setWebsiteUrl] = useState(initialWebsiteUrl || "");
+  const [productDescription, setProductDescription] = useState(initialProductDescription || "");
+
+  // Sync keywords with form state
+  const handleKeywordsChange = (newKeywords: string[]) => {
+    setKeywords(newKeywords);
+    setValue("keywords", newKeywords, { shouldValidate: true });
+  };
+
+  // Update keywords when initialKeywords change (e.g., after refetch)
+  useEffect(() => {
+    setKeywords(initialKeywords);
+    setValue("keywords", initialKeywords, { shouldValidate: true });
+  }, [initialKeywords, setValue]);
+
+  // Update subreddits when initialSubreddits change
+  useEffect(() => {
+    setSubreddits(initialSubreddits);
+  }, [initialSubreddits]);
+
+  // Update website URL and description when initial values change
+  useEffect(() => {
+    setWebsiteUrl(initialWebsiteUrl || "");
+    setProductDescription(initialProductDescription || "");
+    setValue("productDescription", initialProductDescription, { shouldValidate: true });
+  }, [initialWebsiteUrl, initialProductDescription, setValue]);
 
   const addSubreddit = (value: string) => {
     let clean = value.trim().toLowerCase();
     if (!clean) return;
+
+    // Check if already at max limit (10 subreddits)
+    if (subreddits.length >= 10) {
+      return;
+    }
 
     // Allow user to type "r/saas" or "saas"
     if (clean.startsWith("r/")) {
@@ -75,21 +114,38 @@ export function ScraperSettings({
     }
   };
 
+  const handleWebsiteAnalyzerChange = (data: { websiteUrl: string; description: string }) => {
+    setWebsiteUrl(data.websiteUrl);
+    setProductDescription(data.description);
+    // Sync with form state for validation
+    setValue("productDescription", data.description);
+  };
+
   async function onSubmit(data: ScraperFormData) {
-    if (subreddits.length === 0) {
-      toast.error("Please add at least one subreddit.");
+    // Allow 0 subreddits - users who completed onboarding can remove all subreddits
+    // The validation for minimum requirements is handled during onboarding, not in settings
+
+    if (keywords.length === 0) {
+      toast.error("Please add at least one keyword.");
       return;
     }
 
     const formData = new FormData();
-    formData.append("keywords", data.keywords);
-    formData.append("productDescription", data.productDescription);
+    // Send keywords as JSON array (same format as subreddits)
+    formData.append("keywords", JSON.stringify(keywords));
+    // Use productDescription from state (synced from WebsiteAnalyzerForm)
+    formData.append("productDescription", productDescription || data.productDescription);
     formData.append("subreddits", JSON.stringify(subreddits));
+    formData.append("websiteUrl", websiteUrl);
 
     const result = await updateSettings(formData);
 
     if (result.success) {
       toast.success("Scraper settings saved successfully!");
+      // Trigger refresh callback if provided
+      if (onSave) {
+        onSave();
+      }
     } else {
       toast.error(result.error || "Failed to save settings");
     }
@@ -105,17 +161,18 @@ export function ScraperSettings({
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-          <div className="space-y-2">
-            <Label htmlFor="keywords">Keywords</Label>
-            <Input
-              id="keywords"
-              placeholder="saas, startup, marketing, growth"
-              {...register("keywords")}
-            />
-            <p className="text-sm text-muted-foreground">
-              Enter keywords separated by commas (max 20 keywords)
-            </p>
-          </div>
+          <KeywordManager
+            keywords={keywords}
+            onChange={handleKeywordsChange}
+            maxKeywords={10}
+            minKeywords={1}
+            placeholder="e.g., saas, startup, marketing"
+            label="Keywords"
+            showCounter={true}
+          />
+          <p className="text-sm text-muted-foreground">
+            These keywords help us find relevant Reddit posts that match your product. You can add up to 10 keywords.
+          </p>
 
           <div className="space-y-2">
             <Label htmlFor="subredditInput">Subreddits</Label>
@@ -126,11 +183,13 @@ export function ScraperSettings({
                 value={currentSubreddit}
                 onChange={(e) => setCurrentSubreddit(e.target.value)}
                 onKeyDown={handleSubredditKeyDown}
+                disabled={subreddits.length >= 10}
               />
               <Button
                 type="button"
                 variant="outline"
                 onClick={() => addSubreddit(currentSubreddit)}
+                disabled={subreddits.length >= 10 || !currentSubreddit.trim()}
               >
                 <Plus className="h-4 w-4 mr-1" />
                 Add
@@ -141,9 +200,9 @@ export function ScraperSettings({
             </p>
             {subreddits.length > 0 && (
               <div className="flex flex-wrap gap-2 mt-2">
-                {subreddits.map((subreddit) => (
+                {subreddits.map((subreddit, index) => (
                   <Badge
-                    key={subreddit}
+                    key={`${subreddit}-${index}`}
                     variant="secondary"
                     className="flex items-center gap-1 px-2 py-1"
                   >
@@ -162,18 +221,11 @@ export function ScraperSettings({
             )}
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="productDescription">Product Description</Label>
-            <Textarea
-              id="productDescription"
-              placeholder="Describe your product or service in detail..."
-              rows={8}
-              {...register("productDescription")}
-            />
-            <p className="text-sm text-muted-foreground">
-              This description helps the AI understand your product when analyzing Reddit posts
-            </p>
-          </div>
+          <WebsiteAnalyzerForm
+            initialWebsiteUrl={initialWebsiteUrl}
+            initialDescription={initialProductDescription}
+            onChange={handleWebsiteAnalyzerChange}
+          />
 
           <Button type="submit" disabled={isSubmitting}>
             {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}

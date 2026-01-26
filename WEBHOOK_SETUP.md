@@ -1,8 +1,8 @@
 # Supabase Webhook Setup for Worker 2
 
-## Your Google Apps Script Web App URL
+## Your Google Apps Script Web App URL (Worker 3)
 ```
-https://script.google.com/macros/s/AKfycbwdaAr0ASaEe2ADL5nFe9jXvDHAfZabhcBpJWa19yVSCdlHAuChinssYQvYb8rdEPhpgg/exec
+https://script.google.com/macros/s/AKfycbyQkkWQ9OODI4o-yBMfFsmqJWETyY6IVuElnEExQtWEfgfxK0jLPtRC-TqaCLgyCzfy_Q/exec
 ```
 
 ## Step-by-Step Instructions
@@ -38,7 +38,7 @@ Worker 2 - Lead Processing
 
 **URL:**
 ```
-https://script.google.com/macros/s/AKfycbwdaAr0ASaEe2ADL5nFe9jXvDHAfZabhcBpJWa19yVSCdlHAuChinssYQvYb8rdEPhpgg/exec
+https://script.google.com/macros/s/AKfycbyQkkWQ9OODI4o-yBMfFsmqJWETyY6IVuElnEExQtWEfgfxK0jLPtRC-TqaCLgyCzfy_Q/exec
 ```
 
 **HTTP Method:**

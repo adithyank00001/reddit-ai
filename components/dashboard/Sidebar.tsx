@@ -3,10 +3,11 @@
 import { useEffect, useState, useMemo } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Home, Settings, LogOut } from "lucide-react";
+import { Home, Settings, LogOut, Bell, MessageSquare } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { createClient } from "@/utils/supabase/client";
 import { Button } from "@/components/ui/button";
+import { ThemeToggle } from "@/components/theme-toggle";
 import type { User } from "@supabase/supabase-js";
 
 /**
@@ -73,7 +74,33 @@ export function Sidebar() {
                 }`}
               >
                 <Settings className="h-4 w-4" />
-                Settings
+                Scraper Settings
+              </Link>
+            </li>
+            <li>
+              <Link
+                href="/dashboard/settings/notifications"
+                className={`flex items-center gap-2 px-3 py-2 rounded-md transition-colors ${
+                  isActive("/dashboard/settings/notifications")
+                    ? "bg-primary text-primary-foreground"
+                    : "text-muted-foreground hover:text-foreground hover:bg-accent"
+                }`}
+              >
+                <Bell className="h-4 w-4" />
+                Notifications
+              </Link>
+            </li>
+            <li>
+              <Link
+                href="/dashboard/settings/reply-intelligence"
+                className={`flex items-center gap-2 px-3 py-2 rounded-md transition-colors ${
+                  isActive("/dashboard/settings/reply-intelligence")
+                    ? "bg-primary text-primary-foreground"
+                    : "text-muted-foreground hover:text-foreground hover:bg-accent"
+                }`}
+              >
+                <MessageSquare className="h-4 w-4" />
+                Reply Intelligence
               </Link>
             </li>
           </ul>
@@ -82,6 +109,9 @@ export function Sidebar() {
 
       {/* User info and sign out at bottom */}
       <div className="p-4 border-t border-border">
+        <div className="flex items-center gap-2 mb-3">
+          <ThemeToggle />
+        </div>
         {user?.email && (
           <div className="mb-3">
             <p className="text-xs text-muted-foreground mb-1">Logged in as</p>

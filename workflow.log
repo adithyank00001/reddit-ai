@@ -47,3 +47,339 @@
 [2026-01-22 10:12:13.157] [162730ms] [INFO] [SETTINGS_UPDATE] Upserting settings to database | DATA: {"userId":"4cd1ece8-7338-43f0-9f30-2a80878cdf60","descriptionLength":32,"keywordCount":3,"operation":"upsert"}
 [2026-01-22 10:12:13.705] [163278ms] [INFO] [AI_DEBUG] updateSettings AFTER DB SAVE | DATA: {"hasError":false,"errorMessage":"none","errorCode":"none"}
 [2026-01-22 10:12:14.636] [164209ms] [INFO] [SETTINGS_UPDATE_SUCCESS] All settings updated successfully | DATA: {"descriptionLength":32,"keywordCount":3,"subredditsCount":3}
+[2026-01-24 06:12:20.456] [47040ms] [INFO] [AI_DEBUG] updateSettings FUNCTION CALLED - NEW CODE VERSION | DATA: {"timestamp":"2026-01-24T06:12:20.456Z"}
+[2026-01-24 06:12:20.816] [47400ms] [INFO] [AI_DEBUG] updateSettings USER ID CHECK | DATA: {"hasUserId":true,"userId":"99efda60-c451-45e6-9dec-b8bb68291c3e"}
+[2026-01-24 06:12:20.835] [47420ms] [INFO] [AI_DEBUG] updateSettings FORM DATA EXTRACTED | DATA: {"rawDescriptionLength":320,"rawDescriptionPreview":"Struggling to make your brand stand out in a crowd","hasDescription":true,"trimmedLength":320}
+[2026-01-24 06:12:20.839] [47423ms] [INFO] [SETTINGS_UPDATE_START] Settings form received | DATA: {"userId":"99efda60-c451-45e6-9dec-b8bb68291c3e","descriptionLength":320,"keywordsRaw":"saas, seo, feedback, validation","subredditsCount":5,"hasWebhook":false}
+[2026-01-24 06:12:20.847] [47431ms] [INFO] [SETTINGS_UPDATE] Upserting settings to database | DATA: {"userId":"99efda60-c451-45e6-9dec-b8bb68291c3e","descriptionLength":320,"keywordCount":4,"operation":"upsert"}
+[2026-01-24 06:12:21.249] [47833ms] [INFO] [AI_DEBUG] updateSettings AFTER DB SAVE | DATA: {"hasError":false,"errorMessage":"none","errorCode":"none"}
+[2026-01-24 06:12:21.718] [48302ms] [INFO] [SETTINGS_UPDATE_SUCCESS] All settings updated successfully | DATA: {"descriptionLength":320,"keywordCount":4,"subredditsCount":5}
+[2026-01-24 06:18:22.661] [39436ms] [INFO] [AI_DEBUG] updateSettings FUNCTION CALLED - NEW CODE VERSION | DATA: {"timestamp":"2026-01-24T06:18:22.661Z"}
+[2026-01-24 06:18:23.080] [39854ms] [INFO] [AI_DEBUG] updateSettings USER ID CHECK | DATA: {"hasUserId":true,"userId":"99efda60-c451-45e6-9dec-b8bb68291c3e"}
+[2026-01-24 06:18:23.176] [39950ms] [INFO] [AI_DEBUG] updateSettings FORM DATA EXTRACTED | DATA: {"rawDescriptionLength":390,"rawDescriptionPreview":"Transform your project in just a weekend with Supa","hasDescription":true,"trimmedLength":390}
+[2026-01-24 06:18:23.182] [39956ms] [INFO] [SETTINGS_UPDATE_START] Settings form received | DATA: {"userId":"99efda60-c451-45e6-9dec-b8bb68291c3e","descriptionLength":390,"keywordsRaw":"saas, seo, feedback, validation","subredditsCount":5,"hasWebhook":false}
+[2026-01-24 06:18:23.192] [39966ms] [INFO] [SETTINGS_UPDATE] Upserting settings to database | DATA: {"userId":"99efda60-c451-45e6-9dec-b8bb68291c3e","descriptionLength":390,"keywordCount":4,"operation":"upsert"}
+[2026-01-24 06:18:23.765] [40539ms] [INFO] [AI_DEBUG] updateSettings AFTER DB SAVE | DATA: {"hasError":false,"errorMessage":"none","errorCode":"none"}
+[2026-01-24 06:18:24.177] [40951ms] [INFO] [SETTINGS_UPDATE_SUCCESS] All settings updated successfully | DATA: {"descriptionLength":390,"keywordCount":4,"subredditsCount":5}
+[2026-01-24 06:19:10.908] [87682ms] [INFO] [AI_DEBUG] updateSettings FUNCTION CALLED - NEW CODE VERSION | DATA: {"timestamp":"2026-01-24T06:19:10.908Z"}
+[2026-01-24 06:19:11.282] [88056ms] [INFO] [AI_DEBUG] updateSettings USER ID CHECK | DATA: {"hasUserId":true,"userId":"99efda60-c451-45e6-9dec-b8bb68291c3e"}
+[2026-01-24 06:19:11.298] [88072ms] [INFO] [AI_DEBUG] updateSettings FORM DATA EXTRACTED | DATA: {"rawDescriptionLength":49,"rawDescriptionPreview":"ai seo and feedback giving tool for saas founders","hasDescription":true,"trimmedLength":49}
+[2026-01-24 06:19:11.314] [88088ms] [INFO] [SETTINGS_UPDATE_START] Settings form received | DATA: {"userId":"99efda60-c451-45e6-9dec-b8bb68291c3e","descriptionLength":49,"keywordsRaw":"saas, seo, feedback","subredditsCount":5,"hasWebhook":false}
+[2026-01-24 06:19:11.339] [88113ms] [INFO] [SETTINGS_UPDATE] Upserting settings to database | DATA: {"userId":"99efda60-c451-45e6-9dec-b8bb68291c3e","descriptionLength":49,"keywordCount":3,"operation":"upsert"}
+[2026-01-24 06:19:11.720] [88494ms] [INFO] [AI_DEBUG] updateSettings AFTER DB SAVE | DATA: {"hasError":false,"errorMessage":"none","errorCode":"none"}
+[2026-01-24 06:19:12.315] [89089ms] [INFO] [SETTINGS_UPDATE_SUCCESS] All settings updated successfully | DATA: {"descriptionLength":49,"keywordCount":3,"subredditsCount":5}
+[2026-01-24 06:22:01.523] [5365ms] [INFO] [AI_DEBUG] updateSettings FUNCTION CALLED - NEW CODE VERSION | DATA: {"timestamp":"2026-01-24T06:22:01.523Z"}
+[2026-01-24 06:22:01.870] [5712ms] [INFO] [AI_DEBUG] updateSettings USER ID CHECK | DATA: {"hasUserId":true,"userId":"99efda60-c451-45e6-9dec-b8bb68291c3e"}
+[2026-01-24 06:22:01.875] [5717ms] [INFO] [AI_DEBUG] updateSettings FORM DATA EXTRACTED | DATA: {"rawDescriptionLength":353,"rawDescriptionPreview":"Unlock your brand's potential with Oraadz Advertis","hasDescription":true,"trimmedLength":353}
+[2026-01-24 06:22:01.879] [5721ms] [INFO] [SETTINGS_UPDATE_START] Settings form received | DATA: {"userId":"99efda60-c451-45e6-9dec-b8bb68291c3e","descriptionLength":353,"keywordsRaw":"saas, seo, feedback","subredditsCount":5,"hasWebhook":false}
+[2026-01-24 06:22:01.889] [5731ms] [INFO] [SETTINGS_UPDATE] Upserting settings to database | DATA: {"userId":"99efda60-c451-45e6-9dec-b8bb68291c3e","descriptionLength":353,"keywordCount":3,"operation":"upsert"}
+[2026-01-24 06:22:02.249] [6091ms] [INFO] [AI_DEBUG] updateSettings AFTER DB SAVE | DATA: {"hasError":false,"errorMessage":"none","errorCode":"none"}
+[2026-01-24 06:22:02.668] [6510ms] [INFO] [SETTINGS_UPDATE_SUCCESS] All settings updated successfully | DATA: {"descriptionLength":353,"keywordCount":3,"subredditsCount":5}
+[2026-01-24 06:39:28.440] [319ms] [INFO] [AI_DEBUG] updateSettings FUNCTION CALLED - NEW CODE VERSION | DATA: {"timestamp":"2026-01-24T06:39:28.440Z"}
+[2026-01-24 06:39:28.817] [696ms] [INFO] [AI_DEBUG] updateSettings USER ID CHECK | DATA: {"hasUserId":true,"userId":"99efda60-c451-45e6-9dec-b8bb68291c3e"}
+[2026-01-24 06:39:28.820] [699ms] [INFO] [AI_DEBUG] updateSettings FORM DATA EXTRACTED | DATA: {"rawDescriptionLength":353,"rawDescriptionPreview":"Unlock your brand's potential with Oraadz Advertis","hasDescription":true,"trimmedLength":353}
+[2026-01-24 06:39:28.823] [702ms] [INFO] [SETTINGS_UPDATE_START] Settings form received | DATA: {"userId":"99efda60-c451-45e6-9dec-b8bb68291c3e","descriptionLength":353,"keywordsRaw":"saas, seo, feedback","subredditsCount":5,"hasWebhook":false}
+[2026-01-24 06:39:28.828] [707ms] [INFO] [SETTINGS_UPDATE] Upserting settings to database | DATA: {"userId":"99efda60-c451-45e6-9dec-b8bb68291c3e","descriptionLength":353,"keywordCount":3,"operation":"upsert"}
+[2026-01-24 06:39:29.210] [1089ms] [INFO] [AI_DEBUG] updateSettings AFTER DB SAVE | DATA: {"hasError":false,"errorMessage":"none","errorCode":"none"}
+[2026-01-24 06:39:29.608] [1487ms] [INFO] [SETTINGS_UPDATE_SUCCESS] All settings updated successfully | DATA: {"descriptionLength":353,"keywordCount":3,"subredditsCount":5}
+[2026-01-24 06:42:02.327] [154206ms] [INFO] [AI_DEBUG] updateSettings FUNCTION CALLED - NEW CODE VERSION | DATA: {"timestamp":"2026-01-24T06:42:02.327Z"}
+[2026-01-24 06:42:02.679] [154558ms] [INFO] [AI_DEBUG] updateSettings USER ID CHECK | DATA: {"hasUserId":true,"userId":"99efda60-c451-45e6-9dec-b8bb68291c3e"}
+[2026-01-24 06:42:02.686] [154565ms] [INFO] [AI_DEBUG] updateSettings FORM DATA EXTRACTED | DATA: {"rawDescriptionLength":353,"rawDescriptionPreview":"Unlock your brand's potential with Oraadz Advertis","hasDescription":true,"trimmedLength":353}
+[2026-01-24 06:42:02.703] [154582ms] [INFO] [SETTINGS_UPDATE_START] Settings form received | DATA: {"userId":"99efda60-c451-45e6-9dec-b8bb68291c3e","descriptionLength":353,"keywordsRaw":"saas, database ","subredditsCount":4,"hasWebhook":false}
+[2026-01-24 06:42:02.722] [154601ms] [INFO] [SETTINGS_UPDATE] Upserting settings to database | DATA: {"userId":"99efda60-c451-45e6-9dec-b8bb68291c3e","descriptionLength":353,"keywordCount":2,"operation":"upsert"}
+[2026-01-24 06:42:03.392] [155271ms] [INFO] [AI_DEBUG] updateSettings AFTER DB SAVE | DATA: {"hasError":false,"errorMessage":"none","errorCode":"none"}
+[2026-01-24 06:42:04.893] [156772ms] [INFO] [SETTINGS_UPDATE_SUCCESS] All settings updated successfully | DATA: {"descriptionLength":353,"keywordCount":2,"subredditsCount":4}
+[2026-01-24 06:42:28.818] [180697ms] [INFO] [AI_DEBUG] updateSettings FUNCTION CALLED - NEW CODE VERSION | DATA: {"timestamp":"2026-01-24T06:42:28.818Z"}
+[2026-01-24 06:42:29.150] [181029ms] [INFO] [AI_DEBUG] updateSettings USER ID CHECK | DATA: {"hasUserId":true,"userId":"99efda60-c451-45e6-9dec-b8bb68291c3e"}
+[2026-01-24 06:42:29.162] [181041ms] [INFO] [AI_DEBUG] updateSettings FORM DATA EXTRACTED | DATA: {"rawDescriptionLength":396,"rawDescriptionPreview":"Supabase is the ultimate development platform for ","hasDescription":true,"trimmedLength":396}
+[2026-01-24 06:42:29.166] [181045ms] [INFO] [SETTINGS_UPDATE_START] Settings form received | DATA: {"userId":"99efda60-c451-45e6-9dec-b8bb68291c3e","descriptionLength":396,"keywordsRaw":"saas, database","subredditsCount":4,"hasWebhook":false}
+[2026-01-24 06:42:29.171] [181050ms] [INFO] [SETTINGS_UPDATE] Upserting settings to database | DATA: {"userId":"99efda60-c451-45e6-9dec-b8bb68291c3e","descriptionLength":396,"keywordCount":2,"operation":"upsert"}
+[2026-01-24 06:42:29.543] [181422ms] [INFO] [AI_DEBUG] updateSettings AFTER DB SAVE | DATA: {"hasError":false,"errorMessage":"none","errorCode":"none"}
+[2026-01-24 06:42:29.977] [181856ms] [INFO] [SETTINGS_UPDATE_SUCCESS] All settings updated successfully | DATA: {"descriptionLength":396,"keywordCount":2,"subredditsCount":4}
+[2026-01-24 07:54:06.875] [7204ms] [INFO] [ONBOARDING_STEP1_SAVE] Saving onboarding step 1 | DATA: {"userId":"6caff41b-6cd0-4255-bac8-ab6e62380c86","urlLength":12,"descriptionLength":386}
+[2026-01-24 07:54:07.231] [7559ms] [INFO] [ONBOARDING_STEP1_SUCCESS] Onboarding step 1 saved successfully | DATA: {"userId":"6caff41b-6cd0-4255-bac8-ab6e62380c86"}
+[2026-01-24 09:28:22.134] [15383ms] [INFO] [ONBOARDING_STEP1_SAVE] Saving onboarding step 1 | DATA: {"userId":"99efda60-c451-45e6-9dec-b8bb68291c3e","urlLength":12,"descriptionLength":426}
+[2026-01-24 09:28:22.554] [15802ms] [INFO] [ONBOARDING_STEP1_SUCCESS] Onboarding step 1 saved successfully | DATA: {"userId":"99efda60-c451-45e6-9dec-b8bb68291c3e"}
+[2026-01-24 09:29:05.692] [58940ms] [INFO] [ONBOARDING_STEP2_SAVE] Saving onboarding step 2 | DATA: {"userId":"99efda60-c451-45e6-9dec-b8bb68291c3e","keywordCount":5,"keywords":["supabase","saas","database","marketing","webdev"]}
+[2026-01-24 09:29:06.097] [59345ms] [INFO] [ONBOARDING_STEP2_SUCCESS] Onboarding step 2 saved successfully | DATA: {"userId":"99efda60-c451-45e6-9dec-b8bb68291c3e","keywordCount":5}
+[2026-01-24 09:29:28.908] [82156ms] [INFO] [AI_DEBUG] updateSettings FUNCTION CALLED - NEW CODE VERSION | DATA: {"timestamp":"2026-01-24T09:29:28.908Z"}
+[2026-01-24 09:29:29.315] [82563ms] [INFO] [AI_DEBUG] updateSettings USER ID CHECK | DATA: {"hasUserId":true,"userId":"99efda60-c451-45e6-9dec-b8bb68291c3e"}
+[2026-01-24 09:29:29.330] [82578ms] [INFO] [AI_DEBUG] updateSettings FORM DATA EXTRACTED | DATA: {"rawDescriptionLength":426,"rawDescriptionPreview":"Supabase is the all-in-one Postgres development pl","hasDescription":true,"trimmedLength":426}
+[2026-01-24 09:29:29.340] [82588ms] [INFO] [SETTINGS_UPDATE_START] Settings form received | DATA: {"userId":"99efda60-c451-45e6-9dec-b8bb68291c3e","descriptionLength":426,"keywordsRaw":"supabase, saas, database, marketing, webdev","subredditsCount":4,"hasWebhook":false}
+[2026-01-24 09:29:29.344] [82592ms] [INFO] [SETTINGS_UPDATE] Upserting settings to database | DATA: {"userId":"99efda60-c451-45e6-9dec-b8bb68291c3e","descriptionLength":426,"keywordCount":5,"operation":"upsert"}
+[2026-01-24 09:29:29.700] [82948ms] [INFO] [AI_DEBUG] updateSettings AFTER DB SAVE | DATA: {"hasError":false,"errorMessage":"none","errorCode":"none"}
+[2026-01-24 09:29:30.398] [83646ms] [INFO] [SETTINGS_UPDATE_SUCCESS] All settings updated successfully | DATA: {"descriptionLength":426,"keywordCount":5,"subredditsCount":4}
+[2026-01-24 09:29:52.431] [105679ms] [INFO] [ONBOARDING_STEP1_SAVE] Saving onboarding step 1 | DATA: {"userId":"99efda60-c451-45e6-9dec-b8bb68291c3e","urlLength":12,"descriptionLength":182}
+[2026-01-24 09:29:52.742] [105990ms] [INFO] [ONBOARDING_STEP1_SUCCESS] Onboarding step 1 saved successfully | DATA: {"userId":"99efda60-c451-45e6-9dec-b8bb68291c3e"}
+[2026-01-24 09:50:57.655] [86906ms] [INFO] [ONBOARDING_STEP1_SAVE] Saving onboarding step 1 | DATA: {"userId":"4cd1ece8-7338-43f0-9f30-2a80878cdf60","urlLength":10,"descriptionLength":289}
+[2026-01-24 09:50:58.015] [87262ms] [INFO] [ONBOARDING_STEP1_SUCCESS] Onboarding step 1 saved successfully | DATA: {"userId":"4cd1ece8-7338-43f0-9f30-2a80878cdf60"}
+[2026-01-24 10:01:13.253] [388ms] [INFO] [ONBOARDING_COMPLETE_SAVE] Saving complete onboarding data | DATA: {"userId":"4cd1ece8-7338-43f0-9f30-2a80878cdf60","urlLength":12,"descriptionLength":418,"keywordCount":3}
+[2026-01-24 10:01:13.599] [729ms] [INFO] [ONBOARDING_COMPLETE_SUCCESS] Complete onboarding data saved successfully | DATA: {"userId":"4cd1ece8-7338-43f0-9f30-2a80878cdf60"}
+[2026-01-24 10:01:14.626] [1756ms] [INFO] [ONBOARDING_COMPLETE_SAVE] Saving complete onboarding data | DATA: {"userId":"4cd1ece8-7338-43f0-9f30-2a80878cdf60","urlLength":12,"descriptionLength":418,"keywordCount":3}
+[2026-01-24 10:01:14.936] [2066ms] [INFO] [ONBOARDING_COMPLETE_SUCCESS] Complete onboarding data saved successfully | DATA: {"userId":"4cd1ece8-7338-43f0-9f30-2a80878cdf60"}
+[2026-01-24 14:30:27.962] [323ms] [INFO] [ONBOARDING_COMPLETE_SAVE] Saving complete onboarding data | DATA: {"userId":"4cd1ece8-7338-43f0-9f30-2a80878cdf60","urlLength":12,"descriptionLength":402,"keywordCount":3}
+[2026-01-24 14:30:28.288] [649ms] [INFO] [ONBOARDING_COMPLETE_SUCCESS] Complete onboarding data saved successfully | DATA: {"userId":"4cd1ece8-7338-43f0-9f30-2a80878cdf60"}
+[2026-01-24 14:30:29.557] [1918ms] [INFO] [ONBOARDING_COMPLETE_SAVE] Saving complete onboarding data | DATA: {"userId":"4cd1ece8-7338-43f0-9f30-2a80878cdf60","urlLength":12,"descriptionLength":402,"keywordCount":3}
+[2026-01-24 14:30:29.877] [2238ms] [INFO] [ONBOARDING_COMPLETE_SUCCESS] Complete onboarding data saved successfully | DATA: {"userId":"4cd1ece8-7338-43f0-9f30-2a80878cdf60"}
+[2026-01-24 14:32:16.566] [108927ms] [INFO] [ONBOARDING_COMPLETE_SAVE] Saving complete onboarding data | DATA: {"userId":"4cd1ece8-7338-43f0-9f30-2a80878cdf60","urlLength":12,"descriptionLength":372,"keywordCount":3}
+[2026-01-24 14:32:17.052] [109413ms] [INFO] [ONBOARDING_COMPLETE_SUCCESS] Complete onboarding data saved successfully | DATA: {"userId":"4cd1ece8-7338-43f0-9f30-2a80878cdf60"}
+[2026-01-24 14:32:17.968] [110329ms] [INFO] [ONBOARDING_COMPLETE_SAVE] Saving complete onboarding data | DATA: {"userId":"4cd1ece8-7338-43f0-9f30-2a80878cdf60","urlLength":12,"descriptionLength":372,"keywordCount":3}
+[2026-01-24 14:32:18.349] [110710ms] [INFO] [ONBOARDING_COMPLETE_SUCCESS] Complete onboarding data saved successfully | DATA: {"userId":"4cd1ece8-7338-43f0-9f30-2a80878cdf60"}
+[2026-01-24 14:33:12.239] [164600ms] [INFO] [ONBOARDING_COMPLETE_SAVE] Saving complete onboarding data | DATA: {"userId":"99efda60-c451-45e6-9dec-b8bb68291c3e","urlLength":12,"descriptionLength":421,"keywordCount":3}
+[2026-01-24 14:33:12.606] [164967ms] [INFO] [ONBOARDING_COMPLETE_SUCCESS] Complete onboarding data saved successfully | DATA: {"userId":"99efda60-c451-45e6-9dec-b8bb68291c3e"}
+[2026-01-24 14:33:13.486] [165847ms] [INFO] [ONBOARDING_COMPLETE_SAVE] Saving complete onboarding data | DATA: {"userId":"99efda60-c451-45e6-9dec-b8bb68291c3e","urlLength":12,"descriptionLength":421,"keywordCount":3}
+[2026-01-24 14:33:13.805] [166166ms] [INFO] [ONBOARDING_COMPLETE_SUCCESS] Complete onboarding data saved successfully | DATA: {"userId":"99efda60-c451-45e6-9dec-b8bb68291c3e"}
+[2026-01-24 14:48:27.922] [321ms] [INFO] [ONBOARDING_COMPLETE_SAVE] Saving complete onboarding data | DATA: {"userId":"99efda60-c451-45e6-9dec-b8bb68291c3e","urlLength":12,"descriptionLength":503,"keywordCount":4,"subredditCount":3}
+[2026-01-24 14:48:28.930] [1328ms] [INFO] [ONBOARDING_COMPLETE_SUCCESS] Complete onboarding data saved successfully | DATA: {"userId":"99efda60-c451-45e6-9dec-b8bb68291c3e","keywordCount":4,"subredditCount":3}
+[2026-01-24 14:59:17.903] [311ms] [INFO] [ONBOARDING_COMPLETE_SAVE] Saving complete onboarding data | DATA: {"userId":"4cd1ece8-7338-43f0-9f30-2a80878cdf60","urlLength":12,"descriptionLength":408,"keywordCount":4,"subredditCount":3}
+[2026-01-24 14:59:19.239] [1647ms] [INFO] [ONBOARDING_COMPLETE_SUCCESS] Complete onboarding data saved successfully | DATA: {"userId":"4cd1ece8-7338-43f0-9f30-2a80878cdf60","keywordCount":4,"subredditCount":3}
+[2026-01-24 15:02:17.285] [179693ms] [INFO] [ONBOARDING_COMPLETE_SAVE] Saving complete onboarding data | DATA: {"userId":"4cd1ece8-7338-43f0-9f30-2a80878cdf60","urlLength":12,"descriptionLength":369,"keywordCount":3,"subredditCount":4}
+[2026-01-24 15:02:18.272] [180680ms] [INFO] [ONBOARDING_COMPLETE_SUCCESS] Complete onboarding data saved successfully | DATA: {"userId":"4cd1ece8-7338-43f0-9f30-2a80878cdf60","keywordCount":3,"subredditCount":4}
+[2026-01-24 15:09:55.399] [379ms] [INFO] [ONBOARDING_COMPLETE_SAVE] Saving complete onboarding data | DATA: {"userId":"99efda60-c451-45e6-9dec-b8bb68291c3e","urlLength":24,"descriptionLength":366,"keywordCount":3,"subredditCount":3}
+[2026-01-24 15:09:56.748] [1726ms] [INFO] [ONBOARDING_COMPLETE_SUCCESS] Complete onboarding data saved successfully | DATA: {"userId":"99efda60-c451-45e6-9dec-b8bb68291c3e","keywordCount":3,"subredditCount":3}
+[2026-01-24 15:27:27.391] [353ms] [INFO] [ONBOARDING_COMPLETE_SAVE] Saving complete onboarding data | DATA: {"userId":"4cd1ece8-7338-43f0-9f30-2a80878cdf60","urlLength":12,"descriptionLength":399,"keywordCount":2,"subredditCount":3}
+[2026-01-24 15:27:28.543] [1505ms] [INFO] [ONBOARDING_COMPLETE_SUCCESS] Complete onboarding data saved successfully | DATA: {"userId":"4cd1ece8-7338-43f0-9f30-2a80878cdf60","keywordCount":2,"subredditCount":3}
+[2026-01-24 16:32:03.971] [385ms] [INFO] [ONBOARDING_COMPLETE_SAVE] Saving complete onboarding data | DATA: {"userId":"4cd1ece8-7338-43f0-9f30-2a80878cdf60","urlLength":12,"descriptionLength":353,"keywordCount":1,"subredditCount":1}
+[2026-01-24 16:32:05.529] [1943ms] [ERROR] [ONBOARDING_COMPLETE_ERROR] Failed to save alerts | DATA: {"message":"update or delete on table \"alerts\" violates foreign key constraint \"leads_alert_id_fkey\" on table \"leads\"","code":"23503"}
+[2026-01-25 05:26:39.637] [436ms] [INFO] [AI_DEBUG] updateSettings FUNCTION CALLED - NEW CODE VERSION | DATA: {"timestamp":"2026-01-25T05:26:39.637Z"}
+[2026-01-25 05:26:39.988] [787ms] [INFO] [AI_DEBUG] updateSettings USER ID CHECK | DATA: {"hasUserId":true,"userId":"4cd1ece8-7338-43f0-9f30-2a80878cdf60"}
+[2026-01-25 05:26:40.020] [820ms] [INFO] [AI_DEBUG] updateSettings FORM DATA EXTRACTED | DATA: {"rawDescriptionLength":353,"rawDescriptionPreview":"Supabase simplifies building scalable, secure web ","hasDescription":true,"trimmedLength":353}
+[2026-01-25 05:26:40.031] [830ms] [INFO] [SETTINGS_UPDATE_START] Settings form received | DATA: {"userId":"4cd1ece8-7338-43f0-9f30-2a80878cdf60","descriptionLength":353,"keywordsCount":1,"subredditsCount":3,"hasWebhook":false}
+[2026-01-25 05:26:40.035] [834ms] [INFO] [SETTINGS_UPDATE] Upserting settings to database | DATA: {"userId":"4cd1ece8-7338-43f0-9f30-2a80878cdf60","descriptionLength":353,"keywordCount":1,"operation":"upsert"}
+[2026-01-25 05:26:40.388] [1187ms] [INFO] [AI_DEBUG] updateSettings AFTER DB SAVE | DATA: {"hasError":false,"errorMessage":"none","errorCode":"none"}
+[2026-01-25 05:26:41.153] [1952ms] [INFO] [SETTINGS_UPDATE_SUCCESS] All settings updated successfully | DATA: {"descriptionLength":353,"keywordCount":1,"subredditsCount":3}
+[2026-01-25 05:42:28.001] [370ms] [INFO] [ONBOARDING_COMPLETE_SAVE] Saving complete onboarding data | DATA: {"userId":"4cd1ece8-7338-43f0-9f30-2a80878cdf60","urlLength":12,"descriptionLength":353,"keywordCount":1,"subredditCount":1}
+[2026-01-25 05:42:29.106] [1472ms] [INFO] [ONBOARDING_COMPLETE_SUCCESS] Complete onboarding data saved successfully | DATA: {"userId":"4cd1ece8-7338-43f0-9f30-2a80878cdf60","keywordCount":1,"subredditCount":1}
+[2026-01-25 05:43:03.653] [381ms] [INFO] [ONBOARDING_STEP4_SKIP] Marking step 4 as skipped | DATA: {"userId":"4cd1ece8-7338-43f0-9f30-2a80878cdf60"}
+[2026-01-25 05:43:03.967] [695ms] [ERROR] [ONBOARDING_STEP4_SKIP_ERROR] Failed to mark step 4 as skipped | DATA: {"message":"Could not find the 'custom_instructions' column of 'project_settings' in the schema cache","code":"PGRST204"}
+[2026-01-25 05:45:19.601] [723ms] [ERROR] [VOICE_TRAINING_ERROR] Failed to update reply mode | DATA: {"message":"Could not find the 'custom_instructions' column of 'project_settings' in the schema cache"}
+[2026-01-25 05:45:22.520] [3642ms] [INFO] [ONBOARDING_STEP4_SKIP] Marking step 4 as skipped | DATA: {"userId":"4cd1ece8-7338-43f0-9f30-2a80878cdf60"}
+[2026-01-25 05:45:22.832] [3954ms] [ERROR] [ONBOARDING_STEP4_SKIP_ERROR] Failed to mark step 4 as skipped | DATA: {"message":"Could not find the 'custom_instructions' column of 'project_settings' in the schema cache","code":"PGRST204"}
+[2026-01-25 05:45:43.885] [25007ms] [ERROR] [VOICE_TRAINING_ERROR] Failed to update reply mode | DATA: {"message":"Could not find the 'custom_instructions' column of 'project_settings' in the schema cache"}
+[2026-01-25 05:45:57.836] [38958ms] [ERROR] [VOICE_TRAINING_ERROR] Failed to update reply mode | DATA: {"message":"Could not find the 'custom_instructions' column of 'project_settings' in the schema cache"}
+[2026-01-25 05:48:46.617] [383ms] [INFO] [ONBOARDING_STEP4_SKIP] Marking step 4 as skipped | DATA: {"userId":"4cd1ece8-7338-43f0-9f30-2a80878cdf60"}
+[2026-01-25 05:48:46.937] [703ms] [ERROR] [ONBOARDING_STEP4_SKIP_ERROR] Failed to mark step 4 as skipped | DATA: {"message":"Could not find the 'custom_instructions' column of 'project_settings' in the schema cache","code":"PGRST204"}
+[2026-01-25 05:48:57.024] [10790ms] [INFO] [ONBOARDING_STEP4_SKIP] Marking step 4 as skipped | DATA: {"userId":"4cd1ece8-7338-43f0-9f30-2a80878cdf60"}
+[2026-01-25 05:48:57.332] [11098ms] [ERROR] [ONBOARDING_STEP4_SKIP_ERROR] Failed to mark step 4 as skipped | DATA: {"message":"Could not find the 'custom_instructions' column of 'project_settings' in the schema cache","code":"PGRST204"}
+[2026-01-25 05:49:00.033] [13799ms] [ERROR] [VOICE_TRAINING_ERROR] Failed to update reply mode | DATA: {"message":"Could not find the 'custom_instructions' column of 'project_settings' in the schema cache"}
+[2026-01-25 05:50:36.324] [110090ms] [INFO] [ONBOARDING_STEP4_SKIP] Marking step 4 as skipped | DATA: {"userId":"4cd1ece8-7338-43f0-9f30-2a80878cdf60"}
+[2026-01-25 05:50:37.040] [110806ms] [INFO] [ONBOARDING_STEP4_SKIP_SUCCESS] Step 4 marked as skipped successfully | DATA: {"userId":"4cd1ece8-7338-43f0-9f30-2a80878cdf60"}
+[2026-01-25 05:55:47.394] [799763ms] [INFO] [ONBOARDING_COMPLETE_SAVE] Saving complete onboarding data | DATA: {"userId":"99efda60-c451-45e6-9dec-b8bb68291c3e","urlLength":12,"descriptionLength":292,"keywordCount":3,"subredditCount":3}
+[2026-01-25 05:55:48.132] [800498ms] [INFO] [ONBOARDING_COMPLETE_SUCCESS] Complete onboarding data saved successfully | DATA: {"userId":"99efda60-c451-45e6-9dec-b8bb68291c3e","keywordCount":3,"subredditCount":3}
+[2026-01-25 07:11:34.920] [314ms] [INFO] [ONBOARDING_COMPLETE_SAVE] Saving complete onboarding data | DATA: {"userId":"99efda60-c451-45e6-9dec-b8bb68291c3e","urlLength":12,"descriptionLength":323,"keywordCount":3,"subredditCount":2}
+[2026-01-25 07:11:36.005] [1399ms] [INFO] [ONBOARDING_COMPLETE_SUCCESS] Complete onboarding data saved successfully | DATA: {"userId":"99efda60-c451-45e6-9dec-b8bb68291c3e","keywordCount":3,"subredditCount":2}
+[2026-01-25 07:25:31.395] [359ms] [INFO] [ONBOARDING_COMPLETE_SAVE] Saving complete onboarding data | DATA: {"userId":"99efda60-c451-45e6-9dec-b8bb68291c3e","urlLength":12,"descriptionLength":390,"keywordCount":1,"subredditCount":1}
+[2026-01-25 07:25:32.453] [1417ms] [INFO] [ONBOARDING_COMPLETE_SUCCESS] Complete onboarding data saved successfully | DATA: {"userId":"99efda60-c451-45e6-9dec-b8bb68291c3e","keywordCount":1,"subredditCount":1}
+[2026-01-25 09:04:04.468] [397ms] [INFO] [ONBOARDING_COMPLETE_SAVE] Saving complete onboarding data | DATA: {"userId":"99efda60-c451-45e6-9dec-b8bb68291c3e","urlLength":12,"descriptionLength":358,"keywordCount":1,"subredditCount":1}
+[2026-01-25 09:04:05.881] [1807ms] [ERROR] [ONBOARDING_COMPLETE_ERROR] Failed to save alerts | DATA: {"message":"update or delete on table \"alerts\" violates foreign key constraint \"leads_alert_id_fkey\" on table \"leads\"","code":"23503"}
+[2026-01-25 09:04:14.524] [10450ms] [INFO] [ONBOARDING_COMPLETE_SAVE] Saving complete onboarding data | DATA: {"userId":"99efda60-c451-45e6-9dec-b8bb68291c3e","urlLength":12,"descriptionLength":358,"keywordCount":1,"subredditCount":1}
+[2026-01-25 09:04:15.846] [11772ms] [ERROR] [ONBOARDING_COMPLETE_ERROR] Failed to save alerts | DATA: {"message":"update or delete on table \"alerts\" violates foreign key constraint \"leads_alert_id_fkey\" on table \"leads\"","code":"23503"}
+[2026-01-25 09:04:27.444] [23370ms] [INFO] [ONBOARDING_COMPLETE_SAVE] Saving complete onboarding data | DATA: {"userId":"99efda60-c451-45e6-9dec-b8bb68291c3e","urlLength":12,"descriptionLength":358,"keywordCount":1,"subredditCount":2}
+[2026-01-25 09:04:29.470] [25396ms] [ERROR] [ONBOARDING_COMPLETE_ERROR] Failed to save alerts | DATA: {"message":"update or delete on table \"alerts\" violates foreign key constraint \"leads_alert_id_fkey\" on table \"leads\"","code":"23503"}
+[2026-01-25 09:14:47.486] [439ms] [INFO] [ONBOARDING_COMPLETE_SAVE] Saving complete onboarding data | DATA: {"userId":"99efda60-c451-45e6-9dec-b8bb68291c3e","urlLength":12,"descriptionLength":358,"keywordCount":1,"subredditCount":2}
+[2026-01-25 09:14:48.665] [1618ms] [ERROR] [ONBOARDING_COMPLETE_ERROR] Failed to save alerts | DATA: {"message":"update or delete on table \"alerts\" violates foreign key constraint \"leads_alert_id_fkey\" on table \"leads\"","code":"23503"}
+[2026-01-25 09:20:28.646] [388ms] [INFO] [ONBOARDING_COMPLETE_SAVE] Saving complete onboarding data | DATA: {"userId":"99efda60-c451-45e6-9dec-b8bb68291c3e","urlLength":12,"descriptionLength":358,"keywordCount":1,"subredditCount":2}
+[2026-01-25 09:20:30.076] [1818ms] [INFO] [ONBOARDING_COMPLETE_SUCCESS] Complete onboarding data saved successfully | DATA: {"userId":"99efda60-c451-45e6-9dec-b8bb68291c3e","keywordCount":1,"subredditCount":2}
+[2026-01-25 09:28:22.652] [487ms] [INFO] [ONBOARDING_COMPLETE_SAVE] Saving complete onboarding data | DATA: {"userId":"99efda60-c451-45e6-9dec-b8bb68291c3e","urlLength":12,"descriptionLength":331,"keywordCount":1,"subredditCount":1}
+[2026-01-25 09:28:24.203] [2038ms] [INFO] [ONBOARDING_COMPLETE_SUCCESS] Complete onboarding data saved successfully | DATA: {"userId":"99efda60-c451-45e6-9dec-b8bb68291c3e","keywordCount":1,"subredditCount":1}
+[2026-01-25 09:33:56.888] [385ms] [INFO] [ONBOARDING_COMPLETE_SAVE] Saving complete onboarding data | DATA: {"userId":"99efda60-c451-45e6-9dec-b8bb68291c3e","urlLength":12,"descriptionLength":370,"keywordCount":1,"subredditCount":1}
+[2026-01-25 09:33:58.828] [2325ms] [INFO] [ONBOARDING_COMPLETE_SUCCESS] Complete onboarding data saved successfully | DATA: {"userId":"99efda60-c451-45e6-9dec-b8bb68291c3e","keywordCount":1,"subredditCount":1}
+[2026-01-25 09:58:15.874] [392ms] [INFO] [ONBOARDING_COMPLETE_SAVE] Saving complete onboarding data | DATA: {"userId":"99efda60-c451-45e6-9dec-b8bb68291c3e","urlLength":12,"descriptionLength":304,"keywordCount":1,"subredditCount":1}
+[2026-01-25 09:58:18.024] [2542ms] [INFO] [ONBOARDING_COMPLETE_SUCCESS] Complete onboarding data saved successfully | DATA: {"userId":"99efda60-c451-45e6-9dec-b8bb68291c3e","keywordCount":1,"subredditCount":1,"replyModeCleared":true}
+[2026-01-25 09:58:53.759] [426ms] [INFO] [ONBOARDING_STEP4_SKIP] Marking step 4 as skipped | DATA: {"userId":"99efda60-c451-45e6-9dec-b8bb68291c3e"}
+[2026-01-25 09:58:54.073] [740ms] [INFO] [ONBOARDING_STEP4_SKIP_SUCCESS] Step 4 marked as skipped successfully | DATA: {"userId":"99efda60-c451-45e6-9dec-b8bb68291c3e"}
+[2026-01-25 10:00:18.123] [122641ms] [INFO] [ONBOARDING_COMPLETE_SAVE] Saving complete onboarding data | DATA: {"userId":"4cd1ece8-7338-43f0-9f30-2a80878cdf60","urlLength":12,"descriptionLength":343,"keywordCount":1,"subredditCount":1}
+[2026-01-25 10:00:20.375] [124893ms] [INFO] [ONBOARDING_COMPLETE_SUCCESS] Complete onboarding data saved successfully | DATA: {"userId":"4cd1ece8-7338-43f0-9f30-2a80878cdf60","keywordCount":1,"subredditCount":1,"replyModeCleared":true}
+[2026-01-25 10:00:49.168] [115835ms] [INFO] [VOICE_TRAINING_SUCCESS] Reply mode updated | DATA: {"userId":"4cd1ece8-7338-43f0-9f30-2a80878cdf60","mode":"custom"}
+[2026-01-25 10:02:17.841] [242359ms] [INFO] [ONBOARDING_COMPLETE_SAVE] Saving complete onboarding data | DATA: {"userId":"4cd1ece8-7338-43f0-9f30-2a80878cdf60","urlLength":12,"descriptionLength":392,"keywordCount":1,"subredditCount":1}
+[2026-01-25 10:02:19.681] [244200ms] [INFO] [ONBOARDING_COMPLETE_SUCCESS] Complete onboarding data saved successfully | DATA: {"userId":"4cd1ece8-7338-43f0-9f30-2a80878cdf60","keywordCount":1,"subredditCount":1,"replyModeCleared":true}
+[2026-01-25 10:02:49.069] [235736ms] [INFO] [VOICE_TRAINING_SUCCESS] Voice example saved | DATA: {"userId":"4cd1ece8-7338-43f0-9f30-2a80878cdf60","exampleCount":1}
+[2026-01-25 10:27:42.944] [1767462ms] [INFO] [ONBOARDING_COMPLETE_SAVE] Saving complete onboarding data | DATA: {"userId":"99efda60-c451-45e6-9dec-b8bb68291c3e","urlLength":12,"descriptionLength":318,"keywordCount":1,"subredditCount":1}
+[2026-01-25 10:27:47.139] [1771657ms] [INFO] [ONBOARDING_COMPLETE_SUCCESS] Complete onboarding data saved successfully | DATA: {"userId":"99efda60-c451-45e6-9dec-b8bb68291c3e","keywordCount":1,"subredditCount":1,"replyModeCleared":true}
+[2026-01-25 10:28:09.338] [10482ms] [INFO] [VOICE_TRAINING_SUCCESS] Voice example saved | DATA: {"userId":"99efda60-c451-45e6-9dec-b8bb68291c3e","exampleCount":1}
+[2026-01-25 10:28:21.501] [22646ms] [INFO] [VOICE_TRAINING_SUCCESS] Voice example saved | DATA: {"userId":"99efda60-c451-45e6-9dec-b8bb68291c3e","exampleCount":2}
+[2026-01-25 10:28:31.203] [32347ms] [INFO] [VOICE_TRAINING_SUCCESS] Voice example saved | DATA: {"userId":"99efda60-c451-45e6-9dec-b8bb68291c3e","exampleCount":3}
+[2026-01-25 10:44:01.943] [815ms] [INFO] [VOICE_TRAINING_SUCCESS] Reply mode updated | DATA: {"userId":"99efda60-c451-45e6-9dec-b8bb68291c3e","mode":"voice"}
+[2026-01-25 10:49:40.091] [422ms] [INFO] [ONBOARDING_COMPLETE_SAVE] Saving complete onboarding data | DATA: {"userId":"4cd1ece8-7338-43f0-9f30-2a80878cdf60","urlLength":12,"descriptionLength":323,"keywordCount":1,"subredditCount":1}
+[2026-01-25 10:49:41.773] [2104ms] [INFO] [ONBOARDING_COMPLETE_SUCCESS] Complete onboarding data saved successfully | DATA: {"userId":"4cd1ece8-7338-43f0-9f30-2a80878cdf60","keywordCount":1,"subredditCount":1}
+[2026-01-25 10:49:53.180] [352052ms] [INFO] [VOICE_TRAINING_SUCCESS] Reply mode updated | DATA: {"userId":"4cd1ece8-7338-43f0-9f30-2a80878cdf60","mode":"custom"}
+[2026-01-25 10:50:46.905] [67236ms] [INFO] [ONBOARDING_COMPLETE_SAVE] Saving complete onboarding data | DATA: {"userId":"99efda60-c451-45e6-9dec-b8bb68291c3e","urlLength":12,"descriptionLength":376,"keywordCount":1,"subredditCount":1}
+[2026-01-25 10:50:48.950] [69281ms] [INFO] [ONBOARDING_COMPLETE_SUCCESS] Complete onboarding data saved successfully | DATA: {"userId":"99efda60-c451-45e6-9dec-b8bb68291c3e","keywordCount":1,"subredditCount":1}
+[2026-01-25 10:51:17.419] [436291ms] [INFO] [VOICE_TRAINING_SUCCESS] Voice example saved | DATA: {"userId":"99efda60-c451-45e6-9dec-b8bb68291c3e","exampleCount":1}
+[2026-01-25 10:51:25.091] [443964ms] [INFO] [VOICE_TRAINING_SUCCESS] Voice example saved | DATA: {"userId":"99efda60-c451-45e6-9dec-b8bb68291c3e","exampleCount":2}
+[2026-01-25 10:51:37.292] [456164ms] [INFO] [VOICE_TRAINING_SUCCESS] Voice example saved | DATA: {"userId":"99efda60-c451-45e6-9dec-b8bb68291c3e","exampleCount":3}
+[2026-01-25 10:51:43.117] [461989ms] [INFO] [VOICE_TRAINING_SUCCESS] Reply mode updated | DATA: {"userId":"99efda60-c451-45e6-9dec-b8bb68291c3e","mode":"voice"}
+[2026-01-25 10:53:31.533] [231864ms] [INFO] [ONBOARDING_COMPLETE_SAVE] Saving complete onboarding data | DATA: {"userId":"4cd1ece8-7338-43f0-9f30-2a80878cdf60","urlLength":12,"descriptionLength":370,"keywordCount":1,"subredditCount":1}
+[2026-01-25 10:53:33.213] [233545ms] [INFO] [ONBOARDING_COMPLETE_SUCCESS] Complete onboarding data saved successfully | DATA: {"userId":"4cd1ece8-7338-43f0-9f30-2a80878cdf60","keywordCount":1,"subredditCount":1}
+[2026-01-25 10:53:48.151] [587023ms] [INFO] [ONBOARDING_STEP4_SKIP] Marking step 4 as skipped | DATA: {"userId":"4cd1ece8-7338-43f0-9f30-2a80878cdf60"}
+[2026-01-25 10:53:48.558] [587430ms] [INFO] [ONBOARDING_STEP4_SKIP_SUCCESS] Step 4 marked as skipped successfully | DATA: {"userId":"4cd1ece8-7338-43f0-9f30-2a80878cdf60"}
+[2026-01-25 10:54:41.706] [302037ms] [INFO] [ONBOARDING_COMPLETE_SAVE] Saving complete onboarding data | DATA: {"userId":"99efda60-c451-45e6-9dec-b8bb68291c3e","urlLength":12,"descriptionLength":326,"keywordCount":1,"subredditCount":1}
+[2026-01-25 10:54:43.650] [303981ms] [INFO] [ONBOARDING_COMPLETE_SUCCESS] Complete onboarding data saved successfully | DATA: {"userId":"99efda60-c451-45e6-9dec-b8bb68291c3e","keywordCount":1,"subredditCount":1}
+[2026-01-25 10:55:12.900] [671772ms] [INFO] [ONBOARDING_STEP4_SKIP] Marking step 4 as skipped | DATA: {"userId":"99efda60-c451-45e6-9dec-b8bb68291c3e"}
+[2026-01-25 10:55:13.345] [672217ms] [INFO] [ONBOARDING_STEP4_SKIP_SUCCESS] Step 4 marked as skipped successfully | DATA: {"userId":"99efda60-c451-45e6-9dec-b8bb68291c3e"}
+[2026-01-25 16:18:28.970] [235ms] [INFO] [AI_DEBUG] updateSettings FUNCTION CALLED - NEW CODE VERSION | DATA: {"timestamp":"2026-01-25T16:18:28.969Z"}
+[2026-01-25 16:18:29.635] [900ms] [INFO] [AI_DEBUG] updateSettings USER ID CHECK | DATA: {"hasUserId":true,"userId":"99efda60-c451-45e6-9dec-b8bb68291c3e"}
+[2026-01-25 16:18:29.644] [909ms] [INFO] [AI_DEBUG] updateSettings FORM DATA EXTRACTED | DATA: {"rawDescriptionLength":326,"rawDescriptionPreview":"Supabase simplifies building scalable, secure Post","hasDescription":true,"trimmedLength":326}
+[2026-01-25 16:18:29.651] [916ms] [INFO] [SETTINGS_UPDATE_START] Settings form received | DATA: {"userId":"99efda60-c451-45e6-9dec-b8bb68291c3e","descriptionLength":326,"keywordsCount":1,"subredditsCount":1,"hasWebhook":false}
+[2026-01-25 16:18:29.657] [922ms] [INFO] [SETTINGS_UPDATE] Upserting settings to database | DATA: {"userId":"99efda60-c451-45e6-9dec-b8bb68291c3e","descriptionLength":326,"keywordCount":1,"operation":"upsert"}
+[2026-01-25 16:18:30.040] [1305ms] [INFO] [AI_DEBUG] updateSettings AFTER DB SAVE | DATA: {"hasError":false,"errorMessage":"none","errorCode":"none"}
+[2026-01-25 16:18:30.772] [2037ms] [INFO] [SETTINGS_UPDATE_SUCCESS] All settings updated successfully | DATA: {"descriptionLength":326,"keywordCount":1,"subredditsCount":1}
+[2026-01-25 16:31:58.823] [246ms] [INFO] [AI_DEBUG] updateSettings FUNCTION CALLED - NEW CODE VERSION | DATA: {"timestamp":"2026-01-25T16:31:58.822Z"}
+[2026-01-25 16:31:59.207] [630ms] [INFO] [AI_DEBUG] updateSettings USER ID CHECK | DATA: {"hasUserId":true,"userId":"99efda60-c451-45e6-9dec-b8bb68291c3e"}
+[2026-01-25 16:31:59.213] [636ms] [INFO] [AI_DEBUG] updateSettings FORM DATA EXTRACTED | DATA: {"rawDescriptionLength":326,"rawDescriptionPreview":"Supabase simplifies building scalable, secure Post","hasDescription":true,"trimmedLength":326}
+[2026-01-25 16:31:59.219] [642ms] [INFO] [SETTINGS_UPDATE_START] Settings form received | DATA: {"userId":"99efda60-c451-45e6-9dec-b8bb68291c3e","descriptionLength":326,"keywordsCount":1,"subredditsCount":1,"hasWebhook":false}
+[2026-01-25 16:31:59.225] [648ms] [INFO] [SETTINGS_UPDATE] Upserting settings to database | DATA: {"userId":"99efda60-c451-45e6-9dec-b8bb68291c3e","descriptionLength":326,"keywordCount":1,"operation":"upsert"}
+[2026-01-25 16:31:59.605] [1028ms] [INFO] [AI_DEBUG] updateSettings AFTER DB SAVE | DATA: {"hasError":false,"errorMessage":"none","errorCode":"none"}
+[2026-01-25 16:32:00.056] [1479ms] [INFO] [SETTINGS_UPDATE_SUCCESS] All settings updated successfully | DATA: {"descriptionLength":326,"keywordCount":1,"subredditsCount":1}
+[2026-01-26 05:26:36.131] [101ms] [INFO] [AI_DEBUG] updateSettings FUNCTION CALLED - NEW CODE VERSION | DATA: {"timestamp":"2026-01-26T05:26:36.131Z"}
+[2026-01-26 05:26:36.479] [449ms] [INFO] [AI_DEBUG] updateSettings USER ID CHECK | DATA: {"hasUserId":true,"userId":"99efda60-c451-45e6-9dec-b8bb68291c3e"}
+[2026-01-26 05:26:36.494] [464ms] [INFO] [AI_DEBUG] updateSettings FORM DATA EXTRACTED | DATA: {"rawDescriptionLength":326,"rawDescriptionPreview":"Supabase simplifies building scalable, secure Post","hasDescription":true,"trimmedLength":326}
+[2026-01-26 05:26:36.497] [467ms] [INFO] [SETTINGS_UPDATE_START] Settings form received | DATA: {"userId":"99efda60-c451-45e6-9dec-b8bb68291c3e","descriptionLength":326,"keywordsCount":1,"subredditsCount":1,"hasWebhook":false}
+[2026-01-26 05:26:36.503] [473ms] [INFO] [SETTINGS_UPDATE] Upserting settings to database | DATA: {"userId":"99efda60-c451-45e6-9dec-b8bb68291c3e","descriptionLength":326,"keywordCount":1,"operation":"upsert"}
+[2026-01-26 05:26:36.986] [956ms] [INFO] [AI_DEBUG] updateSettings AFTER DB SAVE | DATA: {"hasError":false,"errorMessage":"none","errorCode":"none"}
+[2026-01-26 05:26:37.859] [1829ms] [INFO] [SETTINGS_UPDATE_SUCCESS] All settings updated successfully | DATA: {"descriptionLength":326,"keywordCount":1,"subredditsCount":1}
+[2026-01-26 05:33:21.151] [45ms] [INFO] [AI_DEBUG] updateSettings FUNCTION CALLED - NEW CODE VERSION | DATA: {"timestamp":"2026-01-26T05:33:21.151Z"}
+[2026-01-26 05:33:21.467] [361ms] [INFO] [AI_DEBUG] updateSettings USER ID CHECK | DATA: {"hasUserId":true,"userId":"99efda60-c451-45e6-9dec-b8bb68291c3e"}
+[2026-01-26 05:33:21.474] [368ms] [INFO] [AI_DEBUG] updateSettings FORM DATA EXTRACTED | DATA: {"rawDescriptionLength":326,"rawDescriptionPreview":"Supabase simplifies building scalable, secure Post","hasDescription":true,"trimmedLength":326}
+[2026-01-26 05:33:21.476] [370ms] [INFO] [SETTINGS_UPDATE_START] Settings form received | DATA: {"userId":"99efda60-c451-45e6-9dec-b8bb68291c3e","descriptionLength":326,"keywordsCount":1,"subredditsCount":1,"hasWebhook":false}
+[2026-01-26 05:33:21.480] [374ms] [INFO] [SETTINGS_UPDATE] Upserting settings to database | DATA: {"userId":"99efda60-c451-45e6-9dec-b8bb68291c3e","descriptionLength":326,"keywordCount":1,"operation":"upsert"}
+[2026-01-26 05:33:21.821] [715ms] [INFO] [AI_DEBUG] updateSettings AFTER DB SAVE | DATA: {"hasError":false,"errorMessage":"none","errorCode":"none"}
+[2026-01-26 05:33:22.647] [1541ms] [INFO] [SETTINGS_UPDATE_SUCCESS] All settings updated successfully | DATA: {"descriptionLength":326,"keywordCount":1,"subredditsCount":1}
+[2026-01-26 05:54:34.740] [162ms] [INFO] [AI_DEBUG] updateSettings FUNCTION CALLED - NEW CODE VERSION | DATA: {"timestamp":"2026-01-26T05:54:34.739Z"}
+[2026-01-26 05:54:35.076] [498ms] [INFO] [AI_DEBUG] updateSettings USER ID CHECK | DATA: {"hasUserId":true,"userId":"99efda60-c451-45e6-9dec-b8bb68291c3e"}
+[2026-01-26 05:54:35.081] [503ms] [INFO] [AI_DEBUG] updateSettings FORM DATA EXTRACTED | DATA: {"rawDescriptionLength":0,"rawDescriptionPreview":"","hasDescription":false,"trimmedLength":0}
+[2026-01-26 05:54:35.087] [509ms] [INFO] [SETTINGS_UPDATE_START] Settings form received | DATA: {"userId":"99efda60-c451-45e6-9dec-b8bb68291c3e","descriptionLength":0,"keywordsCount":0,"subredditsCount":0,"hasWebhook":false}
+[2026-01-26 05:54:35.090] [512ms] [INFO] [SETTINGS_UPDATE] Upserting settings to database | DATA: {"userId":"99efda60-c451-45e6-9dec-b8bb68291c3e","descriptionLength":0,"keywordCount":0,"operation":"upsert"}
+[2026-01-26 05:54:36.100] [1522ms] [INFO] [AI_DEBUG] updateSettings AFTER DB SAVE | DATA: {"hasError":false,"errorMessage":"none","errorCode":"none"}
+[2026-01-26 05:54:36.101] [1523ms] [INFO] [SETTINGS_UPDATE_SUCCESS] All settings updated successfully | DATA: {"descriptionLength":0,"keywordCount":0,"subredditsCount":0}
+[2026-01-26 06:13:20.997] [103ms] [INFO] [WEBHOOK_TEST_START] Testing webhook via gas-worker | DATA: {"type":"discord","webhookUrlPreview":"https://discord.com/api/webhooks/14652210991419883..."}
+[2026-01-26 06:13:23.944] [3049ms] [INFO] [WEBHOOK_TEST_SUCCESS] Test notification sent successfully | DATA: {"type":"discord"}
+[2026-01-26 06:13:52.591] [31696ms] [INFO] [WEBHOOK_TEST_START] Testing webhook via gas-worker | DATA: {"type":"discord","webhookUrlPreview":"https://discord.com/api/webhooks/14652210991419883..."}
+[2026-01-26 06:13:56.046] [35151ms] [INFO] [WEBHOOK_TEST_SUCCESS] Test notification sent successfully | DATA: {"type":"discord"}
+[2026-01-26 06:21:11.608] [470713ms] [INFO] [WEBHOOK_TEST_START] Testing webhook via gas-worker | DATA: {"type":"slack","webhookUrlPreview":"https://hooks.slack.com/services/T0AATDRR7PX/B0AB0..."}
+[2026-01-26 06:21:13.846] [472951ms] [INFO] [WEBHOOK_TEST_SUCCESS] Test notification sent successfully | DATA: {"type":"slack"}
+[2026-01-26 06:39:41.828] [101ms] [INFO] [AI_DEBUG] updateSettings FUNCTION CALLED - NEW CODE VERSION | DATA: {"timestamp":"2026-01-26T06:39:41.828Z"}
+[2026-01-26 06:39:42.150] [423ms] [INFO] [AI_DEBUG] updateSettings USER ID CHECK | DATA: {"hasUserId":true,"userId":"99efda60-c451-45e6-9dec-b8bb68291c3e"}
+[2026-01-26 06:39:42.157] [430ms] [INFO] [AI_DEBUG] updateSettings FORM DATA EXTRACTED | DATA: {"rawDescriptionLength":326,"rawDescriptionPreview":"Supabase simplifies building scalable, secure Post","hasDescription":true,"trimmedLength":326}
+[2026-01-26 06:39:42.159] [432ms] [INFO] [PARSED_SUBREDDITS] Parsed subreddits from form | DATA: {"userId":"99efda60-c451-45e6-9dec-b8bb68291c3e","subredditsCount":0,"subreddits":[],"subredditsJson":"[]","hasSubreddits":true}
+[2026-01-26 06:39:42.160] [433ms] [INFO] [SETTINGS_UPDATE_START] Settings form received | DATA: {"userId":"99efda60-c451-45e6-9dec-b8bb68291c3e","descriptionLength":326,"keywordsCount":1,"subredditsCount":0,"hasWebhook":false}
+[2026-01-26 06:39:42.161] [434ms] [INFO] [SETTINGS_UPDATE] Upserting settings to database | DATA: {"userId":"99efda60-c451-45e6-9dec-b8bb68291c3e","descriptionLength":326,"keywordCount":1,"operation":"upsert"}
+[2026-01-26 06:39:42.563] [836ms] [INFO] [AI_DEBUG] updateSettings AFTER DB SAVE | DATA: {"hasError":false,"errorMessage":"none","errorCode":"none"}
+[2026-01-26 06:39:43.007] [1280ms] [INFO] [SUBREDDIT_SYNC_DEBUG] Subreddit sync analysis | DATA: {"userId":"99efda60-c451-45e6-9dec-b8bb68291c3e","cleanedSubreddits":[],"existingAlertsCount":1,"activeAlertsCount":1,"inactiveAlertsCount":0,"activeAlerts":[{"id":"62634843-8e43-4599-b3b4-e46b4f128f12","subreddit":"saas","is_active":true}],"toInsert":[],"toReactivate":[],"toRemove":[{"id":"62634843-8e43-4599-b3b4-e46b4f128f12","subreddit":"saas"}],"desiredSet":[]}
+[2026-01-26 06:39:43.009] [1282ms] [INFO] [DEACTIVATING_ALERTS] Setting alerts to inactive | DATA: {"userId":"99efda60-c451-45e6-9dec-b8bb68291c3e","idsToRemove":["62634843-8e43-4599-b3b4-e46b4f128f12"],"subreddits":["saas"]}
+[2026-01-26 06:39:43.352] [1625ms] [INFO] [DEACTIVATE_ALERTS_SUCCESS] Successfully deactivated alerts | DATA: {"userId":"99efda60-c451-45e6-9dec-b8bb68291c3e","count":1,"idsToRemove":["62634843-8e43-4599-b3b4-e46b4f128f12"]}
+[2026-01-26 06:39:43.354] [1627ms] [INFO] [SETTINGS_UPDATE_SUCCESS] All settings updated successfully | DATA: {"descriptionLength":326,"keywordCount":1,"subredditsCount":0}
+[2026-01-26 06:40:22.670] [40943ms] [INFO] [AI_DEBUG] updateSettings FUNCTION CALLED - NEW CODE VERSION | DATA: {"timestamp":"2026-01-26T06:40:22.670Z"}
+[2026-01-26 06:40:22.987] [41260ms] [INFO] [AI_DEBUG] updateSettings USER ID CHECK | DATA: {"hasUserId":true,"userId":"99efda60-c451-45e6-9dec-b8bb68291c3e"}
+[2026-01-26 06:40:22.990] [41263ms] [INFO] [AI_DEBUG] updateSettings FORM DATA EXTRACTED | DATA: {"rawDescriptionLength":326,"rawDescriptionPreview":"Supabase simplifies building scalable, secure Post","hasDescription":true,"trimmedLength":326}
+[2026-01-26 06:40:22.992] [41265ms] [INFO] [PARSED_SUBREDDITS] Parsed subreddits from form | DATA: {"userId":"99efda60-c451-45e6-9dec-b8bb68291c3e","subredditsCount":1,"subreddits":["saas"],"subredditsJson":"[\"saas\"]","hasSubreddits":true}
+[2026-01-26 06:40:22.993] [41266ms] [INFO] [SETTINGS_UPDATE_START] Settings form received | DATA: {"userId":"99efda60-c451-45e6-9dec-b8bb68291c3e","descriptionLength":326,"keywordsCount":1,"subredditsCount":1,"hasWebhook":false}
+[2026-01-26 06:40:22.995] [41268ms] [INFO] [SETTINGS_UPDATE] Upserting settings to database | DATA: {"userId":"99efda60-c451-45e6-9dec-b8bb68291c3e","descriptionLength":326,"keywordCount":1,"operation":"upsert"}
+[2026-01-26 06:40:23.326] [41599ms] [INFO] [AI_DEBUG] updateSettings AFTER DB SAVE | DATA: {"hasError":false,"errorMessage":"none","errorCode":"none"}
+[2026-01-26 06:40:23.755] [42028ms] [INFO] [SUBREDDIT_SYNC_DEBUG] Subreddit sync analysis | DATA: {"userId":"99efda60-c451-45e6-9dec-b8bb68291c3e","cleanedSubreddits":["saas"],"existingAlertsCount":1,"activeAlertsCount":0,"inactiveAlertsCount":1,"activeAlerts":[],"toInsert":[],"toReactivate":["saas"],"toRemove":[],"desiredSet":["saas"]}
+[2026-01-26 06:40:24.060] [42334ms] [INFO] [NO_ALERTS_TO_REMOVE] No alerts need to be deactivated | DATA: {"userId":"99efda60-c451-45e6-9dec-b8bb68291c3e","cleanedSubreddits":["saas"],"activeAlertsCount":0}
+[2026-01-26 06:40:24.065] [42338ms] [INFO] [SETTINGS_UPDATE_SUCCESS] All settings updated successfully | DATA: {"descriptionLength":326,"keywordCount":1,"subredditsCount":1}
+[2026-01-26 06:40:57.151] [75424ms] [INFO] [WEBHOOK_TEST_START] Testing webhook via gas-worker | DATA: {"type":"slack","webhookUrlPreview":"https://hooks.slack.com/services/T0AATDRR7PX/B0AB0..."}
+[2026-01-26 06:41:01.147] [79420ms] [INFO] [WEBHOOK_TEST_SUCCESS] Test notification sent successfully | DATA: {"type":"slack"}
+[2026-01-26 06:41:02.773] [81046ms] [INFO] [AI_DEBUG] updateSettings FUNCTION CALLED - NEW CODE VERSION | DATA: {"timestamp":"2026-01-26T06:41:02.773Z"}
+[2026-01-26 06:41:03.100] [81373ms] [INFO] [AI_DEBUG] updateSettings USER ID CHECK | DATA: {"hasUserId":true,"userId":"99efda60-c451-45e6-9dec-b8bb68291c3e"}
+[2026-01-26 06:41:03.103] [81376ms] [INFO] [AI_DEBUG] updateSettings FORM DATA EXTRACTED | DATA: {"rawDescriptionLength":0,"rawDescriptionPreview":"","hasDescription":false,"trimmedLength":0}
+[2026-01-26 06:41:03.104] [81377ms] [INFO] [PARSED_SUBREDDITS] Parsed subreddits from form | DATA: {"userId":"99efda60-c451-45e6-9dec-b8bb68291c3e","subredditsCount":0,"subreddits":[],"subredditsJson":"[]","hasSubreddits":false}
+[2026-01-26 06:41:03.106] [81379ms] [INFO] [SETTINGS_UPDATE_START] Settings form received | DATA: {"userId":"99efda60-c451-45e6-9dec-b8bb68291c3e","descriptionLength":0,"keywordsCount":0,"subredditsCount":0,"hasWebhook":true}
+[2026-01-26 06:41:03.107] [81380ms] [INFO] [SETTINGS_UPDATE] Upserting settings to database | DATA: {"userId":"99efda60-c451-45e6-9dec-b8bb68291c3e","descriptionLength":0,"keywordCount":0,"operation":"upsert"}
+[2026-01-26 06:41:03.443] [81716ms] [INFO] [AI_DEBUG] updateSettings AFTER DB SAVE | DATA: {"hasError":false,"errorMessage":"none","errorCode":"none"}
+[2026-01-26 06:41:03.445] [81718ms] [INFO] [SETTINGS_UPDATE_SUCCESS] All settings updated successfully | DATA: {"descriptionLength":0,"keywordCount":0,"subredditsCount":0}
+[2026-01-26 06:52:04.294] [329ms] [INFO] [ONBOARDING_COMPLETE_SAVE] Saving complete onboarding data | DATA: {"userId":"99efda60-c451-45e6-9dec-b8bb68291c3e","urlLength":12,"descriptionLength":383,"keywordCount":1,"subredditCount":1}
+[2026-01-26 06:52:05.160] [1195ms] [INFO] [ONBOARDING_COMPLETE_SUCCESS] Complete onboarding data saved successfully | DATA: {"userId":"99efda60-c451-45e6-9dec-b8bb68291c3e","keywordCount":1,"subredditCount":1}
+[2026-01-26 06:52:13.624] [9659ms] [INFO] [ONBOARDING_STEP4_SKIP] Marking step 4 as skipped | DATA: {"userId":"99efda60-c451-45e6-9dec-b8bb68291c3e"}
+[2026-01-26 06:52:13.954] [9989ms] [INFO] [ONBOARDING_STEP4_SKIP_SUCCESS] Step 4 marked as skipped successfully | DATA: {"userId":"99efda60-c451-45e6-9dec-b8bb68291c3e"}
+[2026-01-26 06:55:23.975] [200012ms] [INFO] [WEBHOOK_TEST_START] Testing webhook via gas-worker | DATA: {"type":"slack","webhookUrlPreview":"https://hooks.slack.com/services/T0AATDRR7PX/B0AAF..."}
+[2026-01-26 06:55:26.341] [202376ms] [INFO] [WEBHOOK_TEST_SUCCESS] Test notification sent successfully | DATA: {"type":"slack"}
+[2026-01-26 06:57:24.948] [320983ms] [INFO] [WEBHOOK_TEST_START] Testing webhook via gas-worker | DATA: {"type":"discord","webhookUrlPreview":"https://discord.com/api/webhooks/14652210991419883..."}
+[2026-01-26 06:57:27.599] [323634ms] [INFO] [WEBHOOK_TEST_SUCCESS] Test notification sent successfully | DATA: {"type":"discord"}
+[2026-01-26 06:58:57.822] [413857ms] [INFO] [AI_DEBUG] updateSettings FUNCTION CALLED - NEW CODE VERSION | DATA: {"timestamp":"2026-01-26T06:58:57.822Z"}
+[2026-01-26 06:58:58.194] [414229ms] [INFO] [AI_DEBUG] updateSettings USER ID CHECK | DATA: {"hasUserId":true,"userId":"99efda60-c451-45e6-9dec-b8bb68291c3e"}
+[2026-01-26 06:58:58.204] [414239ms] [INFO] [AI_DEBUG] updateSettings FORM DATA EXTRACTED | DATA: {"rawDescriptionLength":0,"rawDescriptionPreview":"","hasDescription":false,"trimmedLength":0}
+[2026-01-26 06:58:58.206] [414241ms] [INFO] [PARSED_SUBREDDITS] Parsed subreddits from form | DATA: {"userId":"99efda60-c451-45e6-9dec-b8bb68291c3e","subredditsCount":0,"subreddits":[],"subredditsJson":"[]","hasSubreddits":false}
+[2026-01-26 06:58:58.207] [414242ms] [INFO] [SETTINGS_UPDATE_START] Settings form received | DATA: {"userId":"99efda60-c451-45e6-9dec-b8bb68291c3e","descriptionLength":0,"keywordsCount":0,"subredditsCount":0,"hasWebhook":true}
+[2026-01-26 06:58:58.212] [414247ms] [INFO] [SETTINGS_UPDATE] Upserting settings to database | DATA: {"userId":"99efda60-c451-45e6-9dec-b8bb68291c3e","descriptionLength":0,"keywordCount":0,"operation":"upsert"}
+[2026-01-26 06:58:58.650] [414685ms] [INFO] [AI_DEBUG] updateSettings AFTER DB SAVE | DATA: {"hasError":false,"errorMessage":"none","errorCode":"none"}
+[2026-01-26 06:58:58.653] [414688ms] [INFO] [SETTINGS_UPDATE_SUCCESS] All settings updated successfully | DATA: {"descriptionLength":0,"keywordCount":0,"subredditsCount":0}
+[2026-01-26 06:59:11.236] [427271ms] [INFO] [AI_DEBUG] updateSettings FUNCTION CALLED - NEW CODE VERSION | DATA: {"timestamp":"2026-01-26T06:59:11.236Z"}
+[2026-01-26 06:59:11.552] [427587ms] [INFO] [AI_DEBUG] updateSettings USER ID CHECK | DATA: {"hasUserId":true,"userId":"99efda60-c451-45e6-9dec-b8bb68291c3e"}
+[2026-01-26 06:59:11.554] [427589ms] [INFO] [AI_DEBUG] updateSettings FORM DATA EXTRACTED | DATA: {"rawDescriptionLength":0,"rawDescriptionPreview":"","hasDescription":false,"trimmedLength":0}
+[2026-01-26 06:59:11.555] [427590ms] [INFO] [PARSED_SUBREDDITS] Parsed subreddits from form | DATA: {"userId":"99efda60-c451-45e6-9dec-b8bb68291c3e","subredditsCount":0,"subreddits":[],"subredditsJson":"[]","hasSubreddits":false}
+[2026-01-26 06:59:11.556] [427591ms] [INFO] [SETTINGS_UPDATE_START] Settings form received | DATA: {"userId":"99efda60-c451-45e6-9dec-b8bb68291c3e","descriptionLength":0,"keywordsCount":0,"subredditsCount":0,"hasWebhook":true}
+[2026-01-26 06:59:11.557] [427592ms] [INFO] [SETTINGS_UPDATE] Upserting settings to database | DATA: {"userId":"99efda60-c451-45e6-9dec-b8bb68291c3e","descriptionLength":0,"keywordCount":0,"operation":"upsert"}
+[2026-01-26 06:59:11.869] [427904ms] [INFO] [AI_DEBUG] updateSettings AFTER DB SAVE | DATA: {"hasError":false,"errorMessage":"none","errorCode":"none"}
+[2026-01-26 06:59:11.871] [427906ms] [INFO] [SETTINGS_UPDATE_SUCCESS] All settings updated successfully | DATA: {"descriptionLength":0,"keywordCount":0,"subredditsCount":0}
+[2026-01-26 07:09:29.513] [1045550ms] [INFO] [ONBOARDING_COMPLETE_SAVE] Saving complete onboarding data | DATA: {"userId":"4cd1ece8-7338-43f0-9f30-2a80878cdf60","urlLength":12,"descriptionLength":365,"keywordCount":1,"subredditCount":1}
+[2026-01-26 07:09:30.583] [1046618ms] [INFO] [ONBOARDING_COMPLETE_SUCCESS] Complete onboarding data saved successfully | DATA: {"userId":"4cd1ece8-7338-43f0-9f30-2a80878cdf60","keywordCount":1,"subredditCount":1}
+[2026-01-26 07:09:42.780] [1058815ms] [INFO] [ONBOARDING_STEP4_SKIP] Marking step 4 as skipped | DATA: {"userId":"4cd1ece8-7338-43f0-9f30-2a80878cdf60"}
+[2026-01-26 07:09:43.094] [1059129ms] [INFO] [ONBOARDING_STEP4_SKIP_SUCCESS] Step 4 marked as skipped successfully | DATA: {"userId":"4cd1ece8-7338-43f0-9f30-2a80878cdf60"}
+[2026-01-26 07:09:47.110] [11ms] [INFO] [AI_DEBUG] updateSettings FUNCTION CALLED - NEW CODE VERSION | DATA: {"timestamp":"2026-01-26T07:09:47.110Z"}
+[2026-01-26 07:09:47.459] [360ms] [INFO] [AI_DEBUG] updateSettings USER ID CHECK | DATA: {"hasUserId":true,"userId":"4cd1ece8-7338-43f0-9f30-2a80878cdf60"}
+[2026-01-26 07:09:47.461] [362ms] [INFO] [AI_DEBUG] updateSettings FORM DATA EXTRACTED | DATA: {"rawDescriptionLength":0,"rawDescriptionPreview":"","hasDescription":false,"trimmedLength":0}
+[2026-01-26 07:09:47.463] [364ms] [INFO] [PARSED_SUBREDDITS] Parsed subreddits from form | DATA: {"userId":"4cd1ece8-7338-43f0-9f30-2a80878cdf60","subredditsCount":0,"subreddits":[],"subredditsJson":"[]","hasSubreddits":false}
+[2026-01-26 07:09:47.466] [367ms] [INFO] [SETTINGS_UPDATE_START] Settings form received | DATA: {"userId":"4cd1ece8-7338-43f0-9f30-2a80878cdf60","descriptionLength":0,"keywordsCount":0,"subredditsCount":0,"hasWebhook":false}
+[2026-01-26 07:09:47.467] [368ms] [INFO] [SETTINGS_UPDATE] Upserting settings to database | DATA: {"userId":"4cd1ece8-7338-43f0-9f30-2a80878cdf60","descriptionLength":0,"keywordCount":0,"operation":"upsert"}
+[2026-01-26 07:09:47.804] [705ms] [INFO] [AI_DEBUG] updateSettings AFTER DB SAVE | DATA: {"hasError":false,"errorMessage":"none","errorCode":"none"}
+[2026-01-26 07:09:47.808] [709ms] [INFO] [SETTINGS_UPDATE_SUCCESS] All settings updated successfully | DATA: {"descriptionLength":0,"keywordCount":0,"subredditsCount":0}
+[2026-01-26 07:09:51.293] [4194ms] [INFO] [AI_DEBUG] updateSettings FUNCTION CALLED - NEW CODE VERSION | DATA: {"timestamp":"2026-01-26T07:09:51.293Z"}
+[2026-01-26 07:09:51.611] [4512ms] [INFO] [AI_DEBUG] updateSettings USER ID CHECK | DATA: {"hasUserId":true,"userId":"4cd1ece8-7338-43f0-9f30-2a80878cdf60"}
+[2026-01-26 07:09:51.613] [4514ms] [INFO] [AI_DEBUG] updateSettings FORM DATA EXTRACTED | DATA: {"rawDescriptionLength":0,"rawDescriptionPreview":"","hasDescription":false,"trimmedLength":0}
+[2026-01-26 07:09:51.614] [4515ms] [INFO] [PARSED_SUBREDDITS] Parsed subreddits from form | DATA: {"userId":"4cd1ece8-7338-43f0-9f30-2a80878cdf60","subredditsCount":0,"subreddits":[],"subredditsJson":"[]","hasSubreddits":false}
+[2026-01-26 07:09:51.617] [4518ms] [INFO] [SETTINGS_UPDATE_START] Settings form received | DATA: {"userId":"4cd1ece8-7338-43f0-9f30-2a80878cdf60","descriptionLength":0,"keywordsCount":0,"subredditsCount":0,"hasWebhook":false}
+[2026-01-26 07:09:51.620] [4521ms] [INFO] [SETTINGS_UPDATE] Upserting settings to database | DATA: {"userId":"4cd1ece8-7338-43f0-9f30-2a80878cdf60","descriptionLength":0,"keywordCount":0,"operation":"upsert"}
+[2026-01-26 07:09:51.941] [4842ms] [INFO] [AI_DEBUG] updateSettings AFTER DB SAVE | DATA: {"hasError":false,"errorMessage":"none","errorCode":"none"}
+[2026-01-26 07:09:51.942] [4843ms] [INFO] [SETTINGS_UPDATE_SUCCESS] All settings updated successfully | DATA: {"descriptionLength":0,"keywordCount":0,"subredditsCount":0}
+[2026-01-26 07:09:55.673] [8574ms] [INFO] [AI_DEBUG] updateSettings FUNCTION CALLED - NEW CODE VERSION | DATA: {"timestamp":"2026-01-26T07:09:55.673Z"}
+[2026-01-26 07:09:55.989] [8890ms] [INFO] [AI_DEBUG] updateSettings USER ID CHECK | DATA: {"hasUserId":true,"userId":"4cd1ece8-7338-43f0-9f30-2a80878cdf60"}
+[2026-01-26 07:09:56.013] [8914ms] [INFO] [AI_DEBUG] updateSettings FORM DATA EXTRACTED | DATA: {"rawDescriptionLength":0,"rawDescriptionPreview":"","hasDescription":false,"trimmedLength":0}
+[2026-01-26 07:09:56.017] [8918ms] [INFO] [PARSED_SUBREDDITS] Parsed subreddits from form | DATA: {"userId":"4cd1ece8-7338-43f0-9f30-2a80878cdf60","subredditsCount":0,"subreddits":[],"subredditsJson":"[]","hasSubreddits":false}
+[2026-01-26 07:09:56.018] [8919ms] [INFO] [SETTINGS_UPDATE_START] Settings form received | DATA: {"userId":"4cd1ece8-7338-43f0-9f30-2a80878cdf60","descriptionLength":0,"keywordsCount":0,"subredditsCount":0,"hasWebhook":false}
+[2026-01-26 07:09:56.019] [8920ms] [INFO] [SETTINGS_UPDATE] Upserting settings to database | DATA: {"userId":"4cd1ece8-7338-43f0-9f30-2a80878cdf60","descriptionLength":0,"keywordCount":0,"operation":"upsert"}
+[2026-01-26 07:09:56.330] [9231ms] [INFO] [AI_DEBUG] updateSettings AFTER DB SAVE | DATA: {"hasError":false,"errorMessage":"none","errorCode":"none"}
+[2026-01-26 07:09:56.335] [9236ms] [INFO] [SETTINGS_UPDATE_SUCCESS] All settings updated successfully | DATA: {"descriptionLength":0,"keywordCount":0,"subredditsCount":0}
+[2026-01-26 07:09:57.861] [10762ms] [INFO] [AI_DEBUG] updateSettings FUNCTION CALLED - NEW CODE VERSION | DATA: {"timestamp":"2026-01-26T07:09:57.861Z"}
+[2026-01-26 07:09:58.174] [11075ms] [INFO] [AI_DEBUG] updateSettings USER ID CHECK | DATA: {"hasUserId":true,"userId":"4cd1ece8-7338-43f0-9f30-2a80878cdf60"}
+[2026-01-26 07:09:58.177] [11078ms] [INFO] [AI_DEBUG] updateSettings FORM DATA EXTRACTED | DATA: {"rawDescriptionLength":0,"rawDescriptionPreview":"","hasDescription":false,"trimmedLength":0}
+[2026-01-26 07:09:58.178] [11079ms] [INFO] [PARSED_SUBREDDITS] Parsed subreddits from form | DATA: {"userId":"4cd1ece8-7338-43f0-9f30-2a80878cdf60","subredditsCount":0,"subreddits":[],"subredditsJson":"[]","hasSubreddits":false}
+[2026-01-26 07:09:58.179] [11080ms] [INFO] [SETTINGS_UPDATE_START] Settings form received | DATA: {"userId":"4cd1ece8-7338-43f0-9f30-2a80878cdf60","descriptionLength":0,"keywordsCount":0,"subredditsCount":0,"hasWebhook":false}
+[2026-01-26 07:09:58.181] [11082ms] [INFO] [SETTINGS_UPDATE] Upserting settings to database | DATA: {"userId":"4cd1ece8-7338-43f0-9f30-2a80878cdf60","descriptionLength":0,"keywordCount":0,"operation":"upsert"}
+[2026-01-26 07:09:58.682] [11583ms] [INFO] [AI_DEBUG] updateSettings AFTER DB SAVE | DATA: {"hasError":false,"errorMessage":"none","errorCode":"none"}
+[2026-01-26 07:09:58.684] [11585ms] [INFO] [SETTINGS_UPDATE_SUCCESS] All settings updated successfully | DATA: {"descriptionLength":0,"keywordCount":0,"subredditsCount":0}
+[2026-01-26 07:10:00.588] [13489ms] [INFO] [AI_DEBUG] updateSettings FUNCTION CALLED - NEW CODE VERSION | DATA: {"timestamp":"2026-01-26T07:10:00.588Z"}
+[2026-01-26 07:10:00.895] [13796ms] [INFO] [AI_DEBUG] updateSettings USER ID CHECK | DATA: {"hasUserId":true,"userId":"4cd1ece8-7338-43f0-9f30-2a80878cdf60"}
+[2026-01-26 07:10:00.897] [13798ms] [INFO] [AI_DEBUG] updateSettings FORM DATA EXTRACTED | DATA: {"rawDescriptionLength":0,"rawDescriptionPreview":"","hasDescription":false,"trimmedLength":0}
+[2026-01-26 07:10:00.899] [13800ms] [INFO] [PARSED_SUBREDDITS] Parsed subreddits from form | DATA: {"userId":"4cd1ece8-7338-43f0-9f30-2a80878cdf60","subredditsCount":0,"subreddits":[],"subredditsJson":"[]","hasSubreddits":false}
+[2026-01-26 07:10:00.901] [13802ms] [INFO] [SETTINGS_UPDATE_START] Settings form received | DATA: {"userId":"4cd1ece8-7338-43f0-9f30-2a80878cdf60","descriptionLength":0,"keywordsCount":0,"subredditsCount":0,"hasWebhook":false}
+[2026-01-26 07:10:00.903] [13804ms] [INFO] [SETTINGS_UPDATE] Upserting settings to database | DATA: {"userId":"4cd1ece8-7338-43f0-9f30-2a80878cdf60","descriptionLength":0,"keywordCount":0,"operation":"upsert"}
+[2026-01-26 07:10:01.212] [14113ms] [INFO] [AI_DEBUG] updateSettings AFTER DB SAVE | DATA: {"hasError":false,"errorMessage":"none","errorCode":"none"}
+[2026-01-26 07:10:01.215] [14116ms] [INFO] [SETTINGS_UPDATE_SUCCESS] All settings updated successfully | DATA: {"descriptionLength":0,"keywordCount":0,"subredditsCount":0}
+[2026-01-26 07:10:02.505] [15406ms] [INFO] [AI_DEBUG] updateSettings FUNCTION CALLED - NEW CODE VERSION | DATA: {"timestamp":"2026-01-26T07:10:02.505Z"}
+[2026-01-26 07:10:02.822] [15723ms] [INFO] [AI_DEBUG] updateSettings USER ID CHECK | DATA: {"hasUserId":true,"userId":"4cd1ece8-7338-43f0-9f30-2a80878cdf60"}
+[2026-01-26 07:10:02.827] [15728ms] [INFO] [AI_DEBUG] updateSettings FORM DATA EXTRACTED | DATA: {"rawDescriptionLength":0,"rawDescriptionPreview":"","hasDescription":false,"trimmedLength":0}
+[2026-01-26 07:10:02.830] [15731ms] [INFO] [PARSED_SUBREDDITS] Parsed subreddits from form | DATA: {"userId":"4cd1ece8-7338-43f0-9f30-2a80878cdf60","subredditsCount":0,"subreddits":[],"subredditsJson":"[]","hasSubreddits":false}
+[2026-01-26 07:10:02.837] [15738ms] [INFO] [SETTINGS_UPDATE_START] Settings form received | DATA: {"userId":"4cd1ece8-7338-43f0-9f30-2a80878cdf60","descriptionLength":0,"keywordsCount":0,"subredditsCount":0,"hasWebhook":false}
+[2026-01-26 07:10:02.841] [15742ms] [INFO] [SETTINGS_UPDATE] Upserting settings to database | DATA: {"userId":"4cd1ece8-7338-43f0-9f30-2a80878cdf60","descriptionLength":0,"keywordCount":0,"operation":"upsert"}
+[2026-01-26 07:10:03.156] [16057ms] [INFO] [AI_DEBUG] updateSettings AFTER DB SAVE | DATA: {"hasError":false,"errorMessage":"none","errorCode":"none"}
+[2026-01-26 07:10:03.158] [16059ms] [INFO] [SETTINGS_UPDATE_SUCCESS] All settings updated successfully | DATA: {"descriptionLength":0,"keywordCount":0,"subredditsCount":0}
+[2026-01-26 07:10:03.590] [16491ms] [INFO] [AI_DEBUG] updateSettings FUNCTION CALLED - NEW CODE VERSION | DATA: {"timestamp":"2026-01-26T07:10:03.590Z"}
+[2026-01-26 07:10:03.920] [16821ms] [INFO] [AI_DEBUG] updateSettings USER ID CHECK | DATA: {"hasUserId":true,"userId":"4cd1ece8-7338-43f0-9f30-2a80878cdf60"}
+[2026-01-26 07:10:03.923] [16824ms] [INFO] [AI_DEBUG] updateSettings FORM DATA EXTRACTED | DATA: {"rawDescriptionLength":0,"rawDescriptionPreview":"","hasDescription":false,"trimmedLength":0}
+[2026-01-26 07:10:03.924] [16825ms] [INFO] [PARSED_SUBREDDITS] Parsed subreddits from form | DATA: {"userId":"4cd1ece8-7338-43f0-9f30-2a80878cdf60","subredditsCount":0,"subreddits":[],"subredditsJson":"[]","hasSubreddits":false}
+[2026-01-26 07:10:03.925] [16826ms] [INFO] [SETTINGS_UPDATE_START] Settings form received | DATA: {"userId":"4cd1ece8-7338-43f0-9f30-2a80878cdf60","descriptionLength":0,"keywordsCount":0,"subredditsCount":0,"hasWebhook":false}
+[2026-01-26 07:10:03.926] [16827ms] [INFO] [SETTINGS_UPDATE] Upserting settings to database | DATA: {"userId":"4cd1ece8-7338-43f0-9f30-2a80878cdf60","descriptionLength":0,"keywordCount":0,"operation":"upsert"}
+[2026-01-26 07:10:04.237] [17138ms] [INFO] [AI_DEBUG] updateSettings AFTER DB SAVE | DATA: {"hasError":false,"errorMessage":"none","errorCode":"none"}
+[2026-01-26 07:10:04.239] [17140ms] [INFO] [SETTINGS_UPDATE_SUCCESS] All settings updated successfully | DATA: {"descriptionLength":0,"keywordCount":0,"subredditsCount":0}
+[2026-01-26 07:10:04.694] [17595ms] [INFO] [AI_DEBUG] updateSettings FUNCTION CALLED - NEW CODE VERSION | DATA: {"timestamp":"2026-01-26T07:10:04.694Z"}
+[2026-01-26 07:10:05.019] [17920ms] [INFO] [AI_DEBUG] updateSettings USER ID CHECK | DATA: {"hasUserId":true,"userId":"4cd1ece8-7338-43f0-9f30-2a80878cdf60"}
+[2026-01-26 07:10:05.022] [17923ms] [INFO] [AI_DEBUG] updateSettings FORM DATA EXTRACTED | DATA: {"rawDescriptionLength":0,"rawDescriptionPreview":"","hasDescription":false,"trimmedLength":0}
+[2026-01-26 07:10:05.023] [17924ms] [INFO] [PARSED_SUBREDDITS] Parsed subreddits from form | DATA: {"userId":"4cd1ece8-7338-43f0-9f30-2a80878cdf60","subredditsCount":0,"subreddits":[],"subredditsJson":"[]","hasSubreddits":false}
+[2026-01-26 07:10:05.024] [17925ms] [INFO] [SETTINGS_UPDATE_START] Settings form received | DATA: {"userId":"4cd1ece8-7338-43f0-9f30-2a80878cdf60","descriptionLength":0,"keywordsCount":0,"subredditsCount":0,"hasWebhook":false}
+[2026-01-26 07:10:05.028] [17929ms] [INFO] [SETTINGS_UPDATE] Upserting settings to database | DATA: {"userId":"4cd1ece8-7338-43f0-9f30-2a80878cdf60","descriptionLength":0,"keywordCount":0,"operation":"upsert"}
+[2026-01-26 07:10:05.348] [18249ms] [INFO] [AI_DEBUG] updateSettings AFTER DB SAVE | DATA: {"hasError":false,"errorMessage":"none","errorCode":"none"}
+[2026-01-26 07:10:05.350] [18251ms] [INFO] [SETTINGS_UPDATE_SUCCESS] All settings updated successfully | DATA: {"descriptionLength":0,"keywordCount":0,"subredditsCount":0}
+[2026-01-26 07:10:06.053] [18954ms] [INFO] [ONBOARDING_STEP5_SKIP] Marking step 5 as skipped | DATA: {"userId":"4cd1ece8-7338-43f0-9f30-2a80878cdf60"}
+[2026-01-26 07:10:06.357] [19258ms] [INFO] [ONBOARDING_STEP5_SKIP_SUCCESS] Step 5 marked as skipped successfully | DATA: {"userId":"4cd1ece8-7338-43f0-9f30-2a80878cdf60"}

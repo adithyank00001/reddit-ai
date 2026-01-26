@@ -2,31 +2,22 @@
 
 import { useEffect, useState } from "react";
 import { createClient } from "@/utils/supabase/client";
-import { ScraperSettings } from "@/components/dashboard/settings/ScraperSettings";
+import { NotificationSettings } from "@/components/dashboard/settings/NotificationSettings";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent } from "@/components/ui/card";
-import { Search } from "lucide-react";
+import { Bell } from "lucide-react";
 
 interface SettingsData {
   projectSettings: {
-    keywords?: string[];
-    product_description_raw?: string;
-    website_url?: string;
-    reply_mode?: "custom" | "voice";
-    custom_instructions?: string;
-    voice_examples?: string[];
     slack_webhook_url?: string;
     discord_webhook_url?: string;
     email_notifications_enabled?: boolean;
     slack_notifications_enabled?: boolean;
     discord_notifications_enabled?: boolean;
   } | null;
-  alerts: {
-    subreddit: string;
-  }[];
 }
 
-export default function SettingsPage() {
+export default function NotificationsSettingsPage() {
   const [settings, setSettings] = useState<SettingsData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -46,30 +37,21 @@ export default function SettingsPage() {
 
       const userId = user.id;
 
-      // Fetch project settings (notification settings now in project_settings)
-      const [settingsResult] = await Promise.all([
-        supabase
-          .from("project_settings")
-          .select("*")
-          .eq("user_id", userId)
-          .maybeSingle(),
-      ]);
-
-      // Get all user's active alerts (multiple subreddits)
-      // Only show active alerts in settings - deactivated ones are hidden
-      const { data: alertsResult } = await supabase
-        .from("alerts")
-        .select("subreddit")
+      // Fetch project settings
+      const { data: settingsResult, error: settingsError } = await supabase
+        .from("project_settings")
+        .select("*")
         .eq("user_id", userId)
-        .eq("is_active", true);
+        .maybeSingle();
 
-      if (settingsResult.error) {
-        console.error("Error fetching project_settings:", settingsResult.error);
+      if (settingsError) {
+        console.error("Error fetching project_settings:", settingsError);
+        setError("Failed to load settings. Please try again.");
+        return;
       }
 
       setSettings({
-        projectSettings: settingsResult.data || null,
-        alerts: alertsResult || [],
+        projectSettings: settingsResult || null,
       });
     } catch (err) {
       console.error("Error fetching settings:", err);
@@ -88,11 +70,11 @@ export default function SettingsPage() {
       <div className="flex flex-col h-full overflow-hidden">
         <div className="border-b p-4">
           <div className="flex items-center gap-2">
-            <Search className="h-6 w-6" />
+            <Bell className="h-6 w-6" />
             <div>
-              <h1 className="text-2xl font-bold">Scraper Settings</h1>
+              <h1 className="text-2xl font-bold">Notification Settings</h1>
               <p className="text-sm text-muted-foreground mt-1">
-                Manage keywords, product description, and subreddits to monitor
+                Configure how you receive notifications for new leads
               </p>
             </div>
           </div>
@@ -118,9 +100,9 @@ export default function SettingsPage() {
       <div className="flex flex-col h-full overflow-hidden">
         <div className="border-b p-4">
           <div className="flex items-center gap-2">
-            <Search className="h-6 w-6" />
+            <Bell className="h-6 w-6" />
             <div>
-              <h1 className="text-2xl font-bold">Scraper Settings</h1>
+              <h1 className="text-2xl font-bold">Notification Settings</h1>
             </div>
           </div>
         </div>
@@ -141,11 +123,11 @@ export default function SettingsPage() {
     <div className="flex flex-col h-full overflow-hidden">
       <div className="border-b p-4">
         <div className="flex items-center gap-2">
-          <Search className="h-6 w-6" />
+          <Bell className="h-6 w-6" />
           <div>
-            <h1 className="text-2xl font-bold">Scraper Settings</h1>
+            <h1 className="text-2xl font-bold">Notification Settings</h1>
             <p className="text-sm text-muted-foreground mt-1">
-              Manage keywords, product description, and subreddits to monitor
+              Configure how you receive notifications for new leads
             </p>
           </div>
         </div>
@@ -153,15 +135,12 @@ export default function SettingsPage() {
 
       <div className="flex-1 overflow-y-auto p-6">
         <div className="max-w-4xl mx-auto">
-          <ScraperSettings
-            initialKeywords={settings?.projectSettings?.keywords || []}
-            initialProductDescription={settings?.projectSettings?.product_description_raw || ""}
-            initialSubreddits={settings?.alerts?.map(a => a.subreddit) || []}
-            initialWebsiteUrl={settings?.projectSettings?.website_url || ""}
-            onSave={() => {
-              // Refetch settings after save
-              fetchSettings();
-            }}
+          <NotificationSettings
+            initialSlackWebhookUrl={settings?.projectSettings?.slack_webhook_url || ""}
+            initialDiscordWebhookUrl={settings?.projectSettings?.discord_webhook_url || ""}
+            initialEmailNotificationsEnabled={settings?.projectSettings?.email_notifications_enabled || false}
+            initialSlackNotificationsEnabled={settings?.projectSettings?.slack_notifications_enabled || false}
+            initialDiscordNotificationsEnabled={settings?.projectSettings?.discord_notifications_enabled || false}
           />
         </div>
       </div>

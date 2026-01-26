@@ -2,8 +2,9 @@ import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
 /**
- * Middleware helper to refresh the user's session
+ * Proxy helper to refresh the user's session
  * This ensures the session stays valid as users navigate the app
+ * Note: Next.js 16.1.1 proxy.ts still uses NextRequest/NextResponse
  */
 export async function updateSession(request: NextRequest) {
   let supabaseResponse = NextResponse.next({

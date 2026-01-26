@@ -6,7 +6,6 @@ import { LeadFeed } from "@/components/dashboard/LeadFeed";
 import { LeadDetail } from "@/components/dashboard/LeadDetail";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent } from "@/components/ui/card";
-import { ThemeToggle } from "@/components/theme-toggle";
 import { MessageSquare, LogIn } from "lucide-react";
 import type { Post } from "@/types";
 import type { User } from "@supabase/supabase-js";
@@ -175,15 +174,9 @@ export default function DashboardPage() {
         <div>
           <h1 className="text-2xl font-bold">Lead Feed</h1>
           <p className="text-sm text-muted-foreground mt-1">
-            Reddit opportunities with status: new
-            {user?.email && (
-              <span className="ml-2 text-orange-500 font-medium">
-                • Logged in as: {user.email}
-              </span>
-            )}
+            Discover new opportunities from Reddit posts
           </p>
         </div>
-        <ThemeToggle />
       </div>
 
       {userLoading ? (
@@ -231,6 +224,14 @@ export default function DashboardPage() {
                 leads={leads}
                 selectedLeadId={selectedLeadId}
                 onLeadSelect={setSelectedLeadId}
+                onLeadDeleted={(leadId) => {
+                  // Remove the deleted lead from the state
+                  setLeads((prev) => prev.filter((lead) => lead.id !== leadId));
+                  // Clear selection if the deleted lead was selected
+                  if (selectedLeadId === leadId) {
+                    setSelectedLeadId(null);
+                  }
+                }}
               />
             )}
           </div>

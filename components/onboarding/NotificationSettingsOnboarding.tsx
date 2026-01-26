@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -7,11 +8,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { updateSettings, testWebhookViaWorker } from "@/app/actions/settings";
 import { toast } from "sonner";
-import { Loader2, Webhook, Mail, MessageSquare } from "lucide-react";
+import { Webhook, Mail, MessageSquare } from "lucide-react";
 
 const notificationSchema = z.object({
   slackWebhookUrl: z.string().url("Invalid webhook URL").optional().or(z.literal("")),
@@ -23,28 +23,29 @@ const notificationSchema = z.object({
 
 type NotificationFormData = z.infer<typeof notificationSchema>;
 
-interface NotificationSettingsProps {
+interface NotificationSettingsOnboardingProps {
   initialSlackWebhookUrl?: string;
   initialDiscordWebhookUrl?: string;
   initialEmailNotificationsEnabled?: boolean;
   initialSlackNotificationsEnabled?: boolean;
   initialDiscordNotificationsEnabled?: boolean;
+  onValidationChange?: (isValid: boolean) => void;
 }
 
-export function NotificationSettings({
+export function NotificationSettingsOnboarding({
   initialSlackWebhookUrl = "",
   initialDiscordWebhookUrl = "",
   initialEmailNotificationsEnabled = false,
   initialSlackNotificationsEnabled = false,
   initialDiscordNotificationsEnabled = false,
-}: NotificationSettingsProps) {
+  onValidationChange,
+}: NotificationSettingsOnboardingProps) {
 
   const {
     register,
-    handleSubmit,
     setValue,
     watch,
-    formState: { isSubmitting },
+    formState: { errors },
   } = useForm<NotificationFormData>({
     resolver: zodResolver(notificationSchema),
     defaultValues: {
@@ -54,29 +55,46 @@ export function NotificationSettings({
       slackNotificationsEnabled: initialSlackNotificationsEnabled,
       discordNotificationsEnabled: initialDiscordNotificationsEnabled,
     },
+    mode: "onChange", // Validate on every change
   });
 
-  // Watch toggle values to enable/disable inputs
+  // Watch all values to auto-save and validate
   const emailEnabled = watch("emailNotificationsEnabled");
   const slackEnabled = watch("slackNotificationsEnabled");
   const discordEnabled = watch("discordNotificationsEnabled");
+  const slackWebhookUrl = watch("slackWebhookUrl");
+  const discordWebhookUrl = watch("discordWebhookUrl");
 
-  async function onSubmit(data: NotificationFormData) {
-    const formData = new FormData();
-    formData.append("slackWebhookUrl", data.slackWebhookUrl || "");
-    formData.append("discordWebhookUrl", data.discordWebhookUrl || "");
-    formData.append("emailNotificationsEnabled", data.emailNotificationsEnabled ? "true" : "false");
-    formData.append("slackNotificationsEnabled", data.slackNotificationsEnabled ? "true" : "false");
-    formData.append("discordNotificationsEnabled", data.discordNotificationsEnabled ? "true" : "false");
+  // Auto-save changes whenever form values change
+  useEffect(() => {
+    const autoSave = async () => {
+      const formData = new FormData();
+      formData.append("slackWebhookUrl", slackWebhookUrl || "");
+      formData.append("discordWebhookUrl", discordWebhookUrl || "");
+      formData.append("emailNotificationsEnabled", emailEnabled ? "true" : "false");
+      formData.append("slackNotificationsEnabled", slackEnabled ? "true" : "false");
+      formData.append("discordNotificationsEnabled", discordEnabled ? "true" : "false");
 
-    const result = await updateSettings(formData);
+      await updateSettings(formData);
+    };
 
-    if (result.success) {
-      toast.success("Notification settings saved successfully!");
-    } else {
-      toast.error(result.error || "Failed to save settings");
+    // Debounce auto-save by 500ms
+    const timeoutId = setTimeout(autoSave, 500);
+    return () => clearTimeout(timeoutId);
+  }, [emailEnabled, slackEnabled, discordEnabled, slackWebhookUrl, discordWebhookUrl]);
+
+  // Check if at least one notification channel is properly configured
+  useEffect(() => {
+    const isEmailValid = emailEnabled;
+    const isSlackValid = slackEnabled && slackWebhookUrl.trim().length > 0 && !errors.slackWebhookUrl;
+    const isDiscordValid = discordEnabled && discordWebhookUrl.trim().length > 0 && !errors.discordWebhookUrl;
+
+    const hasValidSettings = isEmailValid || isSlackValid || isDiscordValid;
+    
+    if (onValidationChange) {
+      onValidationChange(hasValidSettings);
     }
-  }
+  }, [emailEnabled, slackEnabled, discordEnabled, slackWebhookUrl, discordWebhookUrl, errors, onValidationChange]);
 
   async function testWebhook(webhookUrl: string, type: "slack" | "discord" = "slack") {
     if (!webhookUrl) {
@@ -85,8 +103,6 @@ export function NotificationSettings({
     }
 
     try {
-      // Use server action to test webhook via gas-worker-3.js
-      // This tests the actual production code path
       const result = await testWebhookViaWorker(webhookUrl, type);
 
       if (result.success) {
@@ -105,11 +121,11 @@ export function NotificationSettings({
         <CardHeader>
           <CardTitle>Notification Channels</CardTitle>
           <CardDescription>
-            Enable notifications and configure webhook URLs for each channel
+            Enable notifications and configure webhook URLs for each channel. Changes are saved automatically.
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+          <div className="space-y-6">
             {/* Email Notifications */}
             <div className="space-y-3">
               <div className="flex items-center justify-between">
@@ -164,22 +180,25 @@ export function NotificationSettings({
                   Slack Webhook URL
                 </Label>
                 <div className="flex gap-2">
-                  <Input
-                    id="slackWebhookUrl"
-                    type="url"
-                    placeholder="https://hooks.slack.com/services/..."
-                    className="flex-1"
-                    disabled={!slackEnabled}
-                    {...register("slackWebhookUrl")}
-                  />
+                  <div className="flex-1">
+                    <Input
+                      id="slackWebhookUrl"
+                      type="url"
+                      placeholder="https://hooks.slack.com/services/..."
+                      disabled={!slackEnabled}
+                      {...register("slackWebhookUrl")}
+                    />
+                    {errors.slackWebhookUrl && slackWebhookUrl && (
+                      <p className="text-sm text-destructive mt-1">
+                        {errors.slackWebhookUrl.message}
+                      </p>
+                    )}
+                  </div>
                   <Button
                     type="button"
                     variant="outline"
                     disabled={!slackEnabled}
-                    onClick={() => {
-                      const url = (document.getElementById("slackWebhookUrl") as HTMLInputElement)?.value;
-                      testWebhook(url, "slack");
-                    }}
+                    onClick={() => testWebhook(slackWebhookUrl, "slack")}
                   >
                     <Webhook className="h-4 w-4 mr-2" />
                     Test
@@ -218,22 +237,25 @@ export function NotificationSettings({
                   Discord Webhook URL
                 </Label>
                 <div className="flex gap-2">
-                  <Input
-                    id="discordWebhookUrl"
-                    type="url"
-                    placeholder="https://discord.com/api/webhooks/..."
-                    className="flex-1"
-                    disabled={!discordEnabled}
-                    {...register("discordWebhookUrl")}
-                  />
+                  <div className="flex-1">
+                    <Input
+                      id="discordWebhookUrl"
+                      type="url"
+                      placeholder="https://discord.com/api/webhooks/..."
+                      disabled={!discordEnabled}
+                      {...register("discordWebhookUrl")}
+                    />
+                    {errors.discordWebhookUrl && discordWebhookUrl && (
+                      <p className="text-sm text-destructive mt-1">
+                        {errors.discordWebhookUrl.message}
+                      </p>
+                    )}
+                  </div>
                   <Button
                     type="button"
                     variant="outline"
                     disabled={!discordEnabled}
-                    onClick={() => {
-                      const url = (document.getElementById("discordWebhookUrl") as HTMLInputElement)?.value;
-                      testWebhook(url, "discord");
-                    }}
+                    onClick={() => testWebhook(discordWebhookUrl, "discord")}
                   >
                     <Webhook className="h-4 w-4 mr-2" />
                     Test
@@ -246,12 +268,7 @@ export function NotificationSettings({
                 )}
               </div>
             </div>
-
-            <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Save Notification Settings
-            </Button>
-          </form>
+          </div>
         </CardContent>
       </Card>
     </div>

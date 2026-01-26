@@ -8,7 +8,8 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Separator } from "@/components/ui/separator";
 import { ReplyDraftSection } from "@/components/ReplyDraftSection";
-import { formatRelativeTime, cn } from "@/lib/utils";
+import { RedditPostContent } from "@/components/dashboard/RedditPostContent";
+import { formatRelativeTime, cn, cleanRedditContent } from "@/lib/utils";
 import type { Post } from "@/types";
 import { ExternalLink, AlertCircle } from "lucide-react";
 
@@ -153,10 +154,8 @@ export function LeadDetail({ leadId }: LeadDetailProps) {
         <CardHeader>
           <CardTitle className="text-base">Post Content</CardTitle>
         </CardHeader>
-        <CardContent>
-          <p className="text-sm text-foreground whitespace-pre-wrap leading-relaxed">
-            {lead.body || "No content available"}
-          </p>
+        <CardContent className="max-h-[500px] overflow-y-auto">
+          <RedditPostContent content={lead.body} />
         </CardContent>
       </Card>
 
@@ -166,10 +165,11 @@ export function LeadDetail({ leadId }: LeadDetailProps) {
           <CardHeader>
             <CardTitle className="text-base">Why this lead?</CardTitle>
           </CardHeader>
-          <CardContent>
-            <p className="text-sm text-muted-foreground leading-relaxed">
-              {lead.opportunity_reason}
-            </p>
+          <CardContent className="max-h-[400px] overflow-y-auto">
+            <RedditPostContent 
+              content={lead.opportunity_reason} 
+              className="text-muted-foreground"
+            />
           </CardContent>
         </Card>
       )}
@@ -180,10 +180,11 @@ export function LeadDetail({ leadId }: LeadDetailProps) {
           <CardHeader>
             <CardTitle className="text-base">Suggested Angle</CardTitle>
           </CardHeader>
-          <CardContent>
-            <p className="text-sm text-muted-foreground leading-relaxed">
-              {lead.suggested_angle}
-            </p>
+          <CardContent className="max-h-[400px] overflow-y-auto">
+            <RedditPostContent 
+              content={lead.suggested_angle} 
+              className="text-muted-foreground"
+            />
           </CardContent>
         </Card>
       )}
