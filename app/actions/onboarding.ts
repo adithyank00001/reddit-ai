@@ -4,6 +4,7 @@ import { logger } from "@/lib/logger";
 import { createClient } from "@/utils/supabase/server";
 import { supabase as supabaseServiceRole } from "@/lib/supabase";
 import { revalidatePath } from "next/cache";
+import { createErrorResponse } from "@/lib/error-codes";
 
 /**
  * Saves onboarding step 1 data (website URL and product description) to database
@@ -24,7 +25,7 @@ export async function saveOnboardingStep1(
       logger.error("AUTH_ERROR", "Unauthorized access to saveOnboardingStep1", {
         error: authError?.message,
       });
-      return { success: false, error: "Unauthorized. Please log in." };
+      return createErrorResponse("AUTH_REQUIRED", { authError: authError?.message });
     }
 
     const userId = user.id;
@@ -34,14 +35,11 @@ export async function saveOnboardingStep1(
     const trimmedDescription = description.trim();
 
     if (!trimmedUrl) {
-      return { success: false, error: "Website URL is required" };
+      return createErrorResponse("MISSING_REQUIRED_FIELD");
     }
 
     if (!trimmedDescription || trimmedDescription.length < 10) {
-      return {
-        success: false,
-        error: "Product description must be at least 10 characters",
-      };
+      return createErrorResponse("MISSING_REQUIRED_FIELD");
     }
 
     logger.info("ONBOARDING_STEP1_SAVE", "Saving onboarding step 1", {
@@ -71,10 +69,10 @@ export async function saveOnboardingStep1(
           code: (settingsError as any).code,
         }
       );
-      return {
-        success: false,
-        error: "Failed to save onboarding data. Please try again.",
-      };
+      return createErrorResponse("ONBOARDING_STEP_FAILED", {
+        dbError: settingsError.message,
+        code: (settingsError as any).code,
+      });
     }
 
     logger.info("ONBOARDING_STEP1_SUCCESS", "Onboarding step 1 saved successfully", {
@@ -87,10 +85,9 @@ export async function saveOnboardingStep1(
     logger.error("ONBOARDING_STEP1_ERROR", "Unexpected error", {
       error: error instanceof Error ? error.message : String(error),
     });
-    return {
-      success: false,
-      error: "An unexpected error occurred. Please try again.",
-    };
+    return createErrorResponse("ONBOARDING_STEP_FAILED", {
+      error: error instanceof Error ? error.message : String(error),
+    });
   }
 }
 
@@ -112,14 +109,14 @@ export async function saveOnboardingStep2(
       logger.error("AUTH_ERROR", "Unauthorized access to saveOnboardingStep2", {
         error: authError?.message,
       });
-      return { success: false, error: "Unauthorized. Please log in." };
+      return createErrorResponse("AUTH_REQUIRED", { authError: authError?.message });
     }
 
     const userId = user.id;
 
     // Validate keywords array
     if (!Array.isArray(keywords)) {
-      return { success: false, error: "Keywords must be an array" };
+      return createErrorResponse("INVALID_CONFIGURATION");
     }
 
     // Clean and validate keywords
@@ -128,14 +125,11 @@ export async function saveOnboardingStep2(
       .filter((k) => k.length >= 2);
 
     if (cleanedKeywords.length === 0) {
-      return { success: false, error: "At least one keyword is required" };
+      return createErrorResponse("MISSING_REQUIRED_FIELD");
     }
 
     if (cleanedKeywords.length > 10) {
-      return {
-        success: false,
-        error: "Maximum 10 keywords allowed for onboarding",
-      };
+      return createErrorResponse("INVALID_CONFIGURATION");
     }
 
     logger.info("ONBOARDING_STEP2_SAVE", "Saving onboarding step 2", {
@@ -164,10 +158,10 @@ export async function saveOnboardingStep2(
           code: (settingsError as any).code,
         }
       );
-      return {
-        success: false,
-        error: "Failed to save keywords. Please try again.",
-      };
+      return createErrorResponse("ONBOARDING_STEP_FAILED", {
+        dbError: settingsError.message,
+        code: (settingsError as any).code,
+      });
     }
 
     logger.info("ONBOARDING_STEP2_SUCCESS", "Onboarding step 2 saved successfully", {
@@ -181,10 +175,9 @@ export async function saveOnboardingStep2(
     logger.error("ONBOARDING_STEP2_ERROR", "Unexpected error", {
       error: error instanceof Error ? error.message : String(error),
     });
-    return {
-      success: false,
-      error: "An unexpected error occurred. Please try again.",
-    };
+    return createErrorResponse("ONBOARDING_STEP_FAILED", {
+      error: error instanceof Error ? error.message : String(error),
+    });
   }
 }
 
@@ -210,7 +203,7 @@ export async function saveCompleteOnboarding(
       logger.error("AUTH_ERROR", "Unauthorized access to saveCompleteOnboarding", {
         error: authError?.message,
       });
-      return { success: false, error: "Unauthorized. Please log in." };
+      return createErrorResponse("AUTH_REQUIRED", { authError: authError?.message });
     }
 
     const userId = user.id;
@@ -220,19 +213,16 @@ export async function saveCompleteOnboarding(
     const trimmedDescription = description.trim();
 
     if (!trimmedUrl) {
-      return { success: false, error: "Website URL is required" };
+      return createErrorResponse("MISSING_REQUIRED_FIELD");
     }
 
     if (!trimmedDescription || trimmedDescription.length < 10) {
-      return {
-        success: false,
-        error: "Product description must be at least 10 characters",
-      };
+      return createErrorResponse("MISSING_REQUIRED_FIELD");
     }
 
     // Validate keywords array
     if (!Array.isArray(keywords)) {
-      return { success: false, error: "Keywords must be an array" };
+      return createErrorResponse("INVALID_CONFIGURATION");
     }
 
     // Clean and validate keywords
@@ -241,19 +231,16 @@ export async function saveCompleteOnboarding(
       .filter((k) => k.length >= 2);
 
     if (cleanedKeywords.length === 0) {
-      return { success: false, error: "At least one keyword is required" };
+      return createErrorResponse("MISSING_REQUIRED_FIELD");
     }
 
     if (cleanedKeywords.length > 10) {
-      return {
-        success: false,
-        error: "Maximum 10 keywords allowed for onboarding",
-      };
+      return createErrorResponse("INVALID_CONFIGURATION");
     }
 
     // Validate subreddits array
     if (!Array.isArray(subreddits)) {
-      return { success: false, error: "Subreddits must be an array" };
+      return createErrorResponse("INVALID_CONFIGURATION");
     }
 
     // Normalize and deduplicate subreddits
@@ -272,7 +259,7 @@ export async function saveCompleteOnboarding(
     );
 
     if (cleanedSubreddits.length === 0) {
-      return { success: false, error: "At least one subreddit is required" };
+      return createErrorResponse("MISSING_REQUIRED_FIELD");
     }
 
     logger.info("ONBOARDING_COMPLETE_SAVE", "Saving complete onboarding data", {
@@ -308,10 +295,10 @@ export async function saveCompleteOnboarding(
           code: (settingsError as any).code,
         }
       );
-      return {
-        success: false,
-        error: "Failed to save onboarding data. Please try again.",
-      };
+      return createErrorResponse("ONBOARDING_STEP_FAILED", {
+        dbError: settingsError.message,
+        code: (settingsError as any).code,
+      });
     }
 
     // Save subreddits to alerts table (same sync logic as in settings.ts)
@@ -373,10 +360,10 @@ export async function saveCompleteOnboarding(
         message: alertsError.message,
         code: (alertsError as any).code,
       });
-      return {
-        success: false,
-        error: "Failed to save subreddit settings. Please try again.",
-      };
+      return createErrorResponse("ONBOARDING_STEP_FAILED", {
+        dbError: alertsError.message,
+        code: (alertsError as any).code,
+      });
     }
 
     logger.info("ONBOARDING_COMPLETE_SUCCESS", "Complete onboarding data saved successfully", {
@@ -395,10 +382,9 @@ export async function saveCompleteOnboarding(
     logger.error("ONBOARDING_COMPLETE_ERROR", "Unexpected error", {
       error: error instanceof Error ? error.message : String(error),
     });
-    return {
-      success: false,
-      error: "An unexpected error occurred. Please try again.",
-    };
+    return createErrorResponse("ONBOARDING_STEP_FAILED", {
+      error: error instanceof Error ? error.message : String(error),
+    });
   }
 }
 
@@ -423,7 +409,7 @@ export async function markStep4Skipped(): Promise<{
       logger.error("AUTH_ERROR", "Unauthorized access to markStep4Skipped", {
         error: authError?.message,
       });
-      return { success: false, error: "Unauthorized. Please log in." };
+      return createErrorResponse("AUTH_REQUIRED", { authError: authError?.message });
     }
 
     const userId = user.id;
@@ -455,10 +441,10 @@ export async function markStep4Skipped(): Promise<{
           code: (updateError as any).code,
         }
       );
-      return {
-        success: false,
-        error: "Failed to save skip status. Please try again.",
-      };
+      return createErrorResponse("ONBOARDING_STEP_FAILED", {
+        dbError: updateError.message,
+        code: (updateError as any).code,
+      });
     }
 
     logger.info("ONBOARDING_STEP4_SKIP_SUCCESS", "Step 4 marked as skipped successfully", {
@@ -472,10 +458,9 @@ export async function markStep4Skipped(): Promise<{
     logger.error("ONBOARDING_STEP4_SKIP_ERROR", "Unexpected error", {
       error: error instanceof Error ? error.message : String(error),
     });
-    return {
-      success: false,
-      error: "An unexpected error occurred. Please try again.",
-    };
+    return createErrorResponse("ONBOARDING_STEP_FAILED", {
+      error: error instanceof Error ? error.message : String(error),
+    });
   }
 }
 
@@ -499,7 +484,7 @@ export async function markStep5Skipped(): Promise<{
       logger.error("AUTH_ERROR", "Unauthorized access to markStep5Skipped", {
         error: authError?.message,
       });
-      return { success: false, error: "Unauthorized. Please log in." };
+      return createErrorResponse("AUTH_REQUIRED", { authError: authError?.message });
     }
 
     const userId = user.id;
@@ -523,10 +508,10 @@ export async function markStep5Skipped(): Promise<{
           code: (updateError as any).code,
         }
       );
-      return {
-        success: false,
-        error: "Failed to save skip status. Please try again.",
-      };
+      return createErrorResponse("ONBOARDING_STEP_FAILED", {
+        dbError: updateError.message,
+        code: (updateError as any).code,
+      });
     }
 
     logger.info("ONBOARDING_STEP5_SKIP_SUCCESS", "Step 5 marked as skipped successfully", {
@@ -540,9 +525,8 @@ export async function markStep5Skipped(): Promise<{
     logger.error("ONBOARDING_STEP5_SKIP_ERROR", "Unexpected error", {
       error: error instanceof Error ? error.message : String(error),
     });
-    return {
-      success: false,
-      error: "An unexpected error occurred. Please try again.",
-    };
+    return createErrorResponse("ONBOARDING_STEP_FAILED", {
+      error: error instanceof Error ? error.message : String(error),
+    });
   }
 }

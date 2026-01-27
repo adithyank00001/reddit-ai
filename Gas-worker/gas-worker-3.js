@@ -4,15 +4,22 @@
  * This script receives webhooks from Supabase when leads are UPDATED,
  * then sends notifications (Slack, Discord, Email) only when AI processing is complete.
  * 
- * Configuration (set via PropertiesService):
+ * Configuration (set via PropertiesService - File > Project Settings > Script Properties):
  * - SUPABASE_URL: Your Supabase project URL
  * - SUPABASE_KEY: Supabase Service Role key (required to bypass RLS)
+ * - RESEND_API_KEY: Your Resend API key (optional, for email notifications)
  * 
  * Deployment:
  * 1. Deploy as Web App: Publish > Deploy as web app
  * 2. Set "Execute as: Me" and "Who has access: Anyone"
  * 3. Copy the web app URL
  * 4. Use this URL in Supabase Database Webhooks (UPDATE trigger on leads table)
+ * 
+ * Testing Email Notifications:
+ * 1. Set RESEND_API_KEY in Script Properties
+ * 2. Update TEST_EMAIL in testResendConnection() function
+ * 3. Run testResendConnection() from the editor
+ * 4. Check your inbox and the execution logs
  * 
  * ============================================================================
  * GOOGLE SHEETS LOGGING SETUP INSTRUCTIONS
@@ -261,18 +268,80 @@ function doPost(e) {
     if (payload.test === true) {
       logWithDebug("Test webhook request received", debugLogs);
       
-      const webhookUrl = payload.webhookUrl;
-      const type = payload.type; // "slack" or "discord"
-      
-      if (!webhookUrl || !type) {
-        logWithDebug("ERROR: Missing webhookUrl or type in test payload", debugLogs);
+      const type = payload.type; // "slack" | "discord" | "email"
+
+      if (!type) {
+        logWithDebug("ERROR: Missing type in test payload", debugLogs);
         return ContentService.createTextOutput(JSON.stringify({
           success: false,
-          error: "Missing webhookUrl or type in test payload",
+          error: "Missing type in test payload",
           debug_logs: debugLogs
         })).setMimeType(ContentService.MimeType.JSON);
       }
-      
+
+      // EMAIL TEST MODE (does not require webhookUrl)
+      if (type === "email") {
+        const toEmail = payload.notificationEmail || payload.toEmail;
+        if (!toEmail) {
+          logWithDebug("ERROR: Missing notificationEmail in email test payload", debugLogs);
+          return ContentService.createTextOutput(JSON.stringify({
+            success: false,
+            error: "Missing notificationEmail in test payload",
+            debug_logs: debugLogs
+          })).setMimeType(ContentService.MimeType.JSON);
+        }
+
+        const config = getConfig(debugLogs);
+        if (!config || !config.resendApiKey) {
+          logWithDebug("ERROR: RESEND_API_KEY not configured in Script Properties", debugLogs);
+          return ContentService.createTextOutput(JSON.stringify({
+            success: false,
+            error: "RESEND_API_KEY not configured",
+            debug_logs: debugLogs
+          })).setMimeType(ContentService.MimeType.JSON);
+        }
+
+        logWithDebug(`Test email notification: to=${toEmail}`, debugLogs);
+        const testSubject = "🧪 Test Email from Reddit Lead Gen";
+        const testHtml = buildLeadEmailHtml(
+          "Test Lead: Email notifications are working",
+          "testsubreddit",
+          "https://www.reddit.com",
+          80,
+          90,
+          "Test"
+        );
+
+        const emailResult = sendResendEmail(config.resendApiKey, toEmail, testSubject, testHtml, debugLogs);
+
+        if (emailResult) {
+          logWithDebug("✓ Test email sent successfully", debugLogs);
+          return ContentService.createTextOutput(JSON.stringify({
+            success: true,
+            message: "Test email sent successfully",
+            debug_logs: debugLogs
+          })).setMimeType(ContentService.MimeType.JSON);
+        } else {
+          logWithDebug("✗ Test email failed", debugLogs);
+          return ContentService.createTextOutput(JSON.stringify({
+            success: false,
+            error: "Failed to send test email",
+            debug_logs: debugLogs
+          })).setMimeType(ContentService.MimeType.JSON);
+        }
+      }
+
+      // SLACK / DISCORD TEST MODE (requires webhookUrl)
+      const webhookUrl = payload.webhookUrl;
+      if (!webhookUrl) {
+        logWithDebug("ERROR: Missing webhookUrl in test payload", debugLogs);
+        return ContentService.createTextOutput(JSON.stringify({
+          success: false,
+          error: "Missing webhookUrl in test payload",
+          debug_logs: debugLogs
+        })).setMimeType(ContentService.MimeType.JSON);
+      }
+
       logWithDebug(`Test notification: type=${type}, webhookUrl=${webhookUrl.substring(0, 50)}...`, debugLogs);
       
       // Create test notification message (same format as production)
@@ -321,7 +390,7 @@ function doPost(e) {
           logWithDebug("Sending test Discord notification...", debugLogs);
           result = sendDiscordNotification(webhookUrl, testMessage, debugLogs);
         } else {
-          errorMessage = `Invalid type: ${type}. Must be 'slack' or 'discord'`;
+          errorMessage = `Invalid type: ${type}. Must be 'slack', 'discord', or 'email'`;
           logWithDebug(`ERROR: ${errorMessage}`, debugLogs);
         }
       } catch (error) {
@@ -456,7 +525,7 @@ function doPost(e) {
     }
 
     logWithDebug(`Notification settings found:`, debugLogs);
-    logWithDebug(`  Email enabled: ${notificationSettings.email_notifications_enabled}`, debugLogs);
+    logWithDebug(`  Email enabled: ${notificationSettings.email_notifications_enabled} (to: ${notificationSettings.notification_email || 'not set'})`, debugLogs);
     logWithDebug(`  Slack enabled: ${notificationSettings.slack_notifications_enabled}`, debugLogs);
     logWithDebug(`  Discord enabled: ${notificationSettings.discord_notifications_enabled}`, debugLogs);
 
@@ -520,40 +589,84 @@ function doPost(e) {
     let notificationsSent = 0;
     let notificationsFailed = 0;
 
+    // ============================================================================
+    // SEND NOTIFICATIONS - Each channel is independent (one failure won't stop others)
+    // ============================================================================
+
     // Send Slack notification if enabled
-    if (notificationSettings.slack_notifications_enabled === true && notificationSettings.slack_webhook_url) {
-      logWithDebug("Sending Slack notification...", debugLogs);
-      const slackResult = sendSlackNotification(notificationSettings.slack_webhook_url, notificationMessage, debugLogs);
-      if (slackResult) {
-        notificationsSent++;
-        logWithDebug("✓ Slack notification sent successfully", debugLogs);
+    try {
+      if (notificationSettings.slack_notifications_enabled === true && notificationSettings.slack_webhook_url) {
+        logWithDebug("Sending Slack notification...", debugLogs);
+        const slackResult = sendSlackNotification(notificationSettings.slack_webhook_url, notificationMessage, debugLogs);
+        if (slackResult) {
+          notificationsSent++;
+          logWithDebug("✓ Slack notification sent successfully", debugLogs);
+        } else {
+          notificationsFailed++;
+          logWithDebug("✗ Slack notification failed", debugLogs);
+        }
       } else {
-        notificationsFailed++;
-        logWithDebug("✗ Slack notification failed", debugLogs);
+        logWithDebug("Slack notifications disabled or webhook URL missing", debugLogs);
       }
-    } else {
-      logWithDebug("Slack notifications disabled or webhook URL missing", debugLogs);
+    } catch (slackError) {
+      notificationsFailed++;
+      logWithDebug(`✗ Slack notification threw error: ${slackError.message}`, debugLogs);
     }
 
     // Send Discord notification if enabled
-    if (notificationSettings.discord_notifications_enabled === true && notificationSettings.discord_webhook_url) {
-      logWithDebug("Sending Discord notification...", debugLogs);
-      const discordResult = sendDiscordNotification(notificationSettings.discord_webhook_url, notificationMessage, debugLogs);
-      if (discordResult) {
-        notificationsSent++;
-        logWithDebug("✓ Discord notification sent successfully", debugLogs);
+    try {
+      if (notificationSettings.discord_notifications_enabled === true && notificationSettings.discord_webhook_url) {
+        logWithDebug("Sending Discord notification...", debugLogs);
+        const discordResult = sendDiscordNotification(notificationSettings.discord_webhook_url, notificationMessage, debugLogs);
+        if (discordResult) {
+          notificationsSent++;
+          logWithDebug("✓ Discord notification sent successfully", debugLogs);
+        } else {
+          notificationsFailed++;
+          logWithDebug("✗ Discord notification failed", debugLogs);
+        }
       } else {
-        notificationsFailed++;
-        logWithDebug("✗ Discord notification failed", debugLogs);
+        logWithDebug("Discord notifications disabled or webhook URL missing", debugLogs);
       }
-    } else {
-      logWithDebug("Discord notifications disabled or webhook URL missing", debugLogs);
+    } catch (discordError) {
+      notificationsFailed++;
+      logWithDebug(`✗ Discord notification threw error: ${discordError.message}`, debugLogs);
     }
 
-    // Email notifications (placeholder - can be implemented later)
-    if (notificationSettings.email_notifications_enabled === true) {
-      logWithDebug("Email notifications enabled (not yet implemented)", debugLogs);
-      // TODO: Implement email sending logic here
+    // Send Email notification via Resend if enabled
+    try {
+      if (notificationSettings.email_notifications_enabled === true && notificationSettings.notification_email) {
+        logWithDebug("Sending Email notification via Resend...", debugLogs);
+        
+        if (!config.resendApiKey) {
+          logWithDebug("✗ Email notification skipped: RESEND_API_KEY not configured", debugLogs);
+          notificationsFailed++;
+        } else {
+          // Construct HTML email
+          const emailHtml = buildLeadEmailHtml(leadTitle, leadSubreddit, leadUrl, relevanceScore, opportunityScore, opportunityType);
+          
+          const emailResult = sendResendEmail(
+            config.resendApiKey,
+            notificationSettings.notification_email,
+            `🎯 New Lead Ready: ${leadTitle}`,
+            emailHtml,
+            debugLogs
+          );
+          
+          if (emailResult) {
+            notificationsSent++;
+            logWithDebug("✓ Email notification sent successfully", debugLogs);
+          } else {
+            notificationsFailed++;
+            logWithDebug("✗ Email notification failed", debugLogs);
+          }
+        }
+      } else {
+        logWithDebug("Email notifications disabled or notification_email missing", debugLogs);
+      }
+    } catch (emailError) {
+      notificationsFailed++;
+      logWithDebug(`✗ Email notification threw error: ${emailError.message}`, debugLogs);
     }
 
     // Update lead record: set notification_sent = true
@@ -606,6 +719,7 @@ function doPost(e) {
  * Reads from Google Apps Script Properties (set in File > Project Settings > Script Properties):
  * - SUPABASE_URL: Your Supabase project URL (e.g., https://xxxxx.supabase.co)
  * - SUPABASE_KEY: Your Supabase Service Role key (JWT token)
+ * - RESEND_API_KEY: Your Resend API key (optional, for email notifications)
  * 
  * @param {Array} debugLogs - Optional array to store debug logs
  */
@@ -614,18 +728,24 @@ function getConfig(debugLogs = null) {
   
   const supabaseUrl = props.getProperty("SUPABASE_URL");
   const supabaseKey = props.getProperty("SUPABASE_KEY");
+  const resendApiKey = props.getProperty("RESEND_API_KEY");
 
   if (!supabaseUrl || !supabaseKey) {
-    logWithDebug("Missing configuration properties:", debugLogs);
+    logWithDebug("Missing required configuration properties:", debugLogs);
     logWithDebug(`  SUPABASE_URL: ${supabaseUrl ? "✓" : "✗"}`, debugLogs);
     logWithDebug(`  SUPABASE_KEY: ${supabaseKey ? "✓" : "✗"}`, debugLogs);
     logWithDebug("Please set these in: File > Project Settings > Script Properties", debugLogs);
     return null;
   }
 
+  if (!resendApiKey) {
+    logWithDebug("WARNING: RESEND_API_KEY not set - email notifications will be disabled", debugLogs);
+  }
+
   return {
     supabaseUrl: supabaseUrl.trim(),
     supabaseKey: supabaseKey.trim(),
+    resendApiKey: resendApiKey ? resendApiKey.trim() : null,
   };
 }
 
@@ -686,7 +806,7 @@ function fetchUserIdFromAlert(config, alertId, debugLogs = null) {
  * @returns {Object|null} Notification settings object or null if not found
  */
 function fetchNotificationSettings(config, userId, debugLogs = null) {
-  const url = `${config.supabaseUrl}/rest/v1/project_settings?user_id=eq.${userId}&select=slack_webhook_url,discord_webhook_url,email_notifications_enabled,slack_notifications_enabled,discord_notifications_enabled`;
+  const url = `${config.supabaseUrl}/rest/v1/project_settings?user_id=eq.${userId}&select=slack_webhook_url,discord_webhook_url,notification_email,email_notifications_enabled,slack_notifications_enabled,discord_notifications_enabled`;
   
   try {
     const response = UrlFetchApp.fetch(url, {
@@ -841,4 +961,220 @@ function updateNotificationSent(config, leadId, debugLogs = null) {
     logWithDebug(`ERROR updating notification_sent: ${error.message}`, debugLogs);
     return false;
   }
+}
+
+/**
+ * Build HTML email content for lead notification
+ * @param {string} title - Lead title
+ * @param {string} subreddit - Subreddit name
+ * @param {string} url - Reddit post URL
+ * @param {number} relevanceScore - Relevance score (0-100)
+ * @param {number} opportunityScore - Opportunity score (0-100)
+ * @param {string} opportunityType - Type of opportunity
+ * @returns {string} HTML email content
+ */
+function buildLeadEmailHtml(title, subreddit, url, relevanceScore, opportunityScore, opportunityType) {
+  return `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>New Lead Ready</title>
+</head>
+<body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f5f5f5;">
+  <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #f5f5f5; padding: 20px 0;">
+    <tr>
+      <td align="center">
+        <table width="600" cellpadding="0" cellspacing="0" border="0" style="background-color: #ffffff; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+          <!-- Header -->
+          <tr>
+            <td style="padding: 30px 30px 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 8px 8px 0 0;">
+              <h1 style="margin: 0; color: #ffffff; font-size: 24px; font-weight: 600;">
+                🎯 New Lead Ready
+              </h1>
+            </td>
+          </tr>
+          
+          <!-- Content -->
+          <tr>
+            <td style="padding: 30px;">
+              <h2 style="margin: 0 0 20px; color: #1a1a1a; font-size: 20px; font-weight: 600;">
+                ${title}
+              </h2>
+              
+              <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom: 20px;">
+                <tr>
+                  <td style="padding: 12px; background-color: #f8f9fa; border-radius: 4px; width: 50%;">
+                    <div style="color: #6c757d; font-size: 12px; font-weight: 600; text-transform: uppercase; margin-bottom: 4px;">Subreddit</div>
+                    <div style="color: #1a1a1a; font-size: 16px; font-weight: 500;">r/${subreddit}</div>
+                  </td>
+                  <td style="width: 10px;"></td>
+                  <td style="padding: 12px; background-color: #f8f9fa; border-radius: 4px; width: 50%;">
+                    <div style="color: #6c757d; font-size: 12px; font-weight: 600; text-transform: uppercase; margin-bottom: 4px;">Opportunity Type</div>
+                    <div style="color: #1a1a1a; font-size: 16px; font-weight: 500;">${opportunityType}</div>
+                  </td>
+                </tr>
+              </table>
+              
+              <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom: 25px;">
+                <tr>
+                  <td style="padding: 12px; background-color: #f8f9fa; border-radius: 4px; width: 50%;">
+                    <div style="color: #6c757d; font-size: 12px; font-weight: 600; text-transform: uppercase; margin-bottom: 4px;">Relevance Score</div>
+                    <div style="color: #1a1a1a; font-size: 20px; font-weight: 600;">${relevanceScore}/100</div>
+                  </td>
+                  <td style="width: 10px;"></td>
+                  <td style="padding: 12px; background-color: #f8f9fa; border-radius: 4px; width: 50%;">
+                    <div style="color: #6c757d; font-size: 12px; font-weight: 600; text-transform: uppercase; margin-bottom: 4px;">Opportunity Score</div>
+                    <div style="color: #1a1a1a; font-size: 20px; font-weight: 600;">${opportunityScore}/100</div>
+                  </td>
+                </tr>
+              </table>
+              
+              ${url ? `
+              <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                <tr>
+                  <td align="center" style="padding: 10px 0;">
+                    <a href="${url}" style="display: inline-block; padding: 14px 32px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #ffffff; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 16px;">
+                      View on Reddit →
+                    </a>
+                  </td>
+                </tr>
+              </table>
+              ` : ''}
+            </td>
+          </tr>
+          
+          <!-- Footer -->
+          <tr>
+            <td style="padding: 20px 30px; background-color: #f8f9fa; border-radius: 0 0 8px 8px; text-align: center;">
+              <p style="margin: 0; color: #6c757d; font-size: 13px;">
+                You're receiving this because you enabled email notifications in Reddit Lead Gen.
+              </p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
+  `.trim();
+}
+
+/**
+ * Send email via Resend API
+ * @param {string} apiKey - Resend API key
+ * @param {string} toEmail - Recipient email address
+ * @param {string} subject - Email subject
+ * @param {string} htmlContent - HTML email content
+ * @param {Array} debugLogs - Optional array to store debug logs
+ * @returns {boolean} True if successful, false otherwise
+ */
+function sendResendEmail(apiKey, toEmail, subject, htmlContent, debugLogs = null) {
+  try {
+    const payload = {
+      from: "Reddit Lead Gen <notifications@resend.dev>", // Update this with your verified domain
+      to: [toEmail],
+      subject: subject,
+      html: htmlContent
+    };
+
+    const response = UrlFetchApp.fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
+      },
+      payload: JSON.stringify(payload),
+      muteHttpExceptions: true,
+    });
+
+    const statusCode = response.getResponseCode();
+    const responseText = response.getContentText();
+
+    if (statusCode === 200) {
+      const result = JSON.parse(responseText);
+      logWithDebug(`Resend API response: ${JSON.stringify(result)}`, debugLogs);
+      return true;
+    } else {
+      logWithDebug(`ERROR: Resend API returned ${statusCode}`, debugLogs);
+      logWithDebug(`Response: ${responseText}`, debugLogs);
+      return false;
+    }
+  } catch (error) {
+    logWithDebug(`ERROR sending Resend email: ${error.message}`, debugLogs);
+    return false;
+  }
+}
+
+/**
+ * Test function to verify Resend connection
+ * Run this manually from the Apps Script editor to test your Resend integration
+ * 
+ * Instructions:
+ * 1. Set RESEND_API_KEY in Script Properties (File > Project Settings > Script Properties)
+ * 2. Update the TEST_EMAIL below to your email address
+ * 3. Click Run > testResendConnection
+ * 4. Check the Execution log (View > Logs) for results
+ * 5. Check your email inbox
+ */
+function testResendConnection() {
+  const TEST_EMAIL = "your-email@example.com"; // ⚠️ UPDATE THIS WITH YOUR EMAIL
+  
+  logToSheet("=== RESEND CONNECTION TEST STARTED ===");
+  Logger.log("=== RESEND CONNECTION TEST STARTED ===");
+  
+  try {
+    // Get API key from Script Properties
+    const props = PropertiesService.getScriptProperties();
+    const resendApiKey = props.getProperty("RESEND_API_KEY");
+    
+    if (!resendApiKey) {
+      const errorMsg = "ERROR: RESEND_API_KEY not found in Script Properties";
+      logToSheet(errorMsg);
+      Logger.log(errorMsg);
+      Logger.log("Please set RESEND_API_KEY in: File > Project Settings > Script Properties");
+      return;
+    }
+    
+    logToSheet("✓ RESEND_API_KEY found");
+    Logger.log("✓ RESEND_API_KEY found");
+    
+    // Build test email
+    const testSubject = "🧪 Test Email from Reddit Lead Gen";
+    const testHtml = buildLeadEmailHtml(
+      "Test Lead: How to grow my SaaS business?",
+      "Entrepreneur",
+      "https://www.reddit.com/r/Entrepreneur/comments/test",
+      85,
+      92,
+      "Question"
+    );
+    
+    logToSheet(`Sending test email to: ${TEST_EMAIL}`);
+    Logger.log(`Sending test email to: ${TEST_EMAIL}`);
+    
+    // Send test email
+    const result = sendResendEmail(resendApiKey, TEST_EMAIL, testSubject, testHtml);
+    
+    if (result) {
+      const successMsg = "✓ TEST EMAIL SENT SUCCESSFULLY! Check your inbox.";
+      logToSheet(successMsg);
+      Logger.log(successMsg);
+    } else {
+      const failMsg = "✗ TEST EMAIL FAILED. Check the logs above for details.";
+      logToSheet(failMsg);
+      Logger.log(failMsg);
+    }
+    
+  } catch (error) {
+    const errorMsg = `FATAL ERROR: ${error.message}`;
+    logToSheet(errorMsg);
+    Logger.log(errorMsg);
+    Logger.log(error.stack);
+  }
+  
+  logToSheet("=== RESEND CONNECTION TEST COMPLETED ===");
+  Logger.log("=== RESEND CONNECTION TEST COMPLETED ===");
 }

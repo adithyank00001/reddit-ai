@@ -17,6 +17,7 @@ export default function OnboardingStep5Page() {
   const [hasValidSettings, setHasValidSettings] = useState(false);
   const [slackWebhookUrl, setSlackWebhookUrl] = useState("");
   const [discordWebhookUrl, setDiscordWebhookUrl] = useState("");
+  const [notificationEmail, setNotificationEmail] = useState("");
   const [emailNotificationsEnabled, setEmailNotificationsEnabled] = useState(false);
   const [slackNotificationsEnabled, setSlackNotificationsEnabled] = useState(false);
   const [discordNotificationsEnabled, setDiscordNotificationsEnabled] = useState(false);
@@ -36,7 +37,7 @@ export default function OnboardingStep5Page() {
         // Check if user has completed steps 1-4
         const { data: settings } = await supabase
           .from("project_settings")
-          .select("website_url, keywords, reply_mode, slack_webhook_url, discord_webhook_url, email_notifications_enabled, slack_notifications_enabled, discord_notifications_enabled")
+          .select("website_url, keywords, reply_mode, slack_webhook_url, discord_webhook_url, notification_email, email_notifications_enabled, slack_notifications_enabled, discord_notifications_enabled")
           .eq("user_id", user.id)
           .maybeSingle();
 
@@ -77,6 +78,7 @@ export default function OnboardingStep5Page() {
         if (settings) {
           setSlackWebhookUrl(settings.slack_webhook_url || "");
           setDiscordWebhookUrl(settings.discord_webhook_url || "");
+          setNotificationEmail(settings.notification_email || "");
           setEmailNotificationsEnabled(settings.email_notifications_enabled || false);
           setSlackNotificationsEnabled(settings.slack_notifications_enabled || false);
           setDiscordNotificationsEnabled(settings.discord_notifications_enabled || false);
@@ -174,6 +176,7 @@ export default function OnboardingStep5Page() {
         <NotificationSettingsOnboarding
           initialSlackWebhookUrl={slackWebhookUrl}
           initialDiscordWebhookUrl={discordWebhookUrl}
+          initialNotificationEmail={notificationEmail}
           initialEmailNotificationsEnabled={emailNotificationsEnabled}
           initialSlackNotificationsEnabled={slackNotificationsEnabled}
           initialDiscordNotificationsEnabled={discordNotificationsEnabled}

@@ -9,13 +9,14 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
-import { updateSettings, testWebhookViaWorker } from "@/app/actions/settings";
+import { testEmailViaWorker, testWebhookViaWorker, updateSettings } from "@/app/actions/settings";
 import { toast } from "sonner";
 import { Loader2, Webhook, Mail, MessageSquare } from "lucide-react";
 
 const notificationSchema = z.object({
   slackWebhookUrl: z.string().url("Invalid webhook URL").optional().or(z.literal("")),
   discordWebhookUrl: z.string().url("Invalid webhook URL").optional().or(z.literal("")),
+  notificationEmail: z.string().email("Invalid email address").optional().or(z.literal("")),
   emailNotificationsEnabled: z.boolean().default(false),
   slackNotificationsEnabled: z.boolean().default(false),
   discordNotificationsEnabled: z.boolean().default(false),
@@ -26,6 +27,7 @@ type NotificationFormData = z.infer<typeof notificationSchema>;
 interface NotificationSettingsProps {
   initialSlackWebhookUrl?: string;
   initialDiscordWebhookUrl?: string;
+  initialNotificationEmail?: string;
   initialEmailNotificationsEnabled?: boolean;
   initialSlackNotificationsEnabled?: boolean;
   initialDiscordNotificationsEnabled?: boolean;
@@ -34,6 +36,7 @@ interface NotificationSettingsProps {
 export function NotificationSettings({
   initialSlackWebhookUrl = "",
   initialDiscordWebhookUrl = "",
+  initialNotificationEmail = "",
   initialEmailNotificationsEnabled = false,
   initialSlackNotificationsEnabled = false,
   initialDiscordNotificationsEnabled = false,
@@ -44,12 +47,13 @@ export function NotificationSettings({
     handleSubmit,
     setValue,
     watch,
-    formState: { isSubmitting },
+    formState: { isSubmitting, errors },
   } = useForm<NotificationFormData>({
     resolver: zodResolver(notificationSchema),
     defaultValues: {
       slackWebhookUrl: initialSlackWebhookUrl,
       discordWebhookUrl: initialDiscordWebhookUrl,
+      notificationEmail: initialNotificationEmail,
       emailNotificationsEnabled: initialEmailNotificationsEnabled,
       slackNotificationsEnabled: initialSlackNotificationsEnabled,
       discordNotificationsEnabled: initialDiscordNotificationsEnabled,
@@ -60,11 +64,15 @@ export function NotificationSettings({
   const emailEnabled = watch("emailNotificationsEnabled");
   const slackEnabled = watch("slackNotificationsEnabled");
   const discordEnabled = watch("discordNotificationsEnabled");
+  const notificationEmail = watch("notificationEmail");
+  const slackWebhookUrl = watch("slackWebhookUrl");
+  const discordWebhookUrl = watch("discordWebhookUrl");
 
   async function onSubmit(data: NotificationFormData) {
     const formData = new FormData();
     formData.append("slackWebhookUrl", data.slackWebhookUrl || "");
     formData.append("discordWebhookUrl", data.discordWebhookUrl || "");
+    formData.append("notificationEmail", data.notificationEmail || "");
     formData.append("emailNotificationsEnabled", data.emailNotificationsEnabled ? "true" : "false");
     formData.append("slackNotificationsEnabled", data.slackNotificationsEnabled ? "true" : "false");
     formData.append("discordNotificationsEnabled", data.discordNotificationsEnabled ? "true" : "false");
@@ -99,6 +107,24 @@ export function NotificationSettings({
     }
   }
 
+  async function testEmail(email: string) {
+    if (!email) {
+      toast.error("Please enter an email address first");
+      return;
+    }
+
+    try {
+      const result = await testEmailViaWorker(email);
+      if (result.success) {
+        toast.success("Test email sent! Check your inbox (and spam).");
+      } else {
+        toast.error(result.error || "Test email failed. Please check your setup.");
+      }
+    } catch {
+      toast.error("Failed to send test email. Please try again.");
+    }
+  }
+
   return (
     <div className="space-y-6">
       <Card>
@@ -130,13 +156,41 @@ export function NotificationSettings({
                   onCheckedChange={(checked) => setValue("emailNotificationsEnabled", checked)}
                 />
               </div>
-              {emailEnabled && (
-                <div className="ml-8 p-3 bg-muted/50 rounded-md">
-                  <p className="text-sm text-muted-foreground">
-                    Email notifications will be sent to your account email address.
-                  </p>
+              <div className="ml-8 space-y-2">
+                <Label htmlFor="notificationEmail" className={!emailEnabled ? "text-muted-foreground" : ""}>
+                  Notification Email
+                </Label>
+                <div className="flex gap-2">
+                  <div className="flex-1">
+                    <Input
+                      id="notificationEmail"
+                      type="email"
+                      placeholder="you@domain.com"
+                      disabled={!emailEnabled}
+                      {...register("notificationEmail")}
+                    />
+                    {errors.notificationEmail && notificationEmail && (
+                      <p className="text-sm text-destructive mt-1">
+                        {errors.notificationEmail.message}
+                      </p>
+                    )}
+                  </div>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    disabled={!emailEnabled || !notificationEmail || !!errors.notificationEmail}
+                    onClick={() => testEmail(notificationEmail || "")}
+                  >
+                    <Webhook className="h-4 w-4 mr-2" />
+                    Test
+                  </Button>
                 </div>
-              )}
+                {!emailEnabled && (
+                  <p className="text-sm text-muted-foreground">
+                    Enable Email notifications to set your email address
+                  </p>
+                )}
+              </div>
             </div>
 
             {/* Slack Notifications */}
@@ -176,10 +230,7 @@ export function NotificationSettings({
                     type="button"
                     variant="outline"
                     disabled={!slackEnabled}
-                    onClick={() => {
-                      const url = (document.getElementById("slackWebhookUrl") as HTMLInputElement)?.value;
-                      testWebhook(url, "slack");
-                    }}
+                    onClick={() => testWebhook(slackWebhookUrl || "", "slack")}
                   >
                     <Webhook className="h-4 w-4 mr-2" />
                     Test
@@ -230,10 +281,7 @@ export function NotificationSettings({
                     type="button"
                     variant="outline"
                     disabled={!discordEnabled}
-                    onClick={() => {
-                      const url = (document.getElementById("discordWebhookUrl") as HTMLInputElement)?.value;
-                      testWebhook(url, "discord");
-                    }}
+                    onClick={() => testWebhook(discordWebhookUrl || "", "discord")}
                   >
                     <Webhook className="h-4 w-4 mr-2" />
                     Test

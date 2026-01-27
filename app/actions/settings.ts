@@ -4,6 +4,7 @@ import { logger } from "@/lib/logger";
 import { createClient } from "@/utils/supabase/server";
 import { supabase as supabaseServiceRole } from "@/lib/supabase";
 import { revalidatePath } from "next/cache";
+import { createErrorResponse, getUserMessage } from "@/lib/error-codes";
 
 /**
  * Settings update action
@@ -34,7 +35,7 @@ export async function updateSettings(formData: FormData) {
     logger.error("AUTH_ERROR", "Unauthorized access to updateSettings", {
       error: authError?.message,
     });
-    return { success: false, error: "Unauthorized. Please log in." };
+    return createErrorResponse("AUTH_REQUIRED", { authError: authError?.message });
   }
   
   const userId = user.id;
@@ -50,6 +51,7 @@ export async function updateSettings(formData: FormData) {
   const hasSubreddits = formData.has("subreddits");
   const hasSlackWebhook = formData.has("slackWebhookUrl");
   const hasDiscordWebhook = formData.has("discordWebhookUrl");
+  const hasNotificationEmail = formData.has("notificationEmail");
   const hasEmailNotifications = formData.has("emailNotificationsEnabled");
   const hasSlackNotifications = formData.has("slackNotificationsEnabled");
   const hasDiscordNotifications = formData.has("discordNotificationsEnabled");
@@ -60,6 +62,7 @@ export async function updateSettings(formData: FormData) {
   const subredditsJson = hasSubreddits ? String(formData.get("subreddits") || "[]") : "[]";
   const slackWebhookUrl = hasSlackWebhook ? String(formData.get("slackWebhookUrl") || "") : "";
   const discordWebhookUrl = hasDiscordWebhook ? String(formData.get("discordWebhookUrl") || "") : "";
+  const notificationEmail = hasNotificationEmail ? String(formData.get("notificationEmail") || "").trim() : "";
   const emailNotificationsEnabled = hasEmailNotifications ? formData.get("emailNotificationsEnabled") === "true" : undefined;
   const slackNotificationsEnabled = hasSlackNotifications ? formData.get("slackNotificationsEnabled") === "true" : undefined;
   const discordNotificationsEnabled = hasDiscordNotifications ? formData.get("discordNotificationsEnabled") === "true" : undefined;
@@ -137,7 +140,7 @@ export async function updateSettings(formData: FormData) {
 
   try {
     // Update project_settings if any project settings fields are provided
-    if (hasKeywords || hasProductDescription || hasWebsiteUrl || hasSlackWebhook || hasDiscordWebhook || hasEmailNotifications || hasSlackNotifications || hasDiscordNotifications) {
+    if (hasKeywords || hasProductDescription || hasWebsiteUrl || hasSlackWebhook || hasDiscordWebhook || hasNotificationEmail || hasEmailNotifications || hasSlackNotifications || hasDiscordNotifications) {
       const settingsPayload: {
         user_id: string;
         product_description_raw?: string;
@@ -145,6 +148,7 @@ export async function updateSettings(formData: FormData) {
         website_url?: string;
         slack_webhook_url?: string | null;
         discord_webhook_url?: string | null;
+        notification_email?: string | null;
         email_notifications_enabled?: boolean;
         slack_notifications_enabled?: boolean;
         discord_notifications_enabled?: boolean;
@@ -171,6 +175,10 @@ export async function updateSettings(formData: FormData) {
 
       if (hasDiscordWebhook) {
         settingsPayload.discord_webhook_url = discordWebhookUrl.trim() || null;
+      }
+
+      if (hasNotificationEmail) {
+        settingsPayload.notification_email = notificationEmail || null;
       }
 
       if (hasEmailNotifications) {
@@ -211,7 +219,10 @@ export async function updateSettings(formData: FormData) {
             code: (settingsError as any).code,
           }
         );
-        return { success: false, error: "Failed to update project settings" };
+        return createErrorResponse("SETTINGS_SAVE_FAILED", {
+          dbError: settingsError.message,
+          code: (settingsError as any).code,
+        });
       }
     }
 
@@ -381,7 +392,10 @@ export async function updateSettings(formData: FormData) {
           message: alertsError.message,
           code: (alertsError as any).code,
         });
-        return { success: false, error: "Failed to update alert settings" };
+        return createErrorResponse("DB_UPDATE_FAILED", {
+          dbError: alertsError.message,
+          code: (alertsError as any).code,
+        });
       }
     }
 
@@ -398,7 +412,87 @@ export async function updateSettings(formData: FormData) {
     logger.error("SETTINGS_UPDATE_ERROR", "Unexpected error", {
       error: error instanceof Error ? error.message : String(error),
     });
-    return { success: false, error: "An unexpected error occurred" };
+    return createErrorResponse("UNKNOWN_ERROR", {
+      error: error instanceof Error ? error.message : String(error),
+    });
+  }
+}
+
+/**
+ * Test email by calling Google Apps Script (gas-worker-3.js) with a test payload.
+ * This uses the same server-side Resend integration as production.
+ */
+export async function testEmailViaWorker(
+  notificationEmail: string
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const gasWebhookUrl =
+      process.env.GAS_WEBHOOK_URL ||
+      "https://script.google.com/macros/s/AKfycbyQkkWQ9OODI4o-yBMfFsmqJWETyY6IVuElnEExQtWEfgfxK0jLPtRC-TqaCLgyCzfy_Q/exec";
+
+    if (!notificationEmail) {
+      return createErrorResponse("MISSING_REQUIRED_FIELD");
+    }
+
+    const testPayload = {
+      test: true,
+      type: "email",
+      notificationEmail: notificationEmail.trim(),
+    };
+
+    logger.info("EMAIL_TEST_START", "Testing email via gas-worker", {
+      notificationEmail,
+    });
+
+    const response = await fetch(gasWebhookUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(testPayload),
+    });
+
+    if (!response.ok) {
+      logger.error("EMAIL_TEST_ERROR", "Failed to call gas-worker", {
+        status: response.status,
+        statusText: response.statusText,
+      });
+      return createErrorResponse("NOTIFICATION_SERVICE_UNAVAILABLE", {
+        status: response.status,
+        statusText: response.statusText,
+      });
+    }
+
+    const result = await response.json();
+
+    if (result.success) {
+      logger.info("EMAIL_TEST_SUCCESS", "Test email sent successfully", {
+        notificationEmail,
+      });
+      return { success: true };
+    } else {
+      logger.error("EMAIL_TEST_ERROR", "Test email failed", {
+        error: result.error || result.message,
+      });
+      
+      // Check if it's a configuration issue (RESEND_API_KEY missing)
+      if (result.error?.includes("RESEND_API_KEY") || result.error?.includes("not configured")) {
+        return createErrorResponse("EMAIL_SERVICE_NOT_CONFIGURED", {
+          error: result.error || result.message,
+        });
+      }
+      
+      return createErrorResponse("EMAIL_TEST_FAILED", {
+        error: result.error || result.message,
+      });
+    }
+  } catch (error) {
+    logger.error("EMAIL_TEST_ERROR", "Unexpected error testing email", {
+      error: error instanceof Error ? error.message : String(error),
+    });
+    return createErrorResponse("EMAIL_TEST_FAILED", {
+      error: error instanceof Error ? error.message : String(error),
+    });
   }
 }
 
@@ -415,7 +509,8 @@ export async function getSettings() {
     logger.error("AUTH_ERROR", "Unauthorized access to getSettings", {
       error: authError?.message,
     });
-    return { error: "Unauthorized. Please log in." };
+    // Keep the original return shape for this function: { error: string }
+    return { error: getUserMessage("AUTH_REQUIRED") };
   }
   
   const userId = user.id;
@@ -446,7 +541,8 @@ export async function getSettings() {
     logger.error("SETTINGS_FETCH_ERROR", "Failed to fetch settings", {
       error: error instanceof Error ? error.message : String(error),
     });
-    return { error: "Failed to fetch settings" };
+    // Keep the original return shape for this function: { error: string }
+    return { error: getUserMessage("SETTINGS_LOAD_FAILED") };
   }
 }
 
@@ -464,7 +560,7 @@ export async function testWebhookViaWorker(
       "https://script.google.com/macros/s/AKfycbyQkkWQ9OODI4o-yBMfFsmqJWETyY6IVuElnEExQtWEfgfxK0jLPtRC-TqaCLgyCzfy_Q/exec";
     
     if (!webhookUrl || !type) {
-      return { success: false, error: "Webhook URL and type are required" };
+      return createErrorResponse("MISSING_REQUIRED_FIELD");
     }
     
     // Create test payload that gas-worker-3.js will recognize
@@ -492,7 +588,10 @@ export async function testWebhookViaWorker(
         status: response.status,
         statusText: response.statusText,
       });
-      return { success: false, error: `Failed to call notification service (${response.status})` };
+      return createErrorResponse("NOTIFICATION_SERVICE_UNAVAILABLE", {
+        status: response.status,
+        statusText: response.statusText,
+      });
     }
     
     const result = await response.json();
@@ -506,12 +605,18 @@ export async function testWebhookViaWorker(
       logger.error("WEBHOOK_TEST_ERROR", "Test notification failed", {
         error: result.error || result.message,
       });
-      return { success: false, error: result.error || result.message || "Failed to send test notification" };
+      // Determine which webhook failed based on type
+      const errorKey = type === "slack" ? "SLACK_WEBHOOK_FAILED" : "DISCORD_WEBHOOK_FAILED";
+      return createErrorResponse(errorKey, {
+        error: result.error || result.message,
+      });
     }
   } catch (error) {
     logger.error("WEBHOOK_TEST_ERROR", "Unexpected error testing webhook", {
       error: error instanceof Error ? error.message : String(error),
     });
-    return { success: false, error: "Failed to test webhook. Please try again." };
+    return createErrorResponse("WEBHOOK_TEST_FAILED", {
+      error: error instanceof Error ? error.message : String(error),
+    });
   }
 }

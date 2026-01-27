@@ -9,13 +9,14 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
-import { updateSettings, testWebhookViaWorker } from "@/app/actions/settings";
+import { testEmailViaWorker, testWebhookViaWorker, updateSettings } from "@/app/actions/settings";
 import { toast } from "sonner";
 import { Webhook, Mail, MessageSquare } from "lucide-react";
 
 const notificationSchema = z.object({
   slackWebhookUrl: z.string().url("Invalid webhook URL").optional().or(z.literal("")),
   discordWebhookUrl: z.string().url("Invalid webhook URL").optional().or(z.literal("")),
+  notificationEmail: z.string().email("Invalid email address").optional().or(z.literal("")),
   emailNotificationsEnabled: z.boolean().default(false),
   slackNotificationsEnabled: z.boolean().default(false),
   discordNotificationsEnabled: z.boolean().default(false),
@@ -26,6 +27,7 @@ type NotificationFormData = z.infer<typeof notificationSchema>;
 interface NotificationSettingsOnboardingProps {
   initialSlackWebhookUrl?: string;
   initialDiscordWebhookUrl?: string;
+  initialNotificationEmail?: string;
   initialEmailNotificationsEnabled?: boolean;
   initialSlackNotificationsEnabled?: boolean;
   initialDiscordNotificationsEnabled?: boolean;
@@ -35,6 +37,7 @@ interface NotificationSettingsOnboardingProps {
 export function NotificationSettingsOnboarding({
   initialSlackWebhookUrl = "",
   initialDiscordWebhookUrl = "",
+  initialNotificationEmail = "",
   initialEmailNotificationsEnabled = false,
   initialSlackNotificationsEnabled = false,
   initialDiscordNotificationsEnabled = false,
@@ -51,6 +54,7 @@ export function NotificationSettingsOnboarding({
     defaultValues: {
       slackWebhookUrl: initialSlackWebhookUrl,
       discordWebhookUrl: initialDiscordWebhookUrl,
+      notificationEmail: initialNotificationEmail,
       emailNotificationsEnabled: initialEmailNotificationsEnabled,
       slackNotificationsEnabled: initialSlackNotificationsEnabled,
       discordNotificationsEnabled: initialDiscordNotificationsEnabled,
@@ -62,6 +66,7 @@ export function NotificationSettingsOnboarding({
   const emailEnabled = watch("emailNotificationsEnabled");
   const slackEnabled = watch("slackNotificationsEnabled");
   const discordEnabled = watch("discordNotificationsEnabled");
+  const notificationEmail = watch("notificationEmail");
   const slackWebhookUrl = watch("slackWebhookUrl");
   const discordWebhookUrl = watch("discordWebhookUrl");
 
@@ -71,6 +76,7 @@ export function NotificationSettingsOnboarding({
       const formData = new FormData();
       formData.append("slackWebhookUrl", slackWebhookUrl || "");
       formData.append("discordWebhookUrl", discordWebhookUrl || "");
+      formData.append("notificationEmail", notificationEmail || "");
       formData.append("emailNotificationsEnabled", emailEnabled ? "true" : "false");
       formData.append("slackNotificationsEnabled", slackEnabled ? "true" : "false");
       formData.append("discordNotificationsEnabled", discordEnabled ? "true" : "false");
@@ -81,11 +87,11 @@ export function NotificationSettingsOnboarding({
     // Debounce auto-save by 500ms
     const timeoutId = setTimeout(autoSave, 500);
     return () => clearTimeout(timeoutId);
-  }, [emailEnabled, slackEnabled, discordEnabled, slackWebhookUrl, discordWebhookUrl]);
+  }, [emailEnabled, slackEnabled, discordEnabled, notificationEmail, slackWebhookUrl, discordWebhookUrl]);
 
   // Check if at least one notification channel is properly configured
   useEffect(() => {
-    const isEmailValid = emailEnabled;
+    const isEmailValid = emailEnabled && notificationEmail.trim().length > 0 && !errors.notificationEmail;
     const isSlackValid = slackEnabled && slackWebhookUrl.trim().length > 0 && !errors.slackWebhookUrl;
     const isDiscordValid = discordEnabled && discordWebhookUrl.trim().length > 0 && !errors.discordWebhookUrl;
 
@@ -94,7 +100,7 @@ export function NotificationSettingsOnboarding({
     if (onValidationChange) {
       onValidationChange(hasValidSettings);
     }
-  }, [emailEnabled, slackEnabled, discordEnabled, slackWebhookUrl, discordWebhookUrl, errors, onValidationChange]);
+  }, [emailEnabled, slackEnabled, discordEnabled, notificationEmail, slackWebhookUrl, discordWebhookUrl, errors, onValidationChange]);
 
   async function testWebhook(webhookUrl: string, type: "slack" | "discord" = "slack") {
     if (!webhookUrl) {
@@ -112,6 +118,24 @@ export function NotificationSettingsOnboarding({
       }
     } catch (error) {
       toast.error("Failed to test webhook. Please try again.");
+    }
+  }
+
+  async function testEmail(email: string) {
+    if (!email) {
+      toast.error("Please enter an email address first");
+      return;
+    }
+
+    try {
+      const result = await testEmailViaWorker(email);
+      if (result.success) {
+        toast.success("Test email sent! Check your inbox (and spam).");
+      } else {
+        toast.error(result.error || "Test email failed. Please check your setup.");
+      }
+    } catch {
+      toast.error("Failed to send test email. Please try again.");
     }
   }
 
@@ -146,13 +170,41 @@ export function NotificationSettingsOnboarding({
                   onCheckedChange={(checked) => setValue("emailNotificationsEnabled", checked)}
                 />
               </div>
-              {emailEnabled && (
-                <div className="ml-8 p-3 bg-muted/50 rounded-md">
-                  <p className="text-sm text-muted-foreground">
-                    Email notifications will be sent to your account email address.
-                  </p>
+              <div className="ml-8 space-y-2">
+                <Label htmlFor="notificationEmail" className={!emailEnabled ? "text-muted-foreground" : ""}>
+                  Notification Email
+                </Label>
+                <div className="flex gap-2">
+                  <div className="flex-1">
+                    <Input
+                      id="notificationEmail"
+                      type="email"
+                      placeholder="you@domain.com"
+                      disabled={!emailEnabled}
+                      {...register("notificationEmail")}
+                    />
+                    {errors.notificationEmail && notificationEmail && (
+                      <p className="text-sm text-destructive mt-1">
+                        {errors.notificationEmail.message}
+                      </p>
+                    )}
+                  </div>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    disabled={!emailEnabled || !notificationEmail || !!errors.notificationEmail}
+                    onClick={() => testEmail(notificationEmail || "")}
+                  >
+                    <Webhook className="h-4 w-4 mr-2" />
+                    Test
+                  </Button>
                 </div>
-              )}
+                {!emailEnabled && (
+                  <p className="text-sm text-muted-foreground">
+                    Enable Email notifications to set your email address
+                  </p>
+                )}
+              </div>
             </div>
 
             {/* Slack Notifications */}

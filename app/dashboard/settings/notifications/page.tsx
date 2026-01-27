@@ -11,6 +11,7 @@ interface SettingsData {
   projectSettings: {
     slack_webhook_url?: string;
     discord_webhook_url?: string;
+    notification_email?: string;
     email_notifications_enabled?: boolean;
     slack_notifications_enabled?: boolean;
     discord_notifications_enabled?: boolean;
@@ -138,6 +139,7 @@ export default function NotificationsSettingsPage() {
           <NotificationSettings
             initialSlackWebhookUrl={settings?.projectSettings?.slack_webhook_url || ""}
             initialDiscordWebhookUrl={settings?.projectSettings?.discord_webhook_url || ""}
+            initialNotificationEmail={settings?.projectSettings?.notification_email || ""}
             initialEmailNotificationsEnabled={settings?.projectSettings?.email_notifications_enabled || false}
             initialSlackNotificationsEnabled={settings?.projectSettings?.slack_notifications_enabled || false}
             initialDiscordNotificationsEnabled={settings?.projectSettings?.discord_notifications_enabled || false}

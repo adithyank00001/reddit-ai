@@ -2,9 +2,8 @@
 
 import { useEffect, useState, useMemo } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { Home, Settings, LogOut, Bell, MessageSquare } from "lucide-react";
-import { usePathname } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
+import { Home, Settings, LogOut, Bell, MessageSquare, MessageCircle } from "lucide-react";
 import { createClient } from "@/utils/supabase/client";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/theme-toggle";
@@ -101,6 +100,19 @@ export function Sidebar() {
               >
                 <MessageSquare className="h-4 w-4" />
                 Reply Intelligence
+              </Link>
+            </li>
+            <li>
+              <Link
+                href="/dashboard/talk-to-founder"
+                className={`flex items-center gap-2 px-3 py-2 rounded-md transition-colors ${
+                  isActive("/dashboard/talk-to-founder")
+                    ? "bg-primary text-primary-foreground"
+                    : "text-muted-foreground hover:text-foreground hover:bg-accent"
+                }`}
+              >
+                <MessageCircle className="h-4 w-4 text-emerald-500" />
+                Talk to Founder
               </Link>
             </li>
           </ul>

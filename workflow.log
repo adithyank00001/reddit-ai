@@ -383,3 +383,15 @@
 [2026-01-26 07:10:05.350] [18251ms] [INFO] [SETTINGS_UPDATE_SUCCESS] All settings updated successfully | DATA: {"descriptionLength":0,"keywordCount":0,"subredditsCount":0}
 [2026-01-26 07:10:06.053] [18954ms] [INFO] [ONBOARDING_STEP5_SKIP] Marking step 5 as skipped | DATA: {"userId":"4cd1ece8-7338-43f0-9f30-2a80878cdf60"}
 [2026-01-26 07:10:06.357] [19258ms] [INFO] [ONBOARDING_STEP5_SKIP_SUCCESS] Step 5 marked as skipped successfully | DATA: {"userId":"4cd1ece8-7338-43f0-9f30-2a80878cdf60"}
+[2026-01-27 09:19:58.325] [60ms] [INFO] [EMAIL_TEST_START] Testing email via gas-worker | DATA: {"notificationEmail":"adithyank0001@gmail.com"}
+[2026-01-27 09:20:03.170] [4904ms] [ERROR] [EMAIL_TEST_ERROR] Test email failed | DATA: {"error":"Missing webhookUrl or type in test payload"}
+[2026-01-27 09:20:12.061] [13795ms] [INFO] [EMAIL_TEST_START] Testing email via gas-worker | DATA: {"notificationEmail":"adithyank0001@gmail.com"}
+[2026-01-27 09:20:15.980] [17714ms] [ERROR] [EMAIL_TEST_ERROR] Test email failed | DATA: {"error":"Missing webhookUrl or type in test payload"}
+[2026-01-27 09:20:21.145] [22879ms] [INFO] [WEBHOOK_TEST_START] Testing webhook via gas-worker | DATA: {"type":"slack","webhookUrlPreview":"https://hooks.slack.com/services/T0AATDRR7PX/B0AAF..."}
+[2026-01-27 09:20:25.474] [27208ms] [INFO] [WEBHOOK_TEST_SUCCESS] Test notification sent successfully | DATA: {"type":"slack"}
+[2026-01-27 09:20:27.769] [29503ms] [INFO] [WEBHOOK_TEST_START] Testing webhook via gas-worker | DATA: {"type":"discord","webhookUrlPreview":"https://discord.com/api/webhooks/14652210991419883..."}
+[2026-01-27 09:20:32.357] [34091ms] [INFO] [WEBHOOK_TEST_SUCCESS] Test notification sent successfully | DATA: {"type":"discord"}
+[2026-01-27 09:24:02.022] [243758ms] [INFO] [EMAIL_TEST_START] Testing email via gas-worker | DATA: {"notificationEmail":"adithyank0001@gmail.com"}
+[2026-01-27 09:24:08.201] [249935ms] [ERROR] [EMAIL_TEST_ERROR] Test email failed | DATA: {"error":"RESEND_API_KEY not configured"}
+[2026-01-27 09:44:53.186] [115ms] [INFO] [EMAIL_TEST_START] Testing email via gas-worker | DATA: {"notificationEmail":"adithyank0001@gmail.com"}
+[2026-01-27 09:44:57.216] [4143ms] [INFO] [EMAIL_TEST_SUCCESS] Test email sent successfully | DATA: {"notificationEmail":"adithyank0001@gmail.com"}
