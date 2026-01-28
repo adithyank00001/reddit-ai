@@ -395,3 +395,148 @@
 [2026-01-27 09:24:08.201] [249935ms] [ERROR] [EMAIL_TEST_ERROR] Test email failed | DATA: {"error":"RESEND_API_KEY not configured"}
 [2026-01-27 09:44:53.186] [115ms] [INFO] [EMAIL_TEST_START] Testing email via gas-worker | DATA: {"notificationEmail":"adithyank0001@gmail.com"}
 [2026-01-27 09:44:57.216] [4143ms] [INFO] [EMAIL_TEST_SUCCESS] Test email sent successfully | DATA: {"notificationEmail":"adithyank0001@gmail.com"}
+[2026-01-27 14:33:51.056] [355ms] [INFO] [ONBOARDING_COMPLETE_SAVE] Saving complete onboarding data | DATA: {"userId":"c8afe079-880a-4318-bb4e-18fbdbe64381","urlLength":10,"descriptionLength":237,"keywordCount":2,"subredditCount":2}
+[2026-01-27 14:33:52.175] [1472ms] [INFO] [ONBOARDING_COMPLETE_SUCCESS] Complete onboarding data saved successfully | DATA: {"userId":"c8afe079-880a-4318-bb4e-18fbdbe64381","keywordCount":2,"subredditCount":2}
+[2026-01-27 14:34:58.337] [67634ms] [INFO] [VOICE_TRAINING_SUCCESS] Reply mode updated | DATA: {"userId":"c8afe079-880a-4318-bb4e-18fbdbe64381","mode":"custom"}
+[2026-01-27 14:45:22.479] [691776ms] [INFO] [AI_DEBUG] updateSettings FUNCTION CALLED - NEW CODE VERSION | DATA: {"timestamp":"2026-01-27T14:45:22.479Z"}
+[2026-01-27 14:45:22.944] [692247ms] [INFO] [AI_DEBUG] updateSettings USER ID CHECK | DATA: {"hasUserId":true,"userId":"c8afe079-880a-4318-bb4e-18fbdbe64381"}
+[2026-01-27 14:45:23.057] [692354ms] [INFO] [AI_DEBUG] updateSettings FORM DATA EXTRACTED | DATA: {"rawDescriptionLength":0,"rawDescriptionPreview":"","hasDescription":false,"trimmedLength":0}
+[2026-01-27 14:45:23.069] [692366ms] [INFO] [PARSED_SUBREDDITS] Parsed subreddits from form | DATA: {"userId":"c8afe079-880a-4318-bb4e-18fbdbe64381","subredditsCount":0,"subreddits":[],"subredditsJson":"[]","hasSubreddits":false}
+[2026-01-27 14:45:23.092] [692389ms] [INFO] [SETTINGS_UPDATE_START] Settings form received | DATA: {"userId":"c8afe079-880a-4318-bb4e-18fbdbe64381","descriptionLength":0,"keywordsCount":0,"subredditsCount":0,"hasWebhook":false}
+[2026-01-27 14:45:23.150] [692447ms] [INFO] [SETTINGS_UPDATE] Upserting settings to database | DATA: {"userId":"c8afe079-880a-4318-bb4e-18fbdbe64381","descriptionLength":0,"keywordCount":0,"operation":"upsert"}
+[2026-01-27 14:45:23.614] [692912ms] [INFO] [AI_DEBUG] updateSettings AFTER DB SAVE | DATA: {"hasError":false,"errorMessage":"none","errorCode":"none"}
+[2026-01-27 14:45:23.627] [692924ms] [INFO] [SETTINGS_UPDATE_SUCCESS] All settings updated successfully | DATA: {"descriptionLength":0,"keywordCount":0,"subredditsCount":0}
+[2026-01-27 14:45:45.089] [714386ms] [INFO] [AI_DEBUG] updateSettings FUNCTION CALLED - NEW CODE VERSION | DATA: {"timestamp":"2026-01-27T14:45:45.089Z"}
+[2026-01-27 14:45:45.431] [714728ms] [INFO] [AI_DEBUG] updateSettings USER ID CHECK | DATA: {"hasUserId":true,"userId":"c8afe079-880a-4318-bb4e-18fbdbe64381"}
+[2026-01-27 14:45:45.433] [714730ms] [INFO] [AI_DEBUG] updateSettings FORM DATA EXTRACTED | DATA: {"rawDescriptionLength":0,"rawDescriptionPreview":"","hasDescription":false,"trimmedLength":0}
+[2026-01-27 14:45:45.435] [714732ms] [INFO] [PARSED_SUBREDDITS] Parsed subreddits from form | DATA: {"userId":"c8afe079-880a-4318-bb4e-18fbdbe64381","subredditsCount":0,"subreddits":[],"subredditsJson":"[]","hasSubreddits":false}
+[2026-01-27 14:45:45.439] [714736ms] [INFO] [SETTINGS_UPDATE_START] Settings form received | DATA: {"userId":"c8afe079-880a-4318-bb4e-18fbdbe64381","descriptionLength":0,"keywordsCount":0,"subredditsCount":0,"hasWebhook":false}
+[2026-01-27 14:45:45.442] [714739ms] [INFO] [SETTINGS_UPDATE] Upserting settings to database | DATA: {"userId":"c8afe079-880a-4318-bb4e-18fbdbe64381","descriptionLength":0,"keywordCount":0,"operation":"upsert"}
+[2026-01-27 14:45:45.767] [715064ms] [INFO] [AI_DEBUG] updateSettings AFTER DB SAVE | DATA: {"hasError":false,"errorMessage":"none","errorCode":"none"}
+[2026-01-27 14:45:45.768] [715065ms] [INFO] [SETTINGS_UPDATE_SUCCESS] All settings updated successfully | DATA: {"descriptionLength":0,"keywordCount":0,"subredditsCount":0}
+[2026-01-27 14:45:58.137] [727434ms] [INFO] [AI_DEBUG] updateSettings FUNCTION CALLED - NEW CODE VERSION | DATA: {"timestamp":"2026-01-27T14:45:58.137Z"}
+[2026-01-27 14:45:58.466] [727763ms] [INFO] [AI_DEBUG] updateSettings USER ID CHECK | DATA: {"hasUserId":true,"userId":"c8afe079-880a-4318-bb4e-18fbdbe64381"}
+[2026-01-27 14:45:58.469] [727766ms] [INFO] [AI_DEBUG] updateSettings FORM DATA EXTRACTED | DATA: {"rawDescriptionLength":0,"rawDescriptionPreview":"","hasDescription":false,"trimmedLength":0}
+[2026-01-27 14:45:58.470] [727767ms] [INFO] [PARSED_SUBREDDITS] Parsed subreddits from form | DATA: {"userId":"c8afe079-880a-4318-bb4e-18fbdbe64381","subredditsCount":0,"subreddits":[],"subredditsJson":"[]","hasSubreddits":false}
+[2026-01-27 14:45:58.471] [727768ms] [INFO] [SETTINGS_UPDATE_START] Settings form received | DATA: {"userId":"c8afe079-880a-4318-bb4e-18fbdbe64381","descriptionLength":0,"keywordsCount":0,"subredditsCount":0,"hasWebhook":false}
+[2026-01-27 14:45:58.472] [727769ms] [INFO] [SETTINGS_UPDATE] Upserting settings to database | DATA: {"userId":"c8afe079-880a-4318-bb4e-18fbdbe64381","descriptionLength":0,"keywordCount":0,"operation":"upsert"}
+[2026-01-27 14:45:58.837] [728134ms] [INFO] [AI_DEBUG] updateSettings AFTER DB SAVE | DATA: {"hasError":false,"errorMessage":"none","errorCode":"none"}
+[2026-01-27 14:45:58.839] [728136ms] [INFO] [SETTINGS_UPDATE_SUCCESS] All settings updated successfully | DATA: {"descriptionLength":0,"keywordCount":0,"subredditsCount":0}
+[2026-01-27 14:45:59.815] [729112ms] [INFO] [AI_DEBUG] updateSettings FUNCTION CALLED - NEW CODE VERSION | DATA: {"timestamp":"2026-01-27T14:45:59.815Z"}
+[2026-01-27 14:46:00.154] [729451ms] [INFO] [AI_DEBUG] updateSettings USER ID CHECK | DATA: {"hasUserId":true,"userId":"c8afe079-880a-4318-bb4e-18fbdbe64381"}
+[2026-01-27 14:46:00.157] [729454ms] [INFO] [AI_DEBUG] updateSettings FORM DATA EXTRACTED | DATA: {"rawDescriptionLength":0,"rawDescriptionPreview":"","hasDescription":false,"trimmedLength":0}
+[2026-01-27 14:46:00.158] [729455ms] [INFO] [PARSED_SUBREDDITS] Parsed subreddits from form | DATA: {"userId":"c8afe079-880a-4318-bb4e-18fbdbe64381","subredditsCount":0,"subreddits":[],"subredditsJson":"[]","hasSubreddits":false}
+[2026-01-27 14:46:00.159] [729457ms] [INFO] [SETTINGS_UPDATE_START] Settings form received | DATA: {"userId":"c8afe079-880a-4318-bb4e-18fbdbe64381","descriptionLength":0,"keywordsCount":0,"subredditsCount":0,"hasWebhook":false}
+[2026-01-27 14:46:00.162] [729459ms] [INFO] [SETTINGS_UPDATE] Upserting settings to database | DATA: {"userId":"c8afe079-880a-4318-bb4e-18fbdbe64381","descriptionLength":0,"keywordCount":0,"operation":"upsert"}
+[2026-01-27 14:46:00.521] [729818ms] [INFO] [AI_DEBUG] updateSettings AFTER DB SAVE | DATA: {"hasError":false,"errorMessage":"none","errorCode":"none"}
+[2026-01-27 14:46:00.522] [729819ms] [INFO] [SETTINGS_UPDATE_SUCCESS] All settings updated successfully | DATA: {"descriptionLength":0,"keywordCount":0,"subredditsCount":0}
+[2026-01-27 14:46:01.506] [730803ms] [INFO] [AI_DEBUG] updateSettings FUNCTION CALLED - NEW CODE VERSION | DATA: {"timestamp":"2026-01-27T14:46:01.506Z"}
+[2026-01-27 14:46:01.931] [731228ms] [INFO] [AI_DEBUG] updateSettings USER ID CHECK | DATA: {"hasUserId":true,"userId":"c8afe079-880a-4318-bb4e-18fbdbe64381"}
+[2026-01-27 14:46:01.934] [731231ms] [INFO] [AI_DEBUG] updateSettings FORM DATA EXTRACTED | DATA: {"rawDescriptionLength":0,"rawDescriptionPreview":"","hasDescription":false,"trimmedLength":0}
+[2026-01-27 14:46:01.935] [731232ms] [INFO] [PARSED_SUBREDDITS] Parsed subreddits from form | DATA: {"userId":"c8afe079-880a-4318-bb4e-18fbdbe64381","subredditsCount":0,"subreddits":[],"subredditsJson":"[]","hasSubreddits":false}
+[2026-01-27 14:46:01.936] [731233ms] [INFO] [SETTINGS_UPDATE_START] Settings form received | DATA: {"userId":"c8afe079-880a-4318-bb4e-18fbdbe64381","descriptionLength":0,"keywordsCount":0,"subredditsCount":0,"hasWebhook":false}
+[2026-01-27 14:46:01.937] [731234ms] [INFO] [SETTINGS_UPDATE] Upserting settings to database | DATA: {"userId":"c8afe079-880a-4318-bb4e-18fbdbe64381","descriptionLength":0,"keywordCount":0,"operation":"upsert"}
+[2026-01-27 14:46:02.273] [731570ms] [INFO] [AI_DEBUG] updateSettings AFTER DB SAVE | DATA: {"hasError":false,"errorMessage":"none","errorCode":"none"}
+[2026-01-27 14:46:02.277] [731574ms] [INFO] [SETTINGS_UPDATE_SUCCESS] All settings updated successfully | DATA: {"descriptionLength":0,"keywordCount":0,"subredditsCount":0}
+[2026-01-27 14:46:03.432] [732729ms] [INFO] [AI_DEBUG] updateSettings FUNCTION CALLED - NEW CODE VERSION | DATA: {"timestamp":"2026-01-27T14:46:03.432Z"}
+[2026-01-27 14:46:03.789] [733086ms] [INFO] [AI_DEBUG] updateSettings USER ID CHECK | DATA: {"hasUserId":true,"userId":"c8afe079-880a-4318-bb4e-18fbdbe64381"}
+[2026-01-27 14:46:03.792] [733089ms] [INFO] [AI_DEBUG] updateSettings FORM DATA EXTRACTED | DATA: {"rawDescriptionLength":0,"rawDescriptionPreview":"","hasDescription":false,"trimmedLength":0}
+[2026-01-27 14:46:03.795] [733092ms] [INFO] [PARSED_SUBREDDITS] Parsed subreddits from form | DATA: {"userId":"c8afe079-880a-4318-bb4e-18fbdbe64381","subredditsCount":0,"subreddits":[],"subredditsJson":"[]","hasSubreddits":false}
+[2026-01-27 14:46:03.797] [733094ms] [INFO] [SETTINGS_UPDATE_START] Settings form received | DATA: {"userId":"c8afe079-880a-4318-bb4e-18fbdbe64381","descriptionLength":0,"keywordsCount":0,"subredditsCount":0,"hasWebhook":false}
+[2026-01-27 14:46:03.800] [733097ms] [INFO] [SETTINGS_UPDATE] Upserting settings to database | DATA: {"userId":"c8afe079-880a-4318-bb4e-18fbdbe64381","descriptionLength":0,"keywordCount":0,"operation":"upsert"}
+[2026-01-27 14:46:04.174] [733471ms] [INFO] [AI_DEBUG] updateSettings AFTER DB SAVE | DATA: {"hasError":false,"errorMessage":"none","errorCode":"none"}
+[2026-01-27 14:46:04.177] [733474ms] [INFO] [SETTINGS_UPDATE_SUCCESS] All settings updated successfully | DATA: {"descriptionLength":0,"keywordCount":0,"subredditsCount":0}
+[2026-01-27 14:46:04.749] [734046ms] [INFO] [EMAIL_TEST_START] Testing email via gas-worker | DATA: {"notificationEmail":"adithyank0001@gmail.com"}
+[2026-01-27 14:46:07.452] [736749ms] [INFO] [EMAIL_TEST_SUCCESS] Test email sent successfully | DATA: {"notificationEmail":"adithyank0001@gmail.com"}
+[2026-01-27 14:57:27.332] [132ms] [INFO] [AI_DEBUG] updateSettings FUNCTION CALLED - NEW CODE VERSION | DATA: {"timestamp":"2026-01-27T14:57:27.331Z"}
+[2026-01-27 14:57:27.736] [536ms] [INFO] [AI_DEBUG] updateSettings USER ID CHECK | DATA: {"hasUserId":true,"userId":"c8afe079-880a-4318-bb4e-18fbdbe64381"}
+[2026-01-27 14:57:27.742] [542ms] [INFO] [AI_DEBUG] updateSettings FORM DATA EXTRACTED | DATA: {"rawDescriptionLength":237,"rawDescriptionPreview":"Struggling to make your brand stand out locally? O","hasDescription":true,"trimmedLength":237}
+[2026-01-27 14:57:27.746] [546ms] [INFO] [PARSED_SUBREDDITS] Parsed subreddits from form | DATA: {"userId":"c8afe079-880a-4318-bb4e-18fbdbe64381","subredditsCount":0,"subreddits":[],"subredditsJson":"[]","hasSubreddits":true}
+[2026-01-27 14:57:27.752] [552ms] [INFO] [SETTINGS_UPDATE_START] Settings form received | DATA: {"userId":"c8afe079-880a-4318-bb4e-18fbdbe64381","descriptionLength":237,"keywordsCount":2,"subredditsCount":0,"hasWebhook":false}
+[2026-01-27 14:57:27.757] [557ms] [INFO] [SETTINGS_UPDATE] Upserting settings to database | DATA: {"userId":"c8afe079-880a-4318-bb4e-18fbdbe64381","descriptionLength":237,"keywordCount":2,"operation":"upsert"}
+[2026-01-27 14:57:28.225] [1025ms] [INFO] [AI_DEBUG] updateSettings AFTER DB SAVE | DATA: {"hasError":false,"errorMessage":"none","errorCode":"none"}
+[2026-01-27 14:57:28.942] [1742ms] [INFO] [SUBREDDIT_SYNC_DEBUG] Subreddit sync analysis | DATA: {"userId":"c8afe079-880a-4318-bb4e-18fbdbe64381","cleanedSubreddits":[],"existingAlertsCount":2,"activeAlertsCount":2,"inactiveAlertsCount":0,"activeAlerts":[{"id":"ddf55d08-5f46-4844-87ae-54370ac1b382","subreddit":"saas","is_active":true},{"id":"61569f87-931b-4061-8a2f-2d4af1602dd8","subreddit":"entrepreneur","is_active":true}],"toInsert":[],"toReactivate":[],"toRemove":[{"id":"ddf55d08-5f46-4844-87ae-54370ac1b382","subreddit":"saas"},{"id":"61569f87-931b-4061-8a2f-2d4af1602dd8","subreddit":"entrepreneur"}],"desiredSet":[]}
+[2026-01-27 14:57:28.945] [1746ms] [INFO] [DEACTIVATING_ALERTS] Setting alerts to inactive | DATA: {"userId":"c8afe079-880a-4318-bb4e-18fbdbe64381","idsToRemove":["ddf55d08-5f46-4844-87ae-54370ac1b382","61569f87-931b-4061-8a2f-2d4af1602dd8"],"subreddits":["saas","entrepreneur"]}
+[2026-01-27 14:57:29.344] [2144ms] [INFO] [DEACTIVATE_ALERTS_SUCCESS] Successfully deactivated alerts | DATA: {"userId":"c8afe079-880a-4318-bb4e-18fbdbe64381","count":2,"idsToRemove":["ddf55d08-5f46-4844-87ae-54370ac1b382","61569f87-931b-4061-8a2f-2d4af1602dd8"]}
+[2026-01-27 14:57:29.346] [2146ms] [INFO] [SETTINGS_UPDATE_SUCCESS] All settings updated successfully | DATA: {"descriptionLength":237,"keywordCount":2,"subredditsCount":0}
+[2026-01-27 14:58:01.971] [34771ms] [INFO] [AI_DEBUG] updateSettings FUNCTION CALLED - NEW CODE VERSION | DATA: {"timestamp":"2026-01-27T14:58:01.971Z"}
+[2026-01-27 14:58:02.366] [35166ms] [INFO] [AI_DEBUG] updateSettings USER ID CHECK | DATA: {"hasUserId":true,"userId":"c8afe079-880a-4318-bb4e-18fbdbe64381"}
+[2026-01-27 14:58:02.371] [35171ms] [INFO] [AI_DEBUG] updateSettings FORM DATA EXTRACTED | DATA: {"rawDescriptionLength":237,"rawDescriptionPreview":"Struggling to make your brand stand out locally? O","hasDescription":true,"trimmedLength":237}
+[2026-01-27 14:58:02.373] [35173ms] [INFO] [PARSED_SUBREDDITS] Parsed subreddits from form | DATA: {"userId":"c8afe079-880a-4318-bb4e-18fbdbe64381","subredditsCount":1,"subreddits":["saas"],"subredditsJson":"[\"saas\"]","hasSubreddits":true}
+[2026-01-27 14:58:02.374] [35174ms] [INFO] [SETTINGS_UPDATE_START] Settings form received | DATA: {"userId":"c8afe079-880a-4318-bb4e-18fbdbe64381","descriptionLength":237,"keywordsCount":2,"subredditsCount":1,"hasWebhook":false}
+[2026-01-27 14:58:02.376] [35176ms] [INFO] [SETTINGS_UPDATE] Upserting settings to database | DATA: {"userId":"c8afe079-880a-4318-bb4e-18fbdbe64381","descriptionLength":237,"keywordCount":2,"operation":"upsert"}
+[2026-01-27 14:58:02.758] [35558ms] [INFO] [AI_DEBUG] updateSettings AFTER DB SAVE | DATA: {"hasError":false,"errorMessage":"none","errorCode":"none"}
+[2026-01-27 14:58:03.237] [36037ms] [INFO] [SUBREDDIT_SYNC_DEBUG] Subreddit sync analysis | DATA: {"userId":"c8afe079-880a-4318-bb4e-18fbdbe64381","cleanedSubreddits":["saas"],"existingAlertsCount":2,"activeAlertsCount":0,"inactiveAlertsCount":2,"activeAlerts":[],"toInsert":[],"toReactivate":["saas"],"toRemove":[],"desiredSet":["saas"]}
+[2026-01-27 14:58:03.654] [36454ms] [INFO] [NO_ALERTS_TO_REMOVE] No alerts need to be deactivated | DATA: {"userId":"c8afe079-880a-4318-bb4e-18fbdbe64381","cleanedSubreddits":["saas"],"activeAlertsCount":0}
+[2026-01-27 14:58:03.656] [36456ms] [INFO] [SETTINGS_UPDATE_SUCCESS] All settings updated successfully | DATA: {"descriptionLength":237,"keywordCount":2,"subredditsCount":1}
+[2026-01-27 14:58:19.620] [790ms] [INFO] [VOICE_TRAINING_SUCCESS] Reply mode updated | DATA: {"userId":"c8afe079-880a-4318-bb4e-18fbdbe64381","mode":"custom"}
+[2026-01-27 15:25:59.910] [152ms] [INFO] [AI_DEBUG] updateSettings FUNCTION CALLED - NEW CODE VERSION | DATA: {"timestamp":"2026-01-27T15:25:59.910Z"}
+[2026-01-27 15:26:00.362] [603ms] [INFO] [AI_DEBUG] updateSettings USER ID CHECK | DATA: {"hasUserId":true,"userId":"c8afe079-880a-4318-bb4e-18fbdbe64381"}
+[2026-01-27 15:26:00.366] [607ms] [INFO] [AI_DEBUG] updateSettings FORM DATA EXTRACTED | DATA: {"rawDescriptionLength":237,"rawDescriptionPreview":"Struggling to make your brand stand out locally? O","hasDescription":true,"trimmedLength":237}
+[2026-01-27 15:26:00.367] [608ms] [INFO] [PARSED_SUBREDDITS] Parsed subreddits from form | DATA: {"userId":"c8afe079-880a-4318-bb4e-18fbdbe64381","subredditsCount":1,"subreddits":["saas"],"subredditsJson":"[\"saas\"]","hasSubreddits":true}
+[2026-01-27 15:26:00.369] [610ms] [INFO] [SETTINGS_UPDATE_START] Settings form received | DATA: {"userId":"c8afe079-880a-4318-bb4e-18fbdbe64381","descriptionLength":237,"keywordsCount":1,"subredditsCount":1,"hasWebhook":false}
+[2026-01-27 15:26:00.372] [613ms] [INFO] [SETTINGS_UPDATE] Upserting settings to database | DATA: {"userId":"c8afe079-880a-4318-bb4e-18fbdbe64381","descriptionLength":237,"keywordCount":1,"operation":"upsert"}
+[2026-01-27 15:26:01.016] [1257ms] [INFO] [AI_DEBUG] updateSettings AFTER DB SAVE | DATA: {"hasError":false,"errorMessage":"none","errorCode":"none"}
+[2026-01-27 15:26:01.749] [1990ms] [INFO] [SUBREDDIT_SYNC_DEBUG] Subreddit sync analysis | DATA: {"userId":"c8afe079-880a-4318-bb4e-18fbdbe64381","cleanedSubreddits":["saas"],"existingAlertsCount":2,"activeAlertsCount":1,"inactiveAlertsCount":1,"activeAlerts":[{"id":"ddf55d08-5f46-4844-87ae-54370ac1b382","subreddit":"saas","is_active":true}],"toInsert":[],"toReactivate":[],"toRemove":[],"desiredSet":["saas"]}
+[2026-01-27 15:26:01.751] [1992ms] [INFO] [NO_ALERTS_TO_REMOVE] No alerts need to be deactivated | DATA: {"userId":"c8afe079-880a-4318-bb4e-18fbdbe64381","cleanedSubreddits":["saas"],"activeAlertsCount":1}
+[2026-01-27 15:26:01.752] [1993ms] [INFO] [SETTINGS_UPDATE_SUCCESS] All settings updated successfully | DATA: {"descriptionLength":237,"keywordCount":1,"subredditsCount":1}
+[2026-01-27 15:26:14.285] [14526ms] [INFO] [AI_DEBUG] updateSettings FUNCTION CALLED - NEW CODE VERSION | DATA: {"timestamp":"2026-01-27T15:26:14.285Z"}
+[2026-01-27 15:26:15.682] [15923ms] [INFO] [AI_DEBUG] updateSettings USER ID CHECK | DATA: {"hasUserId":true,"userId":"c8afe079-880a-4318-bb4e-18fbdbe64381"}
+[2026-01-27 15:26:15.685] [15926ms] [INFO] [AI_DEBUG] updateSettings FORM DATA EXTRACTED | DATA: {"rawDescriptionLength":237,"rawDescriptionPreview":"Struggling to make your brand stand out locally? O","hasDescription":true,"trimmedLength":237}
+[2026-01-27 15:26:15.686] [15927ms] [INFO] [PARSED_SUBREDDITS] Parsed subreddits from form | DATA: {"userId":"c8afe079-880a-4318-bb4e-18fbdbe64381","subredditsCount":1,"subreddits":["saas"],"subredditsJson":"[\"saas\"]","hasSubreddits":true}
+[2026-01-27 15:26:15.693] [15934ms] [INFO] [SETTINGS_UPDATE_START] Settings form received | DATA: {"userId":"c8afe079-880a-4318-bb4e-18fbdbe64381","descriptionLength":237,"keywordsCount":2,"subredditsCount":1,"hasWebhook":false}
+[2026-01-27 15:26:15.696] [15937ms] [INFO] [SETTINGS_UPDATE] Upserting settings to database | DATA: {"userId":"c8afe079-880a-4318-bb4e-18fbdbe64381","descriptionLength":237,"keywordCount":2,"operation":"upsert"}
+[2026-01-27 15:26:16.182] [16423ms] [INFO] [AI_DEBUG] updateSettings AFTER DB SAVE | DATA: {"hasError":false,"errorMessage":"none","errorCode":"none"}
+[2026-01-27 15:26:16.689] [16930ms] [INFO] [SUBREDDIT_SYNC_DEBUG] Subreddit sync analysis | DATA: {"userId":"c8afe079-880a-4318-bb4e-18fbdbe64381","cleanedSubreddits":["saas"],"existingAlertsCount":2,"activeAlertsCount":1,"inactiveAlertsCount":1,"activeAlerts":[{"id":"ddf55d08-5f46-4844-87ae-54370ac1b382","subreddit":"saas","is_active":true}],"toInsert":[],"toReactivate":[],"toRemove":[],"desiredSet":["saas"]}
+[2026-01-27 15:26:16.696] [16937ms] [INFO] [NO_ALERTS_TO_REMOVE] No alerts need to be deactivated | DATA: {"userId":"c8afe079-880a-4318-bb4e-18fbdbe64381","cleanedSubreddits":["saas"],"activeAlertsCount":1}
+[2026-01-27 15:26:16.698] [16939ms] [INFO] [SETTINGS_UPDATE_SUCCESS] All settings updated successfully | DATA: {"descriptionLength":237,"keywordCount":2,"subredditsCount":1}
+[2026-01-27 15:35:13.183] [3682481ms] [INFO] [ONBOARDING_COMPLETE_SAVE] Saving complete onboarding data | DATA: {"userId":"6caff41b-6cd0-4255-bac8-ab6e62380c86","urlLength":12,"descriptionLength":319,"keywordCount":3,"subredditCount":1}
+[2026-01-27 15:35:14.454] [3683751ms] [INFO] [ONBOARDING_COMPLETE_SUCCESS] Complete onboarding data saved successfully | DATA: {"userId":"6caff41b-6cd0-4255-bac8-ab6e62380c86","keywordCount":3,"subredditCount":1}
+[2026-01-27 15:35:24.630] [434ms] [INFO] [ONBOARDING_STEP4_SKIP] Marking step 4 as skipped | DATA: {"userId":"6caff41b-6cd0-4255-bac8-ab6e62380c86"}
+[2026-01-27 15:35:25.017] [821ms] [INFO] [ONBOARDING_STEP4_SKIP_SUCCESS] Step 4 marked as skipped successfully | DATA: {"userId":"6caff41b-6cd0-4255-bac8-ab6e62380c86"}
+[2026-01-27 15:35:31.459] [17ms] [INFO] [AI_DEBUG] updateSettings FUNCTION CALLED - NEW CODE VERSION | DATA: {"timestamp":"2026-01-27T15:35:31.459Z"}
+[2026-01-27 15:35:31.852] [410ms] [INFO] [AI_DEBUG] updateSettings USER ID CHECK | DATA: {"hasUserId":true,"userId":"6caff41b-6cd0-4255-bac8-ab6e62380c86"}
+[2026-01-27 15:35:31.858] [416ms] [INFO] [AI_DEBUG] updateSettings FORM DATA EXTRACTED | DATA: {"rawDescriptionLength":0,"rawDescriptionPreview":"","hasDescription":false,"trimmedLength":0}
+[2026-01-27 15:35:31.860] [418ms] [INFO] [PARSED_SUBREDDITS] Parsed subreddits from form | DATA: {"userId":"6caff41b-6cd0-4255-bac8-ab6e62380c86","subredditsCount":0,"subreddits":[],"subredditsJson":"[]","hasSubreddits":false}
+[2026-01-27 15:35:31.861] [419ms] [INFO] [SETTINGS_UPDATE_START] Settings form received | DATA: {"userId":"6caff41b-6cd0-4255-bac8-ab6e62380c86","descriptionLength":0,"keywordsCount":0,"subredditsCount":0,"hasWebhook":false}
+[2026-01-27 15:35:31.862] [421ms] [INFO] [SETTINGS_UPDATE] Upserting settings to database | DATA: {"userId":"6caff41b-6cd0-4255-bac8-ab6e62380c86","descriptionLength":0,"keywordCount":0,"operation":"upsert"}
+[2026-01-27 15:35:32.761] [1319ms] [INFO] [AI_DEBUG] updateSettings AFTER DB SAVE | DATA: {"hasError":false,"errorMessage":"none","errorCode":"none"}
+[2026-01-27 15:35:32.763] [1321ms] [INFO] [SETTINGS_UPDATE_SUCCESS] All settings updated successfully | DATA: {"descriptionLength":0,"keywordCount":0,"subredditsCount":0}
+[2026-01-27 15:35:40.436] [8994ms] [INFO] [AI_DEBUG] updateSettings FUNCTION CALLED - NEW CODE VERSION | DATA: {"timestamp":"2026-01-27T15:35:40.436Z"}
+[2026-01-27 15:35:40.855] [9413ms] [INFO] [AI_DEBUG] updateSettings USER ID CHECK | DATA: {"hasUserId":true,"userId":"6caff41b-6cd0-4255-bac8-ab6e62380c86"}
+[2026-01-27 15:35:40.868] [9426ms] [INFO] [AI_DEBUG] updateSettings FORM DATA EXTRACTED | DATA: {"rawDescriptionLength":0,"rawDescriptionPreview":"","hasDescription":false,"trimmedLength":0}
+[2026-01-27 15:35:40.878] [9436ms] [INFO] [PARSED_SUBREDDITS] Parsed subreddits from form | DATA: {"userId":"6caff41b-6cd0-4255-bac8-ab6e62380c86","subredditsCount":0,"subreddits":[],"subredditsJson":"[]","hasSubreddits":false}
+[2026-01-27 15:35:40.880] [9438ms] [INFO] [SETTINGS_UPDATE_START] Settings form received | DATA: {"userId":"6caff41b-6cd0-4255-bac8-ab6e62380c86","descriptionLength":0,"keywordsCount":0,"subredditsCount":0,"hasWebhook":false}
+[2026-01-27 15:35:40.887] [9445ms] [INFO] [SETTINGS_UPDATE] Upserting settings to database | DATA: {"userId":"6caff41b-6cd0-4255-bac8-ab6e62380c86","descriptionLength":0,"keywordCount":0,"operation":"upsert"}
+[2026-01-27 15:35:41.289] [9847ms] [INFO] [AI_DEBUG] updateSettings AFTER DB SAVE | DATA: {"hasError":false,"errorMessage":"none","errorCode":"none"}
+[2026-01-27 15:35:41.293] [9851ms] [INFO] [SETTINGS_UPDATE_SUCCESS] All settings updated successfully | DATA: {"descriptionLength":0,"keywordCount":0,"subredditsCount":0}
+[2026-01-27 15:35:56.336] [24894ms] [INFO] [AI_DEBUG] updateSettings FUNCTION CALLED - NEW CODE VERSION | DATA: {"timestamp":"2026-01-27T15:35:56.336Z"}
+[2026-01-27 15:35:56.748] [25306ms] [INFO] [AI_DEBUG] updateSettings USER ID CHECK | DATA: {"hasUserId":true,"userId":"6caff41b-6cd0-4255-bac8-ab6e62380c86"}
+[2026-01-27 15:35:56.752] [25310ms] [INFO] [AI_DEBUG] updateSettings FORM DATA EXTRACTED | DATA: {"rawDescriptionLength":0,"rawDescriptionPreview":"","hasDescription":false,"trimmedLength":0}
+[2026-01-27 15:35:56.755] [25313ms] [INFO] [PARSED_SUBREDDITS] Parsed subreddits from form | DATA: {"userId":"6caff41b-6cd0-4255-bac8-ab6e62380c86","subredditsCount":0,"subreddits":[],"subredditsJson":"[]","hasSubreddits":false}
+[2026-01-27 15:35:56.759] [25317ms] [INFO] [SETTINGS_UPDATE_START] Settings form received | DATA: {"userId":"6caff41b-6cd0-4255-bac8-ab6e62380c86","descriptionLength":0,"keywordsCount":0,"subredditsCount":0,"hasWebhook":false}
+[2026-01-27 15:35:56.765] [25323ms] [INFO] [SETTINGS_UPDATE] Upserting settings to database | DATA: {"userId":"6caff41b-6cd0-4255-bac8-ab6e62380c86","descriptionLength":0,"keywordCount":0,"operation":"upsert"}
+[2026-01-27 15:35:57.908] [26466ms] [INFO] [AI_DEBUG] updateSettings AFTER DB SAVE | DATA: {"hasError":false,"errorMessage":"none","errorCode":"none"}
+[2026-01-27 15:35:57.910] [26468ms] [INFO] [SETTINGS_UPDATE_SUCCESS] All settings updated successfully | DATA: {"descriptionLength":0,"keywordCount":0,"subredditsCount":0}
+[2026-01-27 15:36:01.364] [11ms] [INFO] [EMAIL_TEST_START] Testing email via gas-worker | DATA: {"notificationEmail":"5ameyamadhu@gmail.com"}
+[2026-01-27 15:36:05.920] [4567ms] [ERROR] [EMAIL_TEST_ERROR] Test email failed | DATA: {"error":"Failed to send test email"}
+[2026-01-27 15:36:06.815] [5462ms] [INFO] [EMAIL_TEST_START] Testing email via gas-worker | DATA: {"notificationEmail":"5ameyamadhu@gmail.com"}
+[2026-01-27 15:36:11.100] [9747ms] [ERROR] [EMAIL_TEST_ERROR] Test email failed | DATA: {"error":"Failed to send test email"}
+[2026-01-27 15:37:40.789] [99436ms] [INFO] [EMAIL_TEST_START] Testing email via gas-worker | DATA: {"notificationEmail":"5ameyamadhu@gmail.com"}
+[2026-01-27 15:37:45.185] [103832ms] [ERROR] [EMAIL_TEST_ERROR] Test email failed | DATA: {"error":"Failed to send test email"}
+[2026-01-27 15:37:50.789] [109446ms] [INFO] [EMAIL_TEST_START] Testing email via gas-worker | DATA: {"notificationEmail":"5ameyamadhu@gmail.com"}
+[2026-01-27 15:37:53.182] [111829ms] [ERROR] [EMAIL_TEST_ERROR] Test email failed | DATA: {"error":"Failed to send test email"}
+[2026-01-27 15:43:08.149] [86ms] [INFO] [AI_DEBUG] updateSettings FUNCTION CALLED - NEW CODE VERSION | DATA: {"timestamp":"2026-01-27T15:43:08.149Z"}
+[2026-01-27 15:43:08.562] [499ms] [INFO] [AI_DEBUG] updateSettings USER ID CHECK | DATA: {"hasUserId":true,"userId":"6caff41b-6cd0-4255-bac8-ab6e62380c86"}
+[2026-01-27 15:43:08.565] [502ms] [INFO] [AI_DEBUG] updateSettings FORM DATA EXTRACTED | DATA: {"rawDescriptionLength":319,"rawDescriptionPreview":"Supabase simplifies building scalable, secure Post","hasDescription":true,"trimmedLength":319}
+[2026-01-27 15:43:08.566] [503ms] [INFO] [PARSED_SUBREDDITS] Parsed subreddits from form | DATA: {"userId":"6caff41b-6cd0-4255-bac8-ab6e62380c86","subredditsCount":1,"subreddits":["saas"],"subredditsJson":"[\"saas\"]","hasSubreddits":true}
+[2026-01-27 15:43:08.568] [505ms] [INFO] [SETTINGS_UPDATE_START] Settings form received | DATA: {"userId":"6caff41b-6cd0-4255-bac8-ab6e62380c86","descriptionLength":319,"keywordsCount":2,"subredditsCount":1,"hasWebhook":false}
+[2026-01-27 15:43:08.571] [508ms] [INFO] [SETTINGS_UPDATE] Upserting settings to database | DATA: {"userId":"6caff41b-6cd0-4255-bac8-ab6e62380c86","descriptionLength":319,"keywordCount":2,"operation":"upsert"}
+[2026-01-27 15:43:08.956] [893ms] [INFO] [AI_DEBUG] updateSettings AFTER DB SAVE | DATA: {"hasError":false,"errorMessage":"none","errorCode":"none"}
+[2026-01-27 15:43:09.429] [1366ms] [INFO] [SUBREDDIT_SYNC_DEBUG] Subreddit sync analysis | DATA: {"userId":"6caff41b-6cd0-4255-bac8-ab6e62380c86","cleanedSubreddits":["saas"],"existingAlertsCount":1,"activeAlertsCount":1,"inactiveAlertsCount":0,"activeAlerts":[{"id":"a83f329c-c3cb-42fa-b6ed-2829950411c2","subreddit":"saas","is_active":true}],"toInsert":[],"toReactivate":[],"toRemove":[],"desiredSet":["saas"]}
+[2026-01-27 15:43:09.432] [1369ms] [INFO] [NO_ALERTS_TO_REMOVE] No alerts need to be deactivated | DATA: {"userId":"6caff41b-6cd0-4255-bac8-ab6e62380c86","cleanedSubreddits":["saas"],"activeAlertsCount":1}
+[2026-01-27 15:43:09.440] [1377ms] [INFO] [SETTINGS_UPDATE_SUCCESS] All settings updated successfully | DATA: {"descriptionLength":319,"keywordCount":2,"subredditsCount":1}
+[2026-01-27 16:10:00.208] [19ms] [INFO] [EMAIL_TEST_START] Testing email via gas-worker | DATA: {"notificationEmail":"adithyank0001@gmail.com"}
+[2026-01-27 16:10:05.470] [5280ms] [INFO] [EMAIL_TEST_SUCCESS] Test email sent successfully | DATA: {"notificationEmail":"adithyank0001@gmail.com"}
+[2026-01-27 16:10:10.292] [10102ms] [INFO] [EMAIL_TEST_START] Testing email via gas-worker | DATA: {"notificationEmail":"adithyank0002@gmail.com"}
+[2026-01-27 16:10:14.721] [14531ms] [ERROR] [EMAIL_TEST_ERROR] Test email failed | DATA: {"error":"Failed to send test email"}

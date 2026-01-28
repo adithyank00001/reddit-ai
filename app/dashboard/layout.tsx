@@ -1,7 +1,9 @@
 import { Sidebar } from "@/components/dashboard/Sidebar";
+import { DashboardShell } from "@/components/dashboard/DashboardShell";
 import { createClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
 import { getOnboardingStep } from "@/lib/onboarding";
+import { getSetupIssues } from "@/lib/setup-health";
 
 /**
  * Dashboard Layout
@@ -32,15 +34,18 @@ export default async function DashboardLayout({
     redirect(requiredStep);
   }
 
+  // Check for any setup issues to show as reminders in the dashboard
+  const setupIssues = await getSetupIssues();
+
   return (
     <div className="flex h-screen overflow-hidden bg-background">
       {/* Sidebar */}
       <Sidebar />
 
       {/* Main Content Area */}
-      <div className="flex-1 flex flex-col overflow-hidden">
+      <DashboardShell setupIssues={setupIssues}>
         {children}
-      </div>
+      </DashboardShell>
     </div>
   );
 }

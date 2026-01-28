@@ -17,9 +17,9 @@ const notificationSchema = z.object({
   slackWebhookUrl: z.string().url("Invalid webhook URL").optional().or(z.literal("")),
   discordWebhookUrl: z.string().url("Invalid webhook URL").optional().or(z.literal("")),
   notificationEmail: z.string().email("Invalid email address").optional().or(z.literal("")),
-  emailNotificationsEnabled: z.boolean().default(false),
-  slackNotificationsEnabled: z.boolean().default(false),
-  discordNotificationsEnabled: z.boolean().default(false),
+  emailNotificationsEnabled: z.boolean(),
+  slackNotificationsEnabled: z.boolean(),
+  discordNotificationsEnabled: z.boolean(),
 });
 
 type NotificationFormData = z.infer<typeof notificationSchema>;
@@ -47,16 +47,17 @@ export function NotificationSettings({
     handleSubmit,
     setValue,
     watch,
-    formState: { isSubmitting, errors },
+    reset,
+    formState: { isSubmitting, errors, isDirty },
   } = useForm<NotificationFormData>({
     resolver: zodResolver(notificationSchema),
     defaultValues: {
       slackWebhookUrl: initialSlackWebhookUrl,
       discordWebhookUrl: initialDiscordWebhookUrl,
       notificationEmail: initialNotificationEmail,
-      emailNotificationsEnabled: initialEmailNotificationsEnabled,
-      slackNotificationsEnabled: initialSlackNotificationsEnabled,
-      discordNotificationsEnabled: initialDiscordNotificationsEnabled,
+      emailNotificationsEnabled: initialEmailNotificationsEnabled ?? false,
+      slackNotificationsEnabled: initialSlackNotificationsEnabled ?? false,
+      discordNotificationsEnabled: initialDiscordNotificationsEnabled ?? false,
     },
   });
 
@@ -81,8 +82,10 @@ export function NotificationSettings({
 
     if (result.success) {
       toast.success("Notification settings saved successfully!");
+      // Reset form state so Save button disables again until next change
+      reset(data);
     } else {
-      toast.error(result.error || "Failed to save settings");
+      toast.error("error" in result ? result.error : "Failed to save settings");
     }
   }
 
@@ -295,10 +298,12 @@ export function NotificationSettings({
               </div>
             </div>
 
-            <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Save Notification Settings
-            </Button>
+            {isDirty && (
+              <Button type="submit" disabled={isSubmitting}>
+                {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Save Notification Settings
+              </Button>
+            )}
           </form>
         </CardContent>
       </Card>

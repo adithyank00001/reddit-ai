@@ -81,6 +81,16 @@ export function ScraperSettings({
     setValue("productDescription", initialProductDescription, { shouldValidate: true });
   }, [initialWebsiteUrl, initialProductDescription, setValue]);
 
+  // Detect if any values have changed from the latest initial props
+  const hasKeywordChanges = JSON.stringify(keywords) !== JSON.stringify(initialKeywords);
+  const hasSubredditChanges = JSON.stringify(subreddits) !== JSON.stringify(initialSubreddits);
+  const hasWebsiteUrlChanges = (websiteUrl || "") !== (initialWebsiteUrl || "");
+  const hasProductDescriptionChanges =
+    (productDescription || "") !== (initialProductDescription || "");
+
+  const hasChanges =
+    hasKeywordChanges || hasSubredditChanges || hasWebsiteUrlChanges || hasProductDescriptionChanges;
+
   const addSubreddit = (value: string) => {
     let clean = value.trim().toLowerCase();
     if (!clean) return;
@@ -147,7 +157,7 @@ export function ScraperSettings({
         onSave();
       }
     } else {
-      toast.error(result.error || "Failed to save settings");
+      toast.error("error" in result ? result.error : "Failed to save settings");
     }
   }
 
@@ -168,7 +178,7 @@ export function ScraperSettings({
             minKeywords={1}
             placeholder="e.g., saas, startup, marketing"
             label="Keywords"
-            showCounter={true}
+            showCounter={false}
           />
           <p className="text-sm text-muted-foreground">
             These keywords help us find relevant Reddit posts that match your product. You can add up to 10 keywords.
@@ -227,10 +237,12 @@ export function ScraperSettings({
             onChange={handleWebsiteAnalyzerChange}
           />
 
-          <Button type="submit" disabled={isSubmitting}>
-            {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            Save Scraper Settings
-          </Button>
+          {hasChanges && (
+            <Button type="submit" disabled={isSubmitting}>
+              {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Save Scraper Settings
+            </Button>
+          )}
         </form>
       </CardContent>
     </Card>

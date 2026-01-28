@@ -8,7 +8,7 @@ export default function TalkToFounderPage() {
         <div>
           <h1 className="text-2xl font-bold">Talk to the Founder</h1>
           <p className="text-sm text-muted-foreground mt-1">
-            Reach out directly on WhatsApp for support and feature requests.
+            Reach out directly on WhatsApp.
           </p>
         </div>
       </div>

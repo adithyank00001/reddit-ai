@@ -303,21 +303,22 @@ export async function saveCompleteOnboarding(
 
     // Save subreddits to alerts table (same sync logic as in settings.ts)
     // Fetch existing active alerts for this user
-    const { data: existingAlerts = [] } = await supabase
+    const { data: existingAlerts } = await supabase
       .from("alerts")
       .select("id, subreddit")
       .eq("user_id", userId)
       .eq("is_active", true);
 
+    const alerts = existingAlerts ?? [];
     const existingSet = new Set(
-      existingAlerts.map((a) => a.subreddit.toLowerCase())
+      alerts.map((a) => a.subreddit.toLowerCase())
     );
     const desiredSet = new Set(cleanedSubreddits);
 
     const toInsert = cleanedSubreddits.filter(
       (s) => !existingSet.has(s.toLowerCase())
     );
-    const toDelete = existingAlerts.filter(
+    const toDelete = alerts.filter(
       (a) => !desiredSet.has(a.subreddit.toLowerCase())
     );
 

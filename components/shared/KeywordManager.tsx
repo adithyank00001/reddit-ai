@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { X, Plus } from "lucide-react";
+import { X, Plus, AlertTriangle } from "lucide-react";
 
 interface KeywordManagerProps {
   keywords: string[];
@@ -112,25 +112,33 @@ export function KeywordManager({
         </p>
       )}
       {keywords.length > 0 && (
-        <div className="flex flex-wrap gap-2 mt-2">
-          {keywords.map((keyword) => (
-            <Badge
-              key={keyword}
-              variant="secondary"
-              className="flex items-center gap-1 px-2 py-1"
-            >
-              <span>{keyword}</span>
-              <button
-                type="button"
-                onClick={() => removeKeyword(keyword)}
-                className="ml-1 inline-flex rounded-full hover:bg-muted"
-                aria-label={`Remove ${keyword}`}
-                disabled={disabled}
+        <div className="flex flex-col gap-2 mt-2">
+          <div className="flex flex-wrap gap-2">
+            {keywords.map((keyword) => (
+              <Badge
+                key={keyword}
+                variant="secondary"
+                className="flex items-center gap-1 px-2 py-1"
               >
-                <X className="h-3 w-3" />
-              </button>
-            </Badge>
-          ))}
+                <span>{keyword}</span>
+                <button
+                  type="button"
+                  onClick={() => removeKeyword(keyword)}
+                  className="ml-1 inline-flex rounded-full hover:bg-muted"
+                  aria-label={`Remove ${keyword}`}
+                  disabled={disabled}
+                >
+                  <X className="h-3 w-3" />
+                </button>
+              </Badge>
+            ))}
+          </div>
+          {keywords.length > 0 && keywords.length < 3 && (
+            <p className="flex items-center gap-2 text-xs sm:text-sm text-amber-500">
+              <AlertTriangle className="h-4 w-4" />
+              <span>You&apos;ll get better results if you add at least 3 keywords.</span>
+            </p>
+          )}
         </div>
       )}
     </div>

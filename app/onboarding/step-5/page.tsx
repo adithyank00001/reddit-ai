@@ -4,11 +4,10 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Loader2, ArrowLeft, SkipForward } from "lucide-react";
+import { Loader2, ArrowLeft } from "lucide-react";
 import { createClient } from "@/utils/supabase/client";
 import { toast } from "sonner";
 import { NotificationSettingsOnboarding } from "@/components/onboarding/NotificationSettingsOnboarding";
-import { markStep5Skipped } from "@/app/actions/onboarding";
 
 export default function OnboardingStep5Page() {
   const router = useRouter();
@@ -94,25 +93,6 @@ export default function OnboardingStep5Page() {
     verifyStep();
   }, [router]);
 
-  const handleSkip = async () => {
-    try {
-      setIsLoading(true);
-      const result = await markStep5Skipped();
-      
-      if (result.success) {
-        toast.info("You can configure notification settings later in Settings");
-        router.push("/dashboard");
-      } else {
-        toast.error(result.error || "Failed to skip step. Please try again.");
-        setIsLoading(false);
-      }
-    } catch (error) {
-      console.error("Error skipping step 5:", error);
-      toast.error("An unexpected error occurred. Please try again.");
-      setIsLoading(false);
-    }
-  };
-
   const handleComplete = async () => {
     try {
       setIsLoading(true);
@@ -169,7 +149,7 @@ export default function OnboardingStep5Page() {
       <CardHeader>
         <CardTitle className="text-2xl">Notification Settings</CardTitle>
         <CardDescription>
-          Step 5 of 5 (Optional): Choose how you want to receive notifications. Enable at least one channel to complete this step, or skip to configure later.
+          Step 5 of 5: Choose how you want to receive notifications. You must enable and configure at least one channel to finish onboarding.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
@@ -194,42 +174,21 @@ export default function OnboardingStep5Page() {
             <ArrowLeft className="mr-2 h-4 w-4" />
             Back
           </Button>
-          <div className="flex gap-2">
-            <Button
-              type="button"
-              variant="ghost"
-              onClick={handleSkip}
-              size="lg"
-              disabled={isLoading}
-            >
-              {isLoading ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Skipping...
-                </>
-              ) : (
-                <>
-                  <SkipForward className="mr-2 h-4 w-4" />
-                  Skip
-                </>
-              )}
-            </Button>
-            <Button
-              type="button"
-              onClick={handleComplete}
-              size="lg"
-              disabled={isLoading || !hasValidSettings}
-            >
-              {isLoading ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Completing...
-                </>
-              ) : (
-                "Complete"
-              )}
-            </Button>
-          </div>
+          <Button
+            type="button"
+            onClick={handleComplete}
+            size="lg"
+            disabled={isLoading || !hasValidSettings}
+          >
+            {isLoading ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Completing...
+              </>
+            ) : (
+              "Complete"
+            )}
+          </Button>
         </div>
       </CardContent>
     </Card>

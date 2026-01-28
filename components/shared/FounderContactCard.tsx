@@ -14,9 +14,14 @@ export function FounderContactCard() {
         <div className="space-y-1">
           <CardTitle className="text-xl">Talk to the Founder</CardTitle>
           <CardDescription className="text-sm">
-            Need help or want to request a feature? Skip the email queue. I am available on WhatsApp to solve your
+            Skip the email queue. I am available on WhatsApp to solve your
             issues personally and listen to your suggestions. Let&apos;s connect.
           </CardDescription>
+          <ul className="mt-2 list-disc list-inside text-sm text-muted-foreground space-y-1">
+            <li>Report a bug</li>
+            <li>Need help</li>
+            <li>Request a feature</li>
+          </ul>
         </div>
       </CardHeader>
 

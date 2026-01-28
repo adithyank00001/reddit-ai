@@ -146,7 +146,7 @@ export default function OnboardingStep2Page() {
           minKeywords={1}
           placeholder="e.g., saas, startup, marketing"
           label="Keywords"
-          showCounter={true}
+          showCounter={false}
         />
         <p className="text-sm text-muted-foreground">
           These keywords help us find relevant Reddit posts that match your product. You can add up to 10 keywords during onboarding.

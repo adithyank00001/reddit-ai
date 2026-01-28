@@ -112,8 +112,8 @@ export default function OnboardingStep1Page() {
     });
 
     if (!validation.isValid) {
-      // Show first error message
-      const firstError = validation.errors?.errors[0];
+      // Show first error message (ZodError uses .issues, not .errors)
+      const firstError = validation.errors?.issues?.[0];
       if (firstError) {
         toast.error(firstError.message);
       } else {

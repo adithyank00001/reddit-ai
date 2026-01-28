@@ -15,5 +15,5 @@ if (!supabaseUrl || !supabaseAnonKey) {
  * The service role key should only be used server-side.
  */
 export function createClient() {
-  return createSupabaseClient(supabaseUrl, supabaseAnonKey);
+  return createSupabaseClient(supabaseUrl!, supabaseAnonKey!);
 }

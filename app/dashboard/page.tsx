@@ -120,6 +120,7 @@ export default function DashboardPage() {
   useEffect(() => {
     if (!user) return;
 
+    const currentUser = user;
     let channel: any = null;
 
     async function setupSubscription() {
@@ -127,7 +128,7 @@ export default function DashboardPage() {
       const { data: alertsData } = await supabase
         .from("alerts")
         .select("id")
-        .eq("user_id", user.id);
+        .eq("user_id", currentUser.id);
 
       if (!alertsData || alertsData.length === 0) return;
 
@@ -137,7 +138,7 @@ export default function DashboardPage() {
       const alertIds = alertsData.map(alert => alert.id);
       
       channel = supabase
-        .channel(`leads-channel-${user.id}`)
+        .channel(`leads-channel-${currentUser.id}`)
         .on(
           "postgres_changes",
           {

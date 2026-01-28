@@ -17,9 +17,9 @@ const notificationSchema = z.object({
   slackWebhookUrl: z.string().url("Invalid webhook URL").optional().or(z.literal("")),
   discordWebhookUrl: z.string().url("Invalid webhook URL").optional().or(z.literal("")),
   notificationEmail: z.string().email("Invalid email address").optional().or(z.literal("")),
-  emailNotificationsEnabled: z.boolean().default(false),
-  slackNotificationsEnabled: z.boolean().default(false),
-  discordNotificationsEnabled: z.boolean().default(false),
+  emailNotificationsEnabled: z.boolean(),
+  slackNotificationsEnabled: z.boolean(),
+  discordNotificationsEnabled: z.boolean(),
 });
 
 type NotificationFormData = z.infer<typeof notificationSchema>;
@@ -55,9 +55,9 @@ export function NotificationSettingsOnboarding({
       slackWebhookUrl: initialSlackWebhookUrl,
       discordWebhookUrl: initialDiscordWebhookUrl,
       notificationEmail: initialNotificationEmail,
-      emailNotificationsEnabled: initialEmailNotificationsEnabled,
-      slackNotificationsEnabled: initialSlackNotificationsEnabled,
-      discordNotificationsEnabled: initialDiscordNotificationsEnabled,
+      emailNotificationsEnabled: initialEmailNotificationsEnabled ?? false,
+      slackNotificationsEnabled: initialSlackNotificationsEnabled ?? false,
+      discordNotificationsEnabled: initialDiscordNotificationsEnabled ?? false,
     },
     mode: "onChange", // Validate on every change
   });
@@ -91,9 +91,9 @@ export function NotificationSettingsOnboarding({
 
   // Check if at least one notification channel is properly configured
   useEffect(() => {
-    const isEmailValid = emailEnabled && notificationEmail.trim().length > 0 && !errors.notificationEmail;
-    const isSlackValid = slackEnabled && slackWebhookUrl.trim().length > 0 && !errors.slackWebhookUrl;
-    const isDiscordValid = discordEnabled && discordWebhookUrl.trim().length > 0 && !errors.discordWebhookUrl;
+    const isEmailValid = emailEnabled && (notificationEmail ?? "").trim().length > 0 && !errors.notificationEmail;
+    const isSlackValid = slackEnabled && (slackWebhookUrl ?? "").trim().length > 0 && !errors.slackWebhookUrl;
+    const isDiscordValid = discordEnabled && (discordWebhookUrl ?? "").trim().length > 0 && !errors.discordWebhookUrl;
 
     const hasValidSettings = isEmailValid || isSlackValid || isDiscordValid;
     
@@ -250,7 +250,7 @@ export function NotificationSettingsOnboarding({
                     type="button"
                     variant="outline"
                     disabled={!slackEnabled}
-                    onClick={() => testWebhook(slackWebhookUrl, "slack")}
+                    onClick={() => testWebhook(slackWebhookUrl ?? "", "slack")}
                   >
                     <Webhook className="h-4 w-4 mr-2" />
                     Test
@@ -307,7 +307,7 @@ export function NotificationSettingsOnboarding({
                     type="button"
                     variant="outline"
                     disabled={!discordEnabled}
-                    onClick={() => testWebhook(discordWebhookUrl, "discord")}
+                    onClick={() => testWebhook(discordWebhookUrl ?? "", "discord")}
                   >
                     <Webhook className="h-4 w-4 mr-2" />
                     Test

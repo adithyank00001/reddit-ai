@@ -165,7 +165,7 @@ export async function updateSettings(formData: FormData) {
       }
       
       if (hasWebsiteUrl) {
-        settingsPayload.website_url = websiteUrl || null;
+        settingsPayload.website_url = websiteUrl || undefined;
       }
 
       // Notification settings
@@ -249,10 +249,12 @@ export async function updateSettings(formData: FormData) {
       );
 
       // Fetch existing alerts for this user (including inactive ones to properly sync)
-      const { data: existingAlerts = [] } = await supabase
+      const { data: existingAlerts } = await supabase
         .from("alerts")
         .select("id, subreddit, is_active")
         .eq("user_id", userId);
+
+      const alerts = existingAlerts ?? [];
 
       // Helper function to normalize subreddit names (same as cleaning logic)
       const normalizeSubreddit = (subreddit: string): string => {
@@ -264,8 +266,8 @@ export async function updateSettings(formData: FormData) {
       };
 
       // Separate active and inactive alerts
-      const activeAlerts = existingAlerts.filter((a) => a.is_active === true);
-      const inactiveAlerts = existingAlerts.filter((a) => a.is_active === false);
+      const activeAlerts = alerts.filter((a) => a.is_active === true);
+      const inactiveAlerts = alerts.filter((a) => a.is_active === false);
 
       // Normalize existing alerts for comparison (handle any "r/" prefix or casing differences)
       const activeSet = new Set(
@@ -297,7 +299,7 @@ export async function updateSettings(formData: FormData) {
       logger.info("SUBREDDIT_SYNC_DEBUG", "Subreddit sync analysis", {
         userId,
         cleanedSubreddits,
-        existingAlertsCount: existingAlerts.length,
+        existingAlertsCount: alerts.length,
         activeAlertsCount: activeAlerts.length,
         inactiveAlertsCount: inactiveAlerts.length,
         activeAlerts: activeAlerts.map(a => ({ id: a.id, subreddit: a.subreddit, is_active: a.is_active })),

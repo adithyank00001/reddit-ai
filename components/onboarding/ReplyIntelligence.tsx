@@ -212,20 +212,22 @@ export function ReplyIntelligence({
               rows={6}
               className="resize-none"
             />
-            <Button 
-              onClick={handleSaveCustomInstructions} 
-              disabled={isSaving}
-              className="w-full sm:w-auto"
-            >
-              {isSaving ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Saving...
-                </>
-              ) : (
-                "Save Instructions"
-              )}
-            </Button>
+            {customInstructions.trim() !== (initialCustomInstructions || "").trim() && (
+              <Button 
+                onClick={handleSaveCustomInstructions} 
+                disabled={isSaving}
+                className="w-full sm:w-auto"
+              >
+                {isSaving ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Saving...
+                  </>
+                ) : (
+                  "Save Instructions"
+                )}
+              </Button>
+            )}
           </CardContent>
         </Card>
       )}

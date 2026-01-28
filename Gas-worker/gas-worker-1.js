@@ -23,6 +23,223 @@
 const ENABLE_LIMIT = true; // Set to false to disable the limit
 const MAX_POSTS_PER_RUN = 10; // Max number of posts to save total
 
+// ============================================================================
+// POLITE SCRAPER: Identity and throttling to avoid Reddit rate limits / bans
+// ============================================================================
+/** User-Agent sent to Reddit RSS – generic RSS reader pattern for maximum safety */
+const REDDIT_USER_AGENT = "Mozilla/5.0 (compatible; RSS Reader/1.0)";
+/** Pause (ms) after a failed fetch before trying the next subreddit */
+const SMART_PAUSE_MS = 5000;
+/** Abort entire run after this many consecutive subreddit fetch failures */
+const CIRCUIT_BREAKER_THRESHOLD = 3;
+
+// ============================================================================
+// OWNER MONITORING: Discord alerts for failures / rate limits
+// ============================================================================
+/**
+ * Script Properties key for your ERROR Discord webhook URL.
+ * Set this in: File > Project Settings > Script Properties
+ */
+const ERROR_DISCORD_URL_KEY = "ERROR_DISCORD_URL";
+/**
+ * Script Properties key for end-of-run execution report (report card).
+ * User requested key name: LOG_DISCORD_URL (caps)
+ */
+const LOG_DISCORD_URL_KEY = "LOG_DISCORD_URL";
+
+/** Severity levels for monitoring */
+const SEVERITY = {
+  INFO: "INFO",
+  WARNING: "WARNING",
+  ERROR: "ERROR",
+  CRITICAL: "CRITICAL",
+};
+
+function safeString(value) {
+  try {
+    return value === null || value === undefined ? "" : String(value);
+  } catch (e) {
+    return "";
+  }
+}
+
+function truncate(str, maxLen) {
+  const s = safeString(str);
+  if (s.length <= maxLen) return s;
+  return s.substring(0, maxLen - 3) + "...";
+}
+
+function nowIso() {
+  try {
+    return new Date().toISOString();
+  } catch (e) {
+    return safeString(new Date());
+  }
+}
+
+/**
+ * Send a Discord webhook alert to the owner channel.
+ *
+ * Notes:
+ * - We only send for ERROR/CRITICAL by default to avoid spam.
+ * - We include lots of context (run id, subreddit, HTTP codes, counters, stack).
+ */
+function notifyOwnerDiscord(config, alert) {
+  try {
+    const webhookUrl = config && config.errorDiscordUrl;
+    if (!webhookUrl) {
+      // Monitoring not configured; do nothing.
+      return;
+    }
+
+    const severity = alert && alert.severity ? alert.severity : SEVERITY.ERROR;
+    const shouldSend = severity === SEVERITY.ERROR || severity === SEVERITY.CRITICAL;
+    if (!shouldSend) return;
+
+    const title = `[${severity}] Worker 1 Monitor Alert`;
+    const code = safeString(alert.code || "UNKNOWN");
+    const message = truncate(alert.message || "", 1800);
+
+    const fields = [];
+    const addField = (name, value) => {
+      const v = truncate(value, 1024);
+      if (!v) return;
+      fields.push({ name: truncate(name, 256), value: v, inline: false });
+    };
+
+    addField("code", code);
+    addField("time", nowIso());
+    addField("run_id", safeString(config.runId || ""));
+    addField("subreddit", safeString(alert.subreddit || ""));
+    addField("http_status", safeString(alert.httpStatus || ""));
+    addField("consecutive_failures", safeString(alert.consecutiveFailures || ""));
+    addField("total_errors", safeString(alert.totalErrors || ""));
+    addField("total_posts_saved", safeString(alert.totalProcessed || ""));
+    addField("action_taken", safeString(alert.actionTaken || ""));
+    addField("details", safeString(alert.details || ""));
+
+    // Stack traces can be huge; keep it short
+    const stack = truncate(alert.stack || "", 900);
+    if (stack) {
+      addField("stack (truncated)", "```" + stack + "```");
+    }
+
+    const payload = {
+      username: "Worker 1 Monitor",
+      embeds: [
+        {
+          title: title,
+          description: message,
+          color:
+            severity === SEVERITY.CRITICAL
+              ? 16711680
+              : severity === SEVERITY.ERROR
+                ? 16753920
+                : 16776960,
+          fields: fields.slice(0, 24),
+          timestamp: new Date().toISOString(),
+        },
+      ],
+    };
+
+    UrlFetchApp.fetch(webhookUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "User-Agent": REDDIT_USER_AGENT, // keep a consistent UA on all outgoing requests
+      },
+      payload: JSON.stringify(payload),
+      muteHttpExceptions: true,
+    });
+  } catch (e) {
+    // Never crash the worker because monitoring failed
+    Logger.log(`WARNING: Failed to send owner Discord alert: ${e.message}`);
+  }
+}
+
+/**
+ * Send a FINAL EXECUTION REPORT to the log Discord webhook.
+ * This is sent at the end of every run (success or partial failure) so you can monitor health.
+ *
+ * Format requirement: use a code block (```text) to look like terminal output.
+ */
+function sendExecutionReport(config, stats, startTime, endTime, durationSeconds) {
+  try {
+    const webhookUrl = config && config.logDiscordUrl;
+    if (!webhookUrl) return; // not configured
+
+    const total = stats.totalSubreddits || 0;
+    const success = stats.successCount || 0;
+    const fail = stats.failCount || 0;
+    const successRate = total > 0 ? ((success / total) * 100).toFixed(1) : "0.0";
+
+    const postsFound = stats.postsFound || 0;
+    const postsSaved = stats.postsSaved || 0;
+    const savedRate = postsFound > 0 ? ((postsSaved / postsFound) * 100).toFixed(1) : "0.0";
+
+    const startStr = startTime ? formatTimestamp(startTime) : "";
+    const endStr = endTime ? formatTimestamp(endTime) : "";
+    const durationStr = typeof durationSeconds === "number" ? durationSeconds.toFixed(2) : safeString(durationSeconds);
+
+    let failedBlock = "None";
+    if (stats.failedList && stats.failedList.length > 0) {
+      const lines = [];
+      lines.push("SUBREDDIT                      | REASON");
+      lines.push("--------------------------------+----------------------------------------");
+      stats.failedList.slice(0, 25).forEach((f) => {
+        const name = truncate(f.name || "", 30).padEnd(30, " ");
+        const reason = truncate(f.reason || "", 40);
+        lines.push(`${name} | ${reason}`);
+      });
+      if (stats.failedList.length > 25) {
+        lines.push(`... and ${stats.failedList.length - 25} more`);
+      }
+      failedBlock = lines.join("\n");
+    }
+
+    const reportLines = [];
+    reportLines.push("📊 FINAL EXECUTION REPORT");
+    reportLines.push("");
+    reportLines.push("⏱️ TIMING");
+    reportLines.push(`  Start   : ${startStr}`);
+    reportLines.push(`  End     : ${endStr}`);
+    reportLines.push(`  Duration: ${durationStr}s`);
+    reportLines.push("");
+    reportLines.push("📈 STATISTICS");
+    reportLines.push(`  Subreddits (total)   : ${total}`);
+    reportLines.push(`  Fetch success (200)  : ${success}`);
+    reportLines.push(`  Fetch failures       : ${fail}`);
+    reportLines.push(`  Success rate         : ${successRate}%`);
+    reportLines.push(`  Posts found (RSS)    : ${postsFound}`);
+    reportLines.push(`  Posts saved (matches): ${postsSaved}`);
+    reportLines.push(`  Save rate            : ${savedRate}%`);
+    reportLines.push(`  Keywords (total)     : ${stats.keywordCount || 0}`);
+    reportLines.push(`  Subreddits (unique)  : ${stats.uniqueSubreddits || total}`);
+    if (stats.abortReason) {
+      reportLines.push("");
+      reportLines.push("🛑 ABORT");
+      reportLines.push(`  Reason: ${truncate(stats.abortReason, 250)}`);
+    }
+    reportLines.push("");
+    reportLines.push("❌ FAILED SUBREDDITS");
+    reportLines.push(failedBlock);
+
+    const content = "```text\n" + reportLines.join("\n") + "\n```";
+
+    UrlFetchApp.fetch(webhookUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "User-Agent": REDDIT_USER_AGENT,
+      },
+      payload: JSON.stringify({ content: content }),
+      muteHttpExceptions: true,
+    });
+  } catch (e) {
+    Logger.log(`WARNING: Failed to send execution report: ${e.message}`);
+  }
+}
+
 /**
  * Main function to run the Multi-Tenant Scout process
  * This should be set up as a time-driven trigger in Google Apps Script
@@ -31,12 +248,35 @@ function runSmartScout() {
   const startTime = new Date();
   Logger.log(`[${formatTimestamp(startTime)}] Worker 1 (Multi-Tenant Scout) started`);
 
+  // Execution report state tracking (per run)
+  let stats = {
+    totalSubreddits: 0,
+    successCount: 0,
+    failCount: 0,
+    postsFound: 0,
+    postsSaved: 0,
+    failedList: [],
+    keywordCount: 0,
+    uniqueSubreddits: 0,
+    abortReason: "",
+  };
+
+  let configForReport = null;
+  let reportSent = false;
+
   try {
     // Get configuration
     const config = getConfig();
     if (!config) {
       Logger.log("ERROR: Configuration missing. Please set script properties.");
       return;
+    }
+    configForReport = config;
+    // Add run id for correlation in monitoring
+    try {
+      config.runId = Utilities.getUuid();
+    } catch (e) {
+      config.runId = `${new Date().getTime()}`;
     }
 
     // Step 1: Fetch the "Map" - all active alerts and project settings
@@ -49,6 +289,25 @@ function runSmartScout() {
     }
 
     const uniqueSubreddits = Object.keys(subredditMap);
+    stats.totalSubreddits = uniqueSubreddits.length;
+    stats.uniqueSubreddits = uniqueSubreddits.length;
+    // Count total unique keywords across all users (for the report)
+    try {
+      const kwSet = new Set();
+      uniqueSubreddits.forEach((sr) => {
+        const watchers = subredditMap[sr] || [];
+        watchers.forEach((u) => {
+          const kws = u.keywords || [];
+          kws.forEach((k) => {
+            const s = safeString(k).trim().toLowerCase();
+            if (s) kwSet.add(s);
+          });
+        });
+      });
+      stats.keywordCount = kwSet.size;
+    } catch (e) {
+      // ignore
+    }
     Logger.log(`Found ${uniqueSubreddits.length} unique subreddit(s) with active alerts:`);
     uniqueSubreddits.forEach(subreddit => {
       const userCount = subredditMap[subreddit].length;
@@ -65,6 +324,8 @@ function runSmartScout() {
     let totalProcessed = 0;
     let totalErrors = 0;
     let limitReached = false;
+    let consecutiveFailures = 0; // Circuit breaker: abort after this many in a row
+    let aborted = false;
 
     for (const subreddit of uniqueSubreddits) {
       // Check if cost limit has been reached
@@ -79,13 +340,17 @@ function runSmartScout() {
         
         // Fetch Reddit posts (scrape once per subreddit)
         const posts = fetchRedditPosts(subreddit);
-        
+        // If we got here, fetch was HTTP 200 (success)
+        stats.successCount++;
+
         if (!posts || posts.length === 0) {
           Logger.log(`No posts found for r/${subreddit}`);
+          consecutiveFailures = 0; // Empty feed is success, not failure
           continue;
         }
 
         Logger.log(`Found ${posts.length} post(s) from r/${subreddit}`);
+        stats.postsFound += posts.length;
 
         // Step 3: Distribution Logic - Check each post against all users watching this subreddit
         Logger.log(`Checking posts against ${subredditMap[subreddit].length} user(s) watching r/${subreddit}...`);
@@ -114,6 +379,7 @@ function runSmartScout() {
               
               if (result.success) {
                 totalProcessed++;
+                stats.postsSaved = totalProcessed;
                 subredditProcessed++;
                 Logger.log(`✓ Saved post for user ${userConfig.userId.substring(0, 8)}... (alert: ${userConfig.alertId.substring(0, 8)}...)`);
                 
@@ -137,14 +403,78 @@ function runSmartScout() {
 
         Logger.log(`r/${subreddit}: ${subredditProcessed} post(s) saved, ${subredditErrors} error(s)`);
 
+        consecutiveFailures = 0; // Success – reset circuit breaker counter
+
         if (limitReached) {
           break;
         }
 
       } catch (error) {
+        consecutiveFailures++;
+        totalErrors++;
+        stats.failCount++;
+        stats.failedList.push({
+          name: `r/${subreddit}`,
+          reason: safeString(error && error.message ? error.message : "Unknown error"),
+        });
         Logger.log(`✗ Error processing r/${subreddit}: ${error.message}`);
         Logger.log(error.stack);
-        totalErrors++;
+
+        // Classify Reddit failures for monitoring
+        const status = error && error.httpStatus ? error.httpStatus : error && error.statusCode ? error.statusCode : "";
+        const message = safeString(error && error.message ? error.message : "Unknown error");
+        let code = "REDDIT_FETCH_FAILED";
+        let severity = SEVERITY.ERROR;
+        if (status === 429 || message.indexOf("HTTP 429") >= 0) {
+          code = "REDDIT_RATE_LIMIT_429";
+          severity = SEVERITY.ERROR;
+        } else if (status === 403 || message.indexOf("HTTP 403") >= 0) {
+          code = "REDDIT_FORBIDDEN_403";
+          severity = SEVERITY.CRITICAL; // often indicates blocking/banning
+        } else if (typeof status === "number" && status >= 500) {
+          code = "REDDIT_SERVER_5XX";
+          severity = SEVERITY.ERROR;
+        } else if (message.toLowerCase().indexOf("xml") >= 0 || message.toLowerCase().indexOf("parse") >= 0) {
+          code = "REDDIT_PARSE_ERROR";
+          severity = SEVERITY.ERROR;
+        }
+
+        if (consecutiveFailures >= CIRCUIT_BREAKER_THRESHOLD) {
+          Logger.log(`CRITICAL: Circuit breaker triggered – ${consecutiveFailures} consecutive failures. Aborting run to protect IP.`);
+          aborted = true;
+          stats.abortReason = `Circuit breaker: ${consecutiveFailures} consecutive failures (kill switch). Last subreddit: r/${subreddit}`;
+          notifyOwnerDiscord(config, {
+            severity: SEVERITY.CRITICAL,
+            code: "CIRCUIT_BREAKER_TRIGGERED",
+            message: "Worker 1 aborted due to repeated subreddit failures (kill switch).",
+            subreddit: subreddit,
+            httpStatus: status,
+            consecutiveFailures: `${consecutiveFailures}/${CIRCUIT_BREAKER_THRESHOLD}`,
+            totalErrors: totalErrors,
+            totalProcessed: totalProcessed,
+            actionTaken: "ABORT_RUN",
+            details: `Last error code: ${code}. Last error message: ${message}`,
+            stack: error && error.stack ? error.stack : "",
+          });
+          break;
+        }
+
+        Logger.log(`WARNING: Smart Pause – waiting ${SMART_PAUSE_MS / 1000}s before next subreddit (consecutive failures: ${consecutiveFailures}/${CIRCUIT_BREAKER_THRESHOLD}).`);
+        // Notify owner on important failures (rate limit / forbidden / server errors)
+        notifyOwnerDiscord(config, {
+          severity: severity,
+          code: code,
+          message: `Worker 1 hit an error fetching Reddit RSS. Smart Pause triggered (${SMART_PAUSE_MS / 1000}s).`,
+          subreddit: subreddit,
+          httpStatus: status,
+          consecutiveFailures: `${consecutiveFailures}/${CIRCUIT_BREAKER_THRESHOLD}`,
+          totalErrors: totalErrors,
+          totalProcessed: totalProcessed,
+          actionTaken: `SMART_PAUSE_${SMART_PAUSE_MS}ms`,
+          details: message,
+          stack: error && error.stack ? error.stack : "",
+        });
+        Utilities.sleep(SMART_PAUSE_MS);
       }
     }
 
@@ -158,9 +488,50 @@ function runSmartScout() {
     }
     Logger.log(`Errors: ${totalErrors}`);
 
+    // Always send execution report at end of run
+    stats.postsSaved = totalProcessed;
+    sendExecutionReport(config, stats, startTime, endTime, duration);
+    reportSent = true;
+
+    // Preserve existing behavior: if we aborted, stop here (after reporting)
+    if (aborted) {
+      return;
+    }
+
   } catch (error) {
     Logger.log(`FATAL ERROR: ${error.message}`);
     Logger.log(error.stack);
+    // Try to alert owner if we can still read config
+    try {
+      const config = getConfig();
+      if (config) {
+        notifyOwnerDiscord(config, {
+          severity: SEVERITY.CRITICAL,
+          code: "RUN_FATAL_ERROR",
+          message: "Worker 1 crashed with an unhandled (fatal) error.",
+          details: safeString(error.message),
+          stack: error.stack,
+          actionTaken: "CRASH",
+        });
+      }
+    } catch (e) {
+      // ignore
+    }
+  } finally {
+    // If we returned early (e.g., no alerts) we won't have sent a report.
+    // Send a minimal report if config is available.
+    try {
+      if (configForReport && !reportSent) {
+        const endTime = new Date();
+        const duration = (endTime - startTime) / 1000;
+        // If stats.totalSubreddits was never set, keep it as-is (0)
+        if (!stats.postsSaved) stats.postsSaved = 0;
+        if (!stats.postsFound) stats.postsFound = 0;
+        sendExecutionReport(configForReport, stats, startTime, endTime, duration);
+      }
+    } catch (e) {
+      // ignore
+    }
   }
 }
 
@@ -179,6 +550,8 @@ function getConfig() {
   // Read from Script Properties (set in File > Project Settings > Script Properties)
   const supabaseUrl = props.getProperty("SUPABASE_URL");
   const supabaseKey = props.getProperty("SUPABASE_KEY");
+  const errorDiscordUrl = props.getProperty(ERROR_DISCORD_URL_KEY);
+  const logDiscordUrl = props.getProperty(LOG_DISCORD_URL_KEY);
 
   if (!supabaseUrl || !supabaseKey) {
     Logger.log("Missing configuration properties:");
@@ -191,6 +564,8 @@ function getConfig() {
   return {
     supabaseUrl: supabaseUrl.trim(),
     supabaseKey: supabaseKey.trim(),
+    errorDiscordUrl: errorDiscordUrl ? errorDiscordUrl.trim() : "",
+    logDiscordUrl: logDiscordUrl ? logDiscordUrl.trim() : "",
   };
 }
 
@@ -222,6 +597,7 @@ function fetchMultiTenantMap(config) {
         "apikey": config.supabaseKey,
         "Authorization": `Bearer ${config.supabaseKey}`,
         "Content-Type": "application/json",
+        "User-Agent": REDDIT_USER_AGENT,
       },
       muteHttpExceptions: true,
     });
@@ -232,6 +608,14 @@ function fetchMultiTenantMap(config) {
     if (alertsStatusCode !== 200) {
       Logger.log(`ERROR: Supabase API returned ${alertsStatusCode} when fetching alerts`);
       Logger.log(`Response: ${alertsResponseText}`);
+      notifyOwnerDiscord(config, {
+        severity: SEVERITY.ERROR,
+        code: "SUPABASE_ALERTS_FETCH_FAILED",
+        message: "Worker 1 could not fetch alerts from Supabase.",
+        httpStatus: alertsStatusCode,
+        details: truncate(alertsResponseText, 500),
+        actionTaken: "RETURN_EMPTY_MAP",
+      });
       return {};
     }
 
@@ -252,6 +636,7 @@ function fetchMultiTenantMap(config) {
         "apikey": config.supabaseKey,
         "Authorization": `Bearer ${config.supabaseKey}`,
         "Content-Type": "application/json",
+        "User-Agent": REDDIT_USER_AGENT,
       },
       muteHttpExceptions: true,
     });
@@ -262,6 +647,14 @@ function fetchMultiTenantMap(config) {
     if (settingsStatusCode !== 200) {
       Logger.log(`ERROR: Supabase API returned ${settingsStatusCode} when fetching project_settings`);
       Logger.log(`Response: ${settingsResponseText}`);
+      notifyOwnerDiscord(config, {
+        severity: SEVERITY.ERROR,
+        code: "SUPABASE_SETTINGS_FETCH_FAILED",
+        message: "Worker 1 could not fetch project_settings from Supabase.",
+        httpStatus: settingsStatusCode,
+        details: truncate(settingsResponseText, 500),
+        actionTaken: "RETURN_EMPTY_MAP",
+      });
       return {};
     }
 
@@ -326,58 +719,38 @@ function fetchMultiTenantMap(config) {
 }
 
 /**
- * Generate a randomized Chrome User-Agent to avoid bot detection
- * Randomizes Chrome version slightly to make each request look unique
- */
-function generateStealthUserAgent() {
-  // Base Chrome version (current stable: 131.x)
-  const baseVersion = 131;
-  // Randomize the build number to make each request unique (format: 131.0.XXXX.YY)
-  const buildNumber = 6000 + Math.floor(Math.random() * 1000); // 6000-6999 (realistic build range)
-  const patchNumber = Math.floor(Math.random() * 100); // 0-99
-  
-  // Randomly choose between Windows and Mac
-  const isWindows = Math.random() > 0.5;
-  
-  if (isWindows) {
-    // Windows Chrome User-Agent
-    return `Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/${baseVersion}.0.${buildNumber}.${patchNumber} Safari/537.36`;
-  } else {
-    // Mac Chrome User-Agent
-    const macVersion = `10_${15 + Math.floor(Math.random() * 2)}_${Math.floor(Math.random() * 10)}`;
-    return `Mozilla/5.0 (Macintosh; Intel Mac OS X ${macVersion}) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/${baseVersion}.0.${buildNumber}.${patchNumber} Safari/537.36`;
-  }
-}
-
-/**
  * Fetch Reddit posts from a subreddit using RSS feed
  * RSS feeds are more stable for Google Apps Script than JSON API
+ * Uses a polite bot User-Agent and throws on HTTP/network/parse failure so the loop can throttle/abort.
  */
 function fetchRedditPosts(subreddit) {
   const url = `https://www.reddit.com/r/${subreddit}/new.rss?limit=100`;
-  
+
+  const response = UrlFetchApp.fetch(url, {
+    method: "GET",
+    headers: {
+      "User-Agent": REDDIT_USER_AGENT,
+      "Accept": "application/rss+xml,application/xml,text/xml,*/*",
+      "Accept-Language": "en-US,en;q=0.9",
+    },
+    muteHttpExceptions: true,
+  });
+
+  const statusCode = response.getResponseCode();
+  const responseText = response.getContentText();
+
+  if (statusCode !== 200) {
+    Logger.log(`ERROR: Reddit RSS returned ${statusCode} for r/${subreddit}`);
+    Logger.log(`Response: ${responseText.substring(0, 200)}`);
+    const err = new Error(`Reddit RSS HTTP ${statusCode}`);
+    err.statusCode = statusCode;
+    err.httpStatus = statusCode;
+    err.subreddit = subreddit;
+    err.responseSnippet = responseText ? responseText.substring(0, 200) : "";
+    throw err;
+  }
+
   try {
-    // Generate a randomized User-Agent for each request
-    const userAgent = generateStealthUserAgent();
-    
-    const response = UrlFetchApp.fetch(url, {
-      method: "GET",
-      headers: {
-        "User-Agent": userAgent,
-        "Accept": "application/rss+xml,application/xml,text/xml,*/*",
-        "Accept-Language": "en-US,en;q=0.9",
-      },
-      muteHttpExceptions: true,
-    });
-
-    const statusCode = response.getResponseCode();
-    const responseText = response.getContentText();
-
-    if (statusCode !== 200) {
-      Logger.log(`ERROR: Reddit RSS returned ${statusCode}`);
-      Logger.log(`Response: ${responseText.substring(0, 200)}`);
-      return [];
-    }
 
     // Parse XML using XmlService
     const document = XmlService.parse(responseText);
@@ -389,7 +762,7 @@ function fetchRedditPosts(subreddit) {
     const entries = root.getChildren('entry', atomNamespace);
     
     if (!entries || entries.length === 0) {
-      Logger.log("ERROR: No entries found in RSS feed");
+      // Empty feed is normal (e.g. no new posts) – not a failure; do not throw
       return [];
     }
 
@@ -459,9 +832,9 @@ function fetchRedditPosts(subreddit) {
 
     return posts;
   } catch (error) {
-    Logger.log(`ERROR fetching Reddit posts: ${error.message}`);
+    Logger.log(`ERROR fetching Reddit posts for r/${subreddit}: ${error.message}`);
     Logger.log(error.stack);
-    return [];
+    throw error; // rethrow so caller can apply Smart Pause / Circuit Breaker
   }
 }
 
@@ -574,7 +947,8 @@ function savePostToSupabase(config, post, alertId, subreddit, remainingLimit) {
         "apikey": config.supabaseKey,
         "Authorization": `Bearer ${config.supabaseKey}`,
         "Content-Type": "application/json",
-        "Prefer": "return=minimal"
+        "Prefer": "return=minimal",
+        "User-Agent": REDDIT_USER_AGENT,
       },
       payload: JSON.stringify(leadData),
       muteHttpExceptions: true,
@@ -592,6 +966,18 @@ function savePostToSupabase(config, post, alertId, subreddit, remainingLimit) {
     } else {
       Logger.log(`✗ Failed to save post ${redditPostId}: HTTP ${statusCode}`);
       Logger.log(`Response: ${responseText.substring(0, 200)}`);
+      // Only notify owner for high-signal Supabase issues (avoid spamming per post)
+      if ((statusCode === 401 || statusCode === 403) && !config._notifiedSupabaseAuthError) {
+        config._notifiedSupabaseAuthError = true;
+        notifyOwnerDiscord(config, {
+          severity: SEVERITY.CRITICAL,
+          code: "SUPABASE_AUTH_ERROR",
+          message: "Worker 1 cannot write leads to Supabase (auth error).",
+          httpStatus: statusCode,
+          details: truncate(responseText, 700),
+          actionTaken: "CONTINUING_BUT_WRITES_WILL_FAIL",
+        });
+      }
       return { success: false, error: `HTTP ${statusCode}` };
     }
   } catch (error) {
@@ -621,6 +1007,8 @@ function setupConfig() {
   // CRITICAL: Use SERVICE_ROLE_KEY, not anon key, to bypass RLS (Row Level Security)
   props.setProperty("SUPABASE_URL", "https://your-project.supabase.co");
   props.setProperty("SUPABASE_KEY", "your-supabase-SERVICE-ROLE-key"); // Must be service role key!
+  props.setProperty(ERROR_DISCORD_URL_KEY, "https://discord.com/api/webhooks/xxxxx/xxxxx");
+  props.setProperty(LOG_DISCORD_URL_KEY, "https://discord.com/api/webhooks/xxxxx/xxxxx");
   
   Logger.log("Configuration set. Please update the values with your actual credentials.");
   Logger.log("⚠️ IMPORTANT: SUPABASE_KEY must be the SERVICE_ROLE_KEY (not anon key) to bypass RLS");
